@@ -2,7 +2,7 @@
 // Author: Rien Matthijsse
 //
 #include "mos6502c.h"
-#include "memory.h"
+
 #include <Arduino.h>
 
 #define CPUDEBUG
@@ -141,7 +141,7 @@ inline __attribute__((always_inline)) void putData(uint8_t data)
 /// <summary>
 /// initialise the 65C02
 /// </summary>
-void init6502()
+void init6502(THardwarePtr hardware)
 {
   // CLOCK
   pinMode(uP_CLOCK, OUTPUT);
@@ -180,7 +180,7 @@ void reset6502()
 /// clock cycle 65C02
 /// </summary>
 // inline __attribute__((always_inline))
-void tick6502(uint32_t delay)
+void tick6502(THardwarePtr hardware)
 {
   uint8_t data(0);
   uint16_t address(0);
@@ -199,12 +199,9 @@ void tick6502(uint32_t delay)
 
   DELAY_FACTOR_SHORT();
 
-  address = getAddress();
+  hardware->address = getAddress();
+  hardware->clock_cycle++;
 
-  #ifdef CPUDEBUG
-  sprintf(CPUDEBUGMSG, "%04d: 0x%04X | %c | ", delay, address, getRW() == RW_READ ? 'R' : 'W');
-  Serial.print(CPUDEBUGMSG);
-  #endif
   // depending on the status of the R/W pin,
   // we read the data from memory and write to the bus
   // or we read the data from the bus and store it
@@ -212,19 +209,19 @@ void tick6502(uint32_t delay)
   switch (getRW())
   {
   case RW_READ: // Read the data from memory and write to the bus
-    data = readFromMemory(address); // data = @address
-    putData(data);
+    readFromMemory(hardware); // data = @address
+    putData(hardware->data);
     #ifdef CPUDEBUG
-    sprintf(CPUDEBUGMSG, "%02X", data);
+    sprintf(CPUDEBUGMSG, "%04d: 0x%04X | R | %02X", hardware->clock_cycle, hardware->address, hardware->data);
     Serial.println(CPUDEBUGMSG);
     #endif
     break;
 
   case RW_WRITE: // Read data from the bus and store it to the memory
-    data = getData();
-    writeToMemory(address, data);
+    hardware->data = getData();
+    writeToMemory(hardware);
     #ifdef CPUDEBUG
-    sprintf(CPUDEBUGMSG, "%02X", data);
+    sprintf(CPUDEBUGMSG, "%04d: 0x%04X | W | %02X", hardware->clock_cycle, hardware->address, hardware->data);
     Serial.println(CPUDEBUGMSG);
     #endif
     break;

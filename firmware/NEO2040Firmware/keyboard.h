@@ -1,14 +1,9 @@
 #include <Arduino.h>
-
-#define KBD   0xD010  // Address for the character buffer
-#define KBDCR 0xD010  // Address for the character control register
+#include "datatypes.h"
 
 #define FLAG_UNCONSUMED_KEY 0x80  // 1000 0000 / Bit 7
 
-extern uint8_t regKBD; // place to store the current character
-extern uint8_t regKBDCR; // place to store te keyboard control register 
-
-void initKeyboard();
+void initKeyboard(THardwarePtr hardware);
 /**
  * @brief Checks, if a key has been pressed. 
  * If a key has been pressed, it will be stored in 
@@ -18,3 +13,7 @@ void initKeyboard();
  * 
  */
 void checkForKeyPressed();
+
+
+boolean readKeyboard(THardwarePtr hardware);
+boolean writeKeyboard(THardwarePtr hardware);

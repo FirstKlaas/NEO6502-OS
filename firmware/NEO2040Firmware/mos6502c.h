@@ -8,6 +8,7 @@
 #include <Arduino.h>
 #include "pins.h"
 #include "memory.h"
+#include "datatypes.h"
 
 
 #define CPU_DEBUG   1
@@ -25,8 +26,8 @@
 #define RW_READ     true
 #define RW_WRITE    false
 
-void init6502();
+void init6502(THardwarePtr hardware);
 void reset6502();
-void tick6502(uint32_t);
+void tick6502(THardwarePtr hardware);
 
 #endif

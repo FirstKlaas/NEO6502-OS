@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "compile kernel routines",
+            "label": "convert prg",
             "type": "shell",
-            "command": "java -jar ./KickAss.jar ./kernel.asm -o kernel.prg",
+            "command": "python converter.py",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

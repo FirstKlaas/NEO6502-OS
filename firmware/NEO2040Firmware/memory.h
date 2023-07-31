@@ -2,6 +2,7 @@
 #define _MEMORY_h
 
 #include <Arduino.h>
+#include "datatypes.h"
 
 #define MEMORY_SIZE     0x10000   // 64k
 #define RESET_VECTOR_LB 0xfffc
@@ -33,11 +34,11 @@
  * E0000 - FEFF: Kernal routines
  * 
  */
-void initmemory();
+void initmemory(THardwarePtr hardware);
 
-uint8_t readFromMemory(uint16_t address);
+void readFromMemory(THardwarePtr hardware);
 
-void writeToMemory(uint16_t address, uint8_t data);
+void writeToMemory(THardwarePtr hardware);
 
 inline __attribute__((always_inline))
 uint8_t rmem(uint16_t adr);
