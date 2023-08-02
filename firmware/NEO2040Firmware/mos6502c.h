@@ -26,8 +26,8 @@
 #define RW_READ     true
 #define RW_WRITE    false
 
-void init6502(THardwarePtr hardware);
+void init6502(TContextPtr ctx);
 void reset6502();
-void tick6502(THardwarePtr hardware);
+void tick6502(TContextPtr ctx);
 
 #endif

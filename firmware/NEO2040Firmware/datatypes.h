@@ -2,26 +2,21 @@
 #define DATATYPES_H
 
 #include <Arduino.h>
-#include <PicoDVI.h>
 
 typedef struct Register_ {
   uint8_t KBD;    // Keyboard register
   uint8_t KBDCR;  // Keyboard control register
   uint8_t DIS;    // Display Register
   uint8_t DISCR;  // Display control rgister
-  uint8_t DDRA;   // Data direction register
-  uint8_t XPOS;   // cursor xpos
-  uint8_t YPOS;   // cursor ypos
-  uint8_t COLHI;   // COLOR HI
-  uint8_t COLLO;   // COLOR LO
-    
+  uint8_t DIS00;  // Display Data Register
+  uint8_t DIS01;  // Display Data Register
+  uint8_t DIS02;  // Display Data Register
+  uint8_t DIS03;  // Display Data Register
+  uint8_t DIS04;  // Display Data Register
+  uint8_t DIS05;  // Display Data Register
+  uint8_t DIS06;  // Display Data Register
+  uint8_t DIS07;  // Display Data Register
 } TRegister;
-
-typedef void (*TSetXPos)(uint8_t);
-
-typedef struct Display_ {
-  TSetXPos setXPos;
-} TDisplay;
 
 typedef struct HardwareType_ {
   uint16_t address;
@@ -29,7 +24,6 @@ typedef struct HardwareType_ {
   uint8_t *memory;
   TRegister reg; 
   unsigned long clock_cycle;
-  TDisplay display;
-} THardware, *THardwarePtr;
+} TContext, *TContextPtr;
 
 #endif

@@ -12,10 +12,14 @@
 #define REG_DISCR_ADDR    0xD013  // Display Control register.
                                   // Bit 7: IRQ Bit
                                   // Bit 6: Show Cursor (1= true; 0 = false)
-#define REG_DIS_XPOS      0xD014
-#define REG_DIS_YPOS      0xD015
-#define REG_DIS_COLOR_LO  0xD016  // Colors are always defined in 16bit (5-6-5) 
-#define REG_DIS_COLOR_HI  0xD017  // Therefore we need two bytes to represent a color
+#define REG_DIS_00_ADDR   0xD014
+#define REG_DIS_01_ADDR   0xD015
+#define REG_DIS_02_ADDR   0xD016
+#define REG_DIS_03_ADDR   0xD017
+#define REG_DIS_04_ADDR   0xD018
+#define REG_DIS_05_ADDR   0xD019
+#define REG_DIS_06_ADDR   0xD01A
+#define REG_DIS_07_ADDR   0xD01B
 
 #define REG_DIS_CMD_MASK  0x0f 
 

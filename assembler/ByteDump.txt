@@ -1,0 +1,86 @@
+******************************* Segment: Default *******************************
+[Main Program]
+0800: a2 ff     - start:  ldx #$ff    // Set the stackpointer to
+0802: 9a        -         txs         // highest possible position.
+0803: 8a        - loop:   txa
+0804: 8d 14 d0  -         sta $d014   // Store to DIS01
+0807: ca        -         dex
+0808: 4c 03 08  -         jmp loop
+
+[Kernel Routines Entry Points]
+e000: 4c 00 e1  - get_key:jmp next_key
+
+[Kernel Routines]
+e100: ad 11 d0  - next_key:lda KBDCR               // Load the keyboard control register
+e103: 10 fb     -         bpl next_key            // lda affects the negative flag, 
+e105: 29 70     -         and #KEY_MOD_MASK
+e107: aa        -         tax                     // Save modifiers
+e108: ad 10 d0  -         lda KBD                 // Current key code to accu
+e10b: 60        -         rts                     // Return
+e10c: 48        - print_string:pha                     // Save accu
+e10d: 8a        -         txa
+e10e: 48        -         pha
+e10f: 98        -         tya
+e110: 48        -         pha                     // Save y register
+e111: ad 13 d0  -         lda DISCR
+e114: 29 80     -         and #$80
+e116: d0 f9     -         bne !irq-               // IRQ still active. Wait until cleared
+e118: ae 14 d0  -         ldx DIS_00              // Get initial xpos
+e11b: a0 00     -         ldy #0
+e11d: b1 e0     -         lda (zpRegE0),y         // Read character from memory
+e11f: f0 13     -         beq !end+               // On 0 we are done
+e121: 8d 12 d0  -         sta DIS                 // Write character
+e124: ad 13 d0  -         lda DISCR
+e127: 09 80     -         ora #$80
+e129: 8d 13 d0  -         sta DISCR               // Set IRQ Flag
+e12c: e8        -         inx                     // Next xpos
+e12d: 8e 15 d0  -         stx DIS_01              // Update xpos for the next character
+e130: c8        -         iny                     // Next character index
+e131: 4c 1d e1  -         jmp !loop-
+e134: 68        -         pla                     // restore y
+e135: a8        -         tay
+e136: 68        -         pla
+e137: aa        -         tax
+e138: 68        -         pla                     // restore accu
+e139: 60        -         rts
+e13a: 48        - byte_to_hex:pha                     // Save value to stack.
+e13b: 29 0f     -         and #%00001111
+e13d: 85 e0     -         sta zpRegE0             // store the lower nibble
+e13f: 68        -         pla                     // Load the original value
+e140: 48        -         pha                     // and save it again
+e141: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
+e142: 4a        -         lsr
+e143: 4a        -         lsr
+e144: 4a        -         lsr
+e145: 85 e1     -         sta zpRegE1             // store the higher nibble
+e147: 68        -         pla                     // restore the accu
+e148: 60        -         rts
+e149: a5 e0     - convert565:lda zpRegE0             // red value
+e14b: 0a        -         asl                     // shift three to the left as we
+e14c: 0a        -         asl                     // need to move the lower 5 bits of red
+e14d: 0a        -         asl                     // to the bits 7-5
+e14e: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
+e150: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
+e152: 4a        -         lsr                     // lower bits of the output highbyte
+e153: 4a        -         lsr
+e154: 4a        -         lsr
+e155: 29 07     -         and #%00000111          // Only the lower three bits.
+e157: 05 e0     -         ora zpRegE0             // combine this with the compressed red
+e159: 85 e0     -         sta zpRegE0             // Store the final high byte
+e15b: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
+e15d: 0a        -         asl                     // Shift everything 5 bits to the left and fill
+e15e: 0a        -         asl                     // it with zeros
+e15f: 0a        -         asl
+e160: 0a        -         asl
+e161: 0a        -         asl
+e162: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
+e164: a5 e2     -         lda zpRegE2             // Load blue
+e166: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
+e168: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
+e16a: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
+e16c: 60        -         rts
+
+[Kernel Data]
+f000: 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46  - hex_chars:.text "0123456789ABCDEF"
+f010: 57 05 0c 03 0f 0d 05 20 14 0f 20 46 09 12 13 14  - msg_01: .text "Welcome to FirstKlaas OS v0.1"
+f020: 4b 0c 01 01 13 20 4f 53 20 16 30 2e 31          

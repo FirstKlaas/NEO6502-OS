@@ -34,11 +34,11 @@
  * E0000 - FEFF: Kernal routines
  * 
  */
-void initmemory(THardwarePtr hardware);
+void initmemory(TContextPtr ctx);
 
-void readFromMemory(THardwarePtr hardware);
+void readFromMemory(TContextPtr ctx);
 
-void writeToMemory(THardwarePtr hardware);
+void writeToMemory(TContextPtr ctx);
 
 inline __attribute__((always_inline))
 uint8_t rmem(uint16_t adr);

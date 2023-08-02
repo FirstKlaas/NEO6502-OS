@@ -1,9 +1,9 @@
-#include <Arduino.h>
+#include <pico/stdlib.h>
 #include "datatypes.h"
 
 #define FLAG_UNCONSUMED_KEY 0x80  // 1000 0000 / Bit 7
 
-void initKeyboard(THardwarePtr hardware);
+void initKeyboard(TContextPtr ctx);
 /**
  * @brief Checks, if a key has been pressed. 
  * If a key has been pressed, it will be stored in 
@@ -15,5 +15,5 @@ void initKeyboard(THardwarePtr hardware);
 void checkForKeyPressed();
 
 
-boolean readKeyboard(THardwarePtr hardware);
-boolean writeKeyboard(THardwarePtr hardware);
+boolean readKeyboard(TContextPtr ctx);
+boolean writeKeyboard(TContextPtr ctx);

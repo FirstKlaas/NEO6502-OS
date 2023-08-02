@@ -2,6 +2,9 @@
 #include "keyboard.h"
 #include "kernel.h"
 #include "addr.h"
+#include "display.h"
+
+//#define DEBUG_MEMORY
 
 // Actually 64KB of memory allocated
 uint8_t mem[MEMORY_SIZE];
@@ -12,18 +15,14 @@ uint8_t mem[MEMORY_SIZE];
  * meaning. So we might have to initialise somthing.
  *
  */
-void initmemory(THardwarePtr hardware)
+void initmemory(TContextPtr ctx)
 {
-    hardware->memory = mem;
-    mem[0xFFFC] = lowByte(kernel_start);
-    mem[0xFFFD] = highByte(kernel_start);
-    mem[0xFFFE] = lowByte(kernel_start);
-    mem[0xFFFF] = highByte(kernel_start);
-
-    // Write kernel code to ram. 
-    for (uint8_t i=0; i<kernel_size; i++) {
-      mem[kernel_start + i] = kernel_data[i];
-    }
+    ctx->memory = mem;
+    mem[0xFFFC] = 0x00;
+    mem[0xFFFD] = 0x08;
+    mem[0xFFFE] = 0x00;
+    mem[0xFFFF] = 0x08;
+    load_kernel_to_memory(mem);
 }
 
 inline __attribute__((always_inline))
@@ -45,15 +44,16 @@ inline __attribute__((always_inline)) void wmem(uint16_t adr, uint8_t data)
  * @param address The address to look up
  * @return uint8_t The data from the memory
  */
-void readFromMemory(THardwarePtr hardware)
+void readFromMemory(TContextPtr ctx)
 {
-    if (hardware->address == REG_KBD_ADDR) {
-      hardware->data = hardware->reg.KBD;
-    }
-    if (hardware->address == REG_KBD_ADDR) {
-      hardware->data = hardware->reg.KBD;
-    }
-    hardware->data = hardware->memory[hardware->address];
+    if (readKeyboard(ctx)) return;
+    if (memReadDisplayRegister(ctx)) return;
+
+    // No special register. Store to memory.
+    #ifdef DEBUG_MEMORY
+    Serial.printf("[R] memory[%04X] -> %02X\n", ctx->address, ctx->memory[ctx->address]);
+    #endif
+    ctx->data = ctx->memory[ctx->address];
 }
 
 /**
@@ -62,8 +62,15 @@ void readFromMemory(THardwarePtr hardware)
  * @param address The address to store to
  * @param data The data to store.
  */
-void writeToMemory(THardwarePtr hardware)
+void writeToMemory(TContextPtr ctx)
   {
-    if (writeKeyboard(hardware)) return;
-    hardware->memory[hardware->address] = hardware->data;
+    #ifdef DEBUG_MEMORY
+    Serial.printf("[W] check [%04X] -> %02X\n", ctx->address, ctx->data);
+    #endif
+    if (writeKeyboard(ctx)) return;
+    if (memWriteDisplayRegister(ctx)) return;
+    #ifdef DEBUG_MEMORY
+    Serial.printf("[W] memory[%04X] <- %02X\n", ctx->address, ctx->data);
+    #endif
+    ctx->memory[ctx->address] = ctx->data;
 }

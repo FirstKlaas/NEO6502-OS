@@ -3,8 +3,6 @@
 
 #include <Arduino.h>
 
-extern uint16_t kernel_start;
-extern uint16_t kernel_size;
-extern uint8_t  kernel_data[];
+void load_kernel_to_memory(uint8_t *memory);
 
 #endif

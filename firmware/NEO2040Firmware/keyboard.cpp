@@ -1,11 +1,7 @@
 #include "keyboard.h"
 #include "addr.h"
 
-#define KBDDEBUG
-
-#ifdef KBDDEBUG
-char DEBUGMSG[50];
-#endif
+//#define DEBUG_KEYBOARD
 
 /**
  * @brief Initializes the keyboard interface
@@ -18,10 +14,10 @@ char DEBUGMSG[50];
  * and the flad bit has to be cleared.  
  * 
  */
-void initKeyboard(THardwarePtr hardware) {
-    hardware->reg.KBD = 0x00;
-    hardware->reg.KBDCR = 0x00;
-    #ifdef KBDDEBUG
+void initKeyboard(TContextPtr ctx) {
+    ctx->reg.KBD = 0x00;
+    ctx->reg.KBDCR = 0x00;
+    #ifdef DEBUG_KEYBOARD
     Serial.println("Keyboard initlialized.");
     #endif
 }
@@ -32,17 +28,20 @@ void initKeyboard(THardwarePtr hardware) {
  If true, register management is done properly and true
  will be returned. False otherwise.
 **/
-boolean readKeyboard(THardwarePtr hardware) {
-    if (hardware->address == REG_KBD_ADDR) {
-      hardware->data = hardware->reg.KBD;
+boolean readKeyboard(TContextPtr ctx) {
+    if (ctx->address == REG_KBD_ADDR) {
+      ctx->data = ctx->reg.KBD;
       // Reading the register value also clears the
       // IRQ flag (if set) in the control register.
-      hardware->reg.KBDCR &= 0x7f;
+      ctx->reg.KBDCR &= 0x7f;
+      #ifdef DEBUG_KEYBOARD
+      Serial.printf("readKeyboard: Key value read (0x%02X) and IRG flag cleared (0x%02X)", ctx->data, ctx->reg.KBDCR);
+      #endif
       return true;
     };
 
-    if (hardware->address == REG_KBDCR_ADDR) {
-      hardware->data = hardware->reg.KBDCR;
+    if (ctx->address == REG_KBDCR_ADDR) {
+      ctx->data = ctx->reg.KBDCR;
       return true;
     };
 
@@ -52,34 +51,40 @@ boolean readKeyboard(THardwarePtr hardware) {
 
 
 inline __attribute__((always_inline))
-bool irqSet(THardwarePtr h) {
+bool irqSet(TContextPtr h) {
   return (h->reg.KBDCR & REG_KBD_IRQ_FLAG);  
 }
 
 inline __attribute__((always_inline))
-bool irqClear(THardwarePtr h) {
+bool irqClear(TContextPtr h) {
   return (~irqSet(h));  
 }
 
-boolean writeKeyboard(THardwarePtr hardware) {
+boolean writeKeyboard(TContextPtr ctx) {
     // No idea, if it makes sense to write to the keyboard
     // register from assembler code. But why not. We can change
     // things later down the road.
     // But, if the IRQ Bit is set, we are not allowed to write
     // to this register.
-    if (hardware->address == REG_KBD_ADDR) {
+    if (ctx->address == REG_KBD_ADDR) {
       // Store only, if not IRQ Bit is set
       // In any case we will return true, to indicate that the
       // write request has been handled.
-      if (irqClear(hardware)) hardware->reg.KBD = hardware->data;
+      if (irqClear(ctx)) {
+        ctx->reg.KBD = ctx->data;
+      } else {
+        #ifdef DEBUG_KEYBOARD
+        Serial.println("writeKeyboard: Could not write to keyboard register, as the irg for existing key data is still unhandled.");
+        #endif
+      }
       return true;
     };
 
     // Save data to the keyboard control register.
     // Bit 7 (the IRQ bit) is read only. Therefore
     // it is left changed.
-    if (hardware->address == REG_KBDCR_ADDR) {
-      hardware->reg.KBDCR = ((hardware->data & 0x7f) | (hardware->data & 0x80));
+    if (ctx->address == REG_KBDCR_ADDR) {
+      ctx->reg.KBDCR = ((ctx->data & 0x7f) | (ctx->data & 0x80));
       return true;
     };
 
@@ -87,14 +92,14 @@ boolean writeKeyboard(THardwarePtr hardware) {
 }
 
 /**
- * @brief Checks the hardware serial, which
+ * @brief Checks the ctx serial, which
  * is connected to the keyboard, for a pressed
  * character. If a character is available, it
  * will be stored in the KEY register. But
  * only, if the flag has been cleared.
  * 
  */
-void checkForKeyPressed(THardwarePtr hardware) {
+void checkForKeyPressed(TContextPtr ctx) {
 
     if (Serial.available()) {
 
@@ -102,16 +107,19 @@ void checkForKeyPressed(THardwarePtr hardware) {
         // Not yet implemented. Code fpr ^R is 0x12
 
         // Test, if the interrupt has been cleared? 
-        if ((hardware->reg.KBDCR & FLAG_UNCONSUMED_KEY) == ~FLAG_UNCONSUMED_KEY) {
+        if ((ctx->reg.KBDCR & FLAG_UNCONSUMED_KEY) == ~FLAG_UNCONSUMED_KEY) {
             // There is no unconsumed character
             noInterrupts();
-            hardware->reg.KBD = Serial.read();
-            hardware->reg.KBDCR |= FLAG_UNCONSUMED_KEY;
+            ctx->reg.KBD = Serial.read();
+            ctx->reg.KBDCR |= FLAG_UNCONSUMED_KEY;
             interrupts();
-            #ifdef KBDDEBUG
-            sprintf(DEBUGMSG, "Key pressed. Code is %d (or 0x%02X)", hardware->reg.KBD, hardware->reg.KBD);
-            Serial.println(DEBUGMSG);
+            #ifdef DEBUG_KEYBOARD
+            Serial.printf("checkForKeyPressed: Key pressed. Code is [%d] (0x%02X)\n", ctx->reg.KBD, ctx->reg.KBD);
             #endif
+        } else {
+            #ifdef DEBUG_KEYBOARD
+            Serial.println("checkForKeyPressed: New key available, but there is still an unconsumed character in the register.");
+            #endif          
         }
     }
 }

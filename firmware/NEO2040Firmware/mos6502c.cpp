@@ -141,7 +141,7 @@ inline __attribute__((always_inline)) void putData(uint8_t data)
 /// <summary>
 /// initialise the 65C02
 /// </summary>
-void init6502(THardwarePtr hardware)
+void init6502(TContextPtr ctx)
 {
   // CLOCK
   pinMode(uP_CLOCK, OUTPUT);
@@ -180,7 +180,7 @@ void reset6502()
 /// clock cycle 65C02
 /// </summary>
 // inline __attribute__((always_inline))
-void tick6502(THardwarePtr hardware)
+void tick6502(TContextPtr ctx)
 {
   uint8_t data(0);
   uint16_t address(0);
@@ -199,8 +199,8 @@ void tick6502(THardwarePtr hardware)
 
   DELAY_FACTOR_SHORT();
 
-  hardware->address = getAddress();
-  hardware->clock_cycle++;
+  ctx->address = getAddress();
+  ctx->clock_cycle++;
 
   // depending on the status of the R/W pin,
   // we read the data from memory and write to the bus
@@ -209,19 +209,19 @@ void tick6502(THardwarePtr hardware)
   switch (getRW())
   {
   case RW_READ: // Read the data from memory and write to the bus
-    readFromMemory(hardware); // data = @address
-    putData(hardware->data);
+    readFromMemory(ctx); // data = @address
+    putData(ctx->data);
     #ifdef CPUDEBUG
-    sprintf(CPUDEBUGMSG, "%04d: 0x%04X | R | %02X", hardware->clock_cycle, hardware->address, hardware->data);
+    sprintf(CPUDEBUGMSG, "%04d: 0x%04X | R | %02X", ctx->clock_cycle, ctx->address, ctx->data);
     Serial.println(CPUDEBUGMSG);
     #endif
     break;
 
   case RW_WRITE: // Read data from the bus and store it to the memory
-    hardware->data = getData();
-    writeToMemory(hardware);
+    ctx->data = getData();
+    writeToMemory(ctx);
     #ifdef CPUDEBUG
-    sprintf(CPUDEBUGMSG, "%04d: 0x%04X | W | %02X", hardware->clock_cycle, hardware->address, hardware->data);
+    sprintf(CPUDEBUGMSG, "%04d: 0x%04X | W | %02X", ctx->clock_cycle, ctx->address, ctx->data);
     Serial.println(CPUDEBUGMSG);
     #endif
     break;
