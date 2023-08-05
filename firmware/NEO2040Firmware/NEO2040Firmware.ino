@@ -21,6 +21,10 @@
 static TContext ctx;
 static TContextPtr ctxPtr(&ctx); 
 
+//#define FRAMERATE 10
+//#define FRAME_DURATION_MS  10000 / FRAMERATE
+
+unsigned long lastClockTS;
 
 void setup() 
 {
@@ -46,14 +50,20 @@ void setup()
   reset6502();
 
   sleep_ms(2000);
-  printWelcomeMsg();
-  updateDisplay();
+  printWelcomeMsg(ctxPtr);
   
-  for (int i=0; i<120; i++)
+  
+  for (int i=0; i<5000; i++)
     tick6502(ctxPtr);
-  
+    updateDisplay();
+    
 }
 
 void loop() {
+  tick6502(ctxPtr);
+  if ((millis() - lastClockTS) >= FRAMETIME) {
+    updateDisplay();
+    lastClockTS = millis();
+  }
   // put your main code here, to run repeatedly:
 }

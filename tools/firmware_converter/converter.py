@@ -97,7 +97,7 @@ def write_loader_function(out, segments):
     for (uint8_t i=0; i<{len(segments)}; i++) {{
         Serial.printf("Loading segment [%02d] at [%04x]. %d bytes", i+1, segment[i].address, segment[i].size);
         // Better use memcpy
-        for (uint16_t mem_index=0; i<segment[i].size; mem_index++) {{
+        for (uint16_t mem_index=0; mem_index<segment[i].size; mem_index++) {{
             memory[segment[i].address + mem_index] = segment[i].data[mem_index];
         }};
     }};

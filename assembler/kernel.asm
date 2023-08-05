@@ -9,21 +9,44 @@
                 .const DIS    = $d012    // Display register
                 .const DISCR  = $d013    // Display control register
 
-                .const DIS_00 = $d014    // Data exchange register 
-                .const DIS_01 = $d015    // Data exchange register 
-                .const DIS_02 = $d016    // Data exchange register 
-                .const DIS_03 = $d017    // Data exchange register 
-                .const DIS_04 = $d018    // Data exchange register 
-                .const DIS_05 = $d019    // Data exchange register 
-                .const DIS_06 = $d01A    // Data exchange register 
-                .const DIS_07 = $d01B    // Data exchange register 
+                .const DISCMD = $d014    // Display command register
+                .const DIS_00 = $d015    // Data exchange register 
+                .const DIS_01 = $d016    // Data exchange register 
+                .const DIS_02 = $d017    // Data exchange register 
+                .const DIS_03 = $d018    // Data exchange register 
+                .const DIS_04 = $d019    // Data exchange register 
+                .const DIS_05 = $d01A    // Data exchange register 
+                .const DIS_06 = $d01B    // Data exchange register 
+                .const DIS_07 = $d01C    // Data exchange register 
 
                 .const KBD_IRQ_FLAG = $80
                 .const DIS_IRQ_FLAG = $80
 
                 .const KEY_MOD_MASK = %01110000  // Mask for the modifiers
 
-
+                .const CMD_GET_CURSOR_X     = $01
+                .const CMD_GET_CURSOR_Y     = $02
+                .const CMD_SET_CURSOR_X     = $03
+                .const CMD_SET_CURSOR_Y     = $04
+                .const CMD_GET_FG_COLOR     = $05
+                .const CMD_GET_BG_COLOR     = $06
+                .const CMD_SET_FG_COLOR     = $07
+                .const CMD_SET_BG_COLOR     = $08
+                .const CMD_GET_X_OFFSET     = $09
+                .const CMD_GET_Y_OFFSET     = $0a
+                .const CMD_SET_X_OFFSET     = $0b
+                .const CMD_SET_Y_OFFSET     = $0c
+                .const CMD_WRITE_CHAR       = $0d
+                .const CMD_FILL_SCREEN      = $0e
+                .const CMD_CLEAR_SCREEN     = $0f
+                .const CMD_SCROLL_UP        = $10
+                .const CMD_SCROLL_DOWN      = $11
+                .const CMD_SHOW_CURSOR      = $12
+                .const CMD_HIDE_CURSOR      = $13
+                // Graphics Commands
+                .const CMD_DRAW_LINE        = $14
+                .const CMD_DRAW_HLINE       = $15
+                .const CMD_DRAW_VLINE       = $16
 
 /* ----------------------------------------------------------------------------
                 ZERO PAGE 
@@ -37,6 +60,7 @@
                 Returnvalues.
    ----------------------------------------------------------------------------
 */
+                
 *=$E0 virtual 
 .zp {
                 zpRegE0: .byte 0
@@ -73,17 +97,8 @@
                 zpRegFF: .byte 0
 }
 
-/* ============================================================================
-                MAIN PROGRAM
-   ----------------------------------------------------------------------------
-*/
-                * = $0800 "Main Program"
-start:          ldx #$ff    // Set the stackpointer to
-                txs         // highest possible position.
-loop:           txa
-                sta $d014   // Store to DIS01
-                dex
-                jmp loop
+
+.import source "asm/main.asm"
 
 
 /* ============================================================================
@@ -92,7 +107,10 @@ loop:           txa
 */
                 * = $E000 "Kernel Routines Entry Points"
 
-get_key:        jmp next_key
+get_key:        jmp get_key_
+set_cursor_x:   jmp set_cursor_x_
+set_cursor_y:   jmp set_cursor_y_
+print_char:     jmp print_char_
 
 /* ----------------------------------------------------------------------------
     Display Routines.
@@ -111,77 +129,10 @@ get_key:        jmp next_key
 
 
                 * = $E100 "Kernel Routines"
-/*  ----------------------------------------------------------------------------
-    Wait for the next character from the Keyboard and store it in the accu.
-    Modifiers are stored in the X register
-  
-    Since         : 31.07.2023
-    Last modified : 31.07.2023
-    ----------------------------------------------------------------------------
-*/
-next_key:       lda KBDCR               // Load the keyboard control register
-                                        // to check the irq flag
-                bpl next_key            // lda affects the negative flag, 
-                                        // which is a copy of the highest bit
-                                        // (irq flag)
-                and #KEY_MOD_MASK
-                tax                     // Save modifiers
-                lda KBD                 // Current key code to accu
-                rts                     // Return
 
+.import source "asm/kernel_text_routines.asm"
+.import source "asm/debug_register.asm"
 
-/* ----------------------------------------------------------------------------
-    Prints a 0 terminated text string out.
-    x pos is incremented automatically. 
-    Currently noch checks are performed, if the text fits on a line.
-    Starting address of the text is stored in zpRegE0 (lowbyte) and
-    zpRegE1 (highbyte).
-
-    The text is printed starting at the current cursor position.
-
-    Params:
-        zpRegE0 : Text address in memory (lowbyte)
-        zpRegE1 : Text address in memory (highbyte)
-  
-    Saved register:
-        A,X,Y
-
-    Since         : 31.07.2023
-    Last modified : 31.07.2023
-   ----------------------------------------------------------------------------
-*/
-print_string:   pha                     // Save accu
-                txa
-                pha
-                tya
-                pha                     // Save y register
-!irq:
-                lda DISCR
-                and #$80
-                bne !irq-               // IRQ still active. Wait until cleared
-
-                ldx DIS_00              // Get initial xpos
-                ldy #0
-
-!loop:
-                lda (zpRegE0),y         // Read character from memory
-                beq !end+               // On 0 we are done
-                sta DIS                 // Write character
-                lda DISCR
-                ora #$80
-                sta DISCR               // Set IRQ Flag
-                inx                     // Next xpos
-                stx DIS_01              // Update xpos for the next character
-                iny                     // Next character index
-                jmp !loop-
-!end:
-                pla                     // restore y
-                tay
-                pla
-                tax
-                pla                     // restore accu
-                rts
-                
 
 /* ----------------------------------------------------------------------------
     convert a single byte to two hex values (not characters).
@@ -255,7 +206,6 @@ convert565:     lda zpRegE0             // red value
                 ora zpRegE1             // Combine it with the green fraction
                 sta zpRegE1             // Store the final low byte of the compressed color
                 rts
-
 
 /* ============================================================================
                 KERNAL DATA

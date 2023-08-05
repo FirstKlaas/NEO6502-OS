@@ -3,9 +3,8 @@
 //
 #include "mos6502c.h"
 
-#include <Arduino.h>
-
-#define CPUDEBUG
+#include <pico/stdlib.h>
+//#define CPUDEBUG
 
 #define DELAY_FACTOR_SHORT() asm volatile("nop\nnop\nnop\nnop\nnop\n");
 #define DELAY_FACTOR_LONG() asm volatile("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");

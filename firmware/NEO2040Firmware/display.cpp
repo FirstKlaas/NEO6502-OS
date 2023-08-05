@@ -15,17 +15,17 @@ static const struct dvi_serialiser_cfg dvi_cfg = {
 DVIGFX8 display(DVI_RES_320x240p60, true, dvi_cfg);
 
 struct {
-  uint8_t x;
-  uint8_t y;
-  uint8_t offset_y;
-  uint8_t offset_x;
+  uint16_t x;         // X position in pixel
+  uint16_t y;         // Y position in pixel
+  uint8_t offset_y;   // Top offset in pixel
+  uint8_t offset_x;   // Left offset in pixel
 
   uint8_t textbuffer[LINES * LINECHARS];
   uint8_t currentColor;
-  uint8_t currentXpos;
-  uint8_t currentYpos;
+  uint8_t currentXpos;  // X position in character
+  uint8_t currentYpos;  // Y position in character
 
-  boolean needsRefresh;
+  uint32_t needsRefresh;  // If > 0: Screen will be updated.
 
 } screendata;
 
@@ -59,6 +59,7 @@ void initDisplay(TContextPtr ctx) {
   display.setTextSize(1);        // Default size
   display.setTextWrap(false);
   display.swap(false, true);     // Duplicate same palette into front & back buffers
+  screendata.needsRefresh = 0;
 };
 
 void setColor(uint8_t vColor) {
@@ -66,61 +67,131 @@ void setColor(uint8_t vColor) {
   display.setTextColor(vColor);
 }
 
-void setCursor(uint16_t x, uint16_t y) {
+void setCursor(TContextPtr ctx, uint8_t x, uint8_t y) {
+  uint8_t ox(screendata.currentXpos);
+  uint8_t oy(screendata.currentYpos);
+  
   screendata.currentXpos = x;
   screendata.currentYpos = y;
-  screendata.x = x * FONT_CHAR_WIDTH + screendata.offset_x;
-  screendata.y = y * FONT_CHAR_HEIGHT  + screendata.offset_y;
+
+  if (x >= LINECHARS && (ctx->reg.DISCR & AUTO_WRAP_FLAG)) {
+    //screendata.currentXpos = 0;
+    //screendata.currentYpos = y+1;
+    screendata.currentXpos = (x % LINECHARS);
+    screendata.currentYpos += (x / LINECHARS);
+    /*
+      Serial.printf("######## Wrapping: %02d %02d\n", x, y);
+      Serial.printf("                   %02d %02d\n", screendata.currentXpos, screendata.currentYpos);
+      Serial.printf("                   %02d %02d\n", ox, oy);
+    */
+  };
+
+  screendata.x = screendata.currentXpos * FONT_CHAR_WIDTH + screendata.offset_x;
+  screendata.y = screendata.currentYpos * FONT_CHAR_HEIGHT  + screendata.offset_y;
+
   display.setCursor(screendata.x , screendata.y);
+  if (ctx->reg.DISCR && SHOW_CURSOR_FLAG) {
+    // If there is a change and we show the cursor,
+    // we need to refresh the screen.
+    screendata.needsRefresh++;
+  }
 }
 
-void writeChar(uint8_t c) {
-  
+void setCursorX(TContextPtr ctx,uint8_t x) {
+  setCursor(ctx, x, screendata.currentYpos);
+}
+
+void setCursorY(TContextPtr ctx,uint8_t y) {
+  setCursor(ctx, screendata.currentXpos, y);
+}
+
+void getCursorX(TContextPtr ctx) {
+  ctx->reg.DIS00 = screendata.currentXpos;
+}
+
+void getCursorY(TContextPtr ctx) {
+  ctx->reg.DIS00 = screendata.currentYpos;
+}
+
+void writeChar(TContextPtr ctx, uint8_t c) {
+  // Cursor position is off screen, do nothing
+  if (screendata.currentXpos >= LINECHARS || screendata.currentYpos >= LINES) return;
+
+  display.write(c);
+  screendata.needsRefresh++;
+  // Check, if we need to adjust the cursor
+  // automatically
+  if (ctx->reg.DISCR && ADJUST_CURSOR_FLAG) {
+    setCursor(ctx, screendata.currentXpos+1, screendata.currentYpos);  
+  }
 }
 
 char HEXCHARS[] = "0123456789ABCDEF";
 
-void writeHex(uint8_t v) {
+void writeHex(TContextPtr ctx, uint8_t v) {
   display.write(HEXCHARS[(v >> 4) & 0x0f]);
-  setCursor(screendata.currentXpos+1, screendata.currentYpos);
+  setCursor(ctx, screendata.currentXpos+1, screendata.currentYpos);
   display.write(HEXCHARS[v & 0x0f]);
-  setCursor(screendata.currentXpos+2, screendata.currentYpos);
+  setCursor(ctx, screendata.currentXpos+2, screendata.currentYpos);
   updateDisplay();
 }
 
 void updateDisplay() {
+  if (screendata.needsRefresh) {
+    display.swap(true,false);
+  };
+  screendata.needsRefresh = 0;
+}
+
+void printWelcomeMsg(TContextPtr ctx) {
+  screendata.needsRefresh++;
+  display.setCursor(1,0);
+  setColor(7);
+  display.print("NEO6502");
+  setCursor(ctx,0,4);
+  writeChar(ctx, 'M');
+  setCursor(ctx,0,5);
+  writeChar(ctx, 'D');
   display.swap(true,false);
 }
 
-void printWelcomeMsg() {
-  setCursor(0, 0);
-  setColor(7); // AMBER
-  display.print("NEO6502");
-  setColor(255); // WHITE
-  display.println(" - Cute little thing");
-  setColor(2); // GREEN   
-  setCursor(3,2);
-  display.println("FirstKlaas Firmware");
-  setCursor(0,5);
+void executeCommand(TContextPtr ctx) {
+
+  switch (ctx->reg.DISCMD) {
+    case CMD_NOP:
+      break;
+    case CMD_SET_CURSOR_X:
+      setCursorX(ctx, ctx->reg.DIS00);
+      break;
+    case CMD_SET_CURSOR_Y:
+      setCursorY(ctx, ctx->reg.DIS00);
+      break;
+    case CMD_WRITE_CHAR:
+      writeChar(ctx, ctx->reg.DIS00);
+      screendata.needsRefresh++;
+      break;
+    case CMD_SET_FG_COLOR:
+      //Serial.printf("Set color %d\n", ctx->reg.DIS00);
+      setColor(ctx->reg.DIS00);
+      break;
+    case CMD_GET_CURSOR_X:
+      getCursorX(ctx);
+      break;
+    case CMD_GET_CURSOR_Y:
+      getCursorY(ctx);
+      break;
+  }
+  ctx->reg.DISCR &= 0x7f; // Clear IRQ flag. Leave the rest
 }
 
 boolean memReadDisplayRegister(TContextPtr ctx) {
-  if (ctx->address == REG_DIS_ADDR) {
-    ctx->data = ctx->reg.DIS;
-    return true;
-  };
-
-  if (ctx->address == REG_DISCR_ADDR) {
-    ctx->data = ctx->reg.DISCR;
-    return true;
-  };
-
-  return false;
-
+  if (ctx->address < REG_DIS_START || ctx->address > REG_DIS_END) return false;
+  ctx->data = ctx->reg.displayRegister[ctx->address - REG_DIS_START];
+  return true;
 }
 
 boolean memWriteDisplayRegister(TContextPtr ctx) {
-  if (ctx->address < REG_DIS_ADDR || ctx->address > REG_DIS_07_ADDR) return false;
+  if (ctx->address < REG_DIS_START || ctx->address > REG_DIS_END) return false;
 
   #ifdef DEBUG_DISPLAY
   Serial.printf("Display write: [%04X] := %02X\n", ctx->address, ctx->data);
@@ -135,53 +206,21 @@ boolean memWriteDisplayRegister(TContextPtr ctx) {
     return true;
   }
 
-  switch (ctx->address) {
-    case REG_DIS_ADDR:
-      ctx->reg.DIS = ctx->data;
-      return true;
+  ctx->reg.displayRegister[ctx->address - REG_DIS_START] = ctx->data;
 
-    case REG_DISCR_ADDR:
-      ctx->reg.DISCR = ctx->data;
-      return true;
-
-    case REG_DIS_00_ADDR:
-      ctx->reg.DIS00 = ctx->data;
-      // Test code
-      writeHex(ctx->data);
-      return true;
-
-    case REG_DIS_01_ADDR:
-      ctx->reg.DIS01 = ctx->data;
-      return true;
-      
-    case REG_DIS_02_ADDR:
-      ctx->reg.DIS02 = ctx->data;
-      return true;
-      
-    case REG_DIS_03_ADDR:
-      ctx->reg.DIS03 = ctx->data;
-      return true;
-      
-    case REG_DIS_04_ADDR:
-      ctx->reg.DIS04 = ctx->data;
-      return true;
-      
-    case REG_DIS_05_ADDR:
-      ctx->reg.DIS05 = ctx->data;
-      return true;
-      
-    case REG_DIS_06_ADDR:
-      ctx->reg.DIS06 = ctx->data;
-      return true;
-      
-    case REG_DIS_07_ADDR:
-      ctx->reg.DIS07 = ctx->data;
-      return true;
-      
+  // Check for IRQ Flag
+  if (ctx->reg.DISCR & 0x80) {
+    
+      // If the IRQ flag is set, we know that it was set through this write
+      // instruction. This means, we are requested to execute the
+      // prepared command. 
+      #ifdef DEBUG_DISPLAY
+      Serial.printf("IRQ Flag for display set. Executing command. %02x\n", ctx->reg.DISCMD);
+      #endif
+      executeCommand(ctx); // Execute command and clear irq flag
   }
-
-  return false;
-}
+  return true;    
+ }
 
 uint16_t convertColor565(uint8_t r, uint8_t g, uint8_t b) {
   return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
