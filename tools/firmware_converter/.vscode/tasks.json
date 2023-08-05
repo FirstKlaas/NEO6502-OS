@@ -6,7 +6,7 @@
         {
             "label": "convert prg",
             "type": "shell",
-            "command": "python converter.py",
+            "command": "python3 converter.py",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
