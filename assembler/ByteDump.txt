@@ -5,20 +5,28 @@
 0803: ad 13 d0  -         lda DISCR   // Set the auto adjust 
 0806: 09 0c     -         ora #$0C    // and wrap flag
 0808: 8d 13 d0  -         sta DISCR                
-080b: 20 0f e2  -         jsr debug_register_
+080b: 20 e8 e1  -         jsr debug_register_
 080e: a9 01     -         lda #1
-0810: 20 52 e1  -         jsr set_cursor_y_
+0810: 20 24 e1  -         jsr set_cursor_y_
 0813: a9 00     -         lda #0
-0815: 20 3a e1  -         jsr set_cursor_x_
+0815: 20 0c e1  -         jsr set_cursor_x_
 0818: a9 03     -         lda #3
-081a: 20 6a e1  -         jsr set_fg_color_
-081d: 4c 1d 08  - end:    jmp end
+081a: 20 3c e1  -         jsr set_fg_color_
+081d: a9 2b     -         lda #<welcome
+081f: 85 e0     -         sta zpRegE0
+0821: a9 08     -         lda #>welcome
+0823: 85 e1     -         sta zpRegE1
+0825: 20 b0 e1  -         jsr print_text_
+0828: 4c 28 08  - end:    jmp end
+082b: 57 65 6c 63 6f 6d 65 20 74 6f 20 74 68 65 20 70  - welcome:.text "Welcome to the pleasure Dome!"
+083b: 6c 65 61 73 75 72 65 20 44 6f 6d 65 21          
+0848: 00        -         .byte 0
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_
-e003: 4c 3a e1  - set_cursor_x:jmp set_cursor_x_
-e006: 4c 52 e1  - set_cursor_y:jmp set_cursor_y_
-e009: 4c c6 e1  - print_char:jmp print_char_
+e003: 4c 0c e1  - set_cursor_x:jmp set_cursor_x_
+e006: 4c 24 e1  - set_cursor_y:jmp set_cursor_y_
+e009: 4c 98 e1  - print_char:jmp print_char_
 
 [Kernel Routines]
 e100: ad 11 d0  - get_key_:lda KBDCR               // Load the keyboard control register
@@ -27,184 +35,162 @@ e105: 29 70     -         and #KEY_MOD_MASK
 e107: aa        -         tax                     // Save modifiers
 e108: ad 10 d0  -         lda KBD                 // Current key code to accu
 e10b: 60        -         rts                     // Return
-e10c: 48        - print_string:pha                     // Save accu
-e10d: 8a        -         txa
-e10e: 48        -         pha
-e10f: 98        -         tya
-e110: 48        -         pha                     // Save y register
-e111: ad 13 d0  -         lda DISCR
-e114: 29 80     -         and #$80
-e116: d0 f9     -         bne !irq-               // IRQ still active. Wait until cleared
-e118: ae 15 d0  -         ldx DIS_00              // Get initial xpos
-e11b: a0 00     -         ldy #0
-e11d: b1 e0     -         lda (zpRegE0),y         // Read character from memory
-e11f: f0 13     -         beq !end+               // On 0 we are done
-e121: 8d 12 d0  -         sta DIS                 // Write character
-e124: ad 13 d0  -         lda DISCR
-e127: 09 80     -         ora #$80
-e129: 8d 13 d0  -         sta DISCR               // Set IRQ Flag
-e12c: e8        -         inx                     // Next xpos
-e12d: 8e 16 d0  -         stx DIS_01              // Update xpos for the next character
-e130: c8        -         iny                     // Next character index
-e131: 4c 1d e1  -         jmp !loop-
-e134: 68        -         pla                     // restore y
-e135: a8        -         tay
-e136: 68        -         pla
-e137: aa        -         tax
-e138: 68        -         pla                     // restore accu
-e139: 60        -         rts
-e13a: 48        - set_cursor_x_:pha                     // Save accu
-e13b: 8d 15 d0  -         sta DIS_00              // Save the xpos to the 
-e13e: a9 03     -         lda #CMD_SET_CURSOR_X
-e140: 8d 14 d0  -         sta DISCMD              // Write the command. Will raise the irq                                         
-e143: ad 13 d0  -         lda DISCR
-e146: 09 80     -         ora #$80
-e148: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
-e14b: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
-e14e: 30 fb     -         bmi !wait-              // No! Let's wait
-e150: 68        -         pla                     // Restore input parameter in accu
-e151: 60        -         rts                     // Return
-e152: 48        - set_cursor_y_:pha                     // Save accu
-e153: 8d 15 d0  -         sta DIS_00              // Save the xpos to the 
-e156: a9 04     -         lda #CMD_SET_CURSOR_Y
-e158: 8d 14 d0  -         sta DISCMD
-e15b: ad 13 d0  -         lda DISCR
-e15e: 09 80     -         ora #$80
-e160: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
-e163: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
-e166: 30 fb     -         bmi !wait-              // No! Let's wait
-e168: 68        -         pla                     // Restore input parameter in accu
-e169: 60        -         rts                     // Return
-e16a: 48        - set_fg_color_:pha                     // Save accu
-e16b: 8d 15 d0  -         sta DIS_00              // Save the xpos to the 
-e16e: a9 07     -         lda #CMD_SET_FG_COLOR
-e170: 8d 14 d0  -         sta DISCMD
-e173: ad 13 d0  -         lda DISCR
-e176: 09 80     -         ora #$80
-e178: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
-e17b: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
-e17e: 30 fb     -         bmi !wait-              // No! Let's wait
-e180: 68        -         pla                     // Restore input parameter in accu
+e10c: 48        - set_cursor_x_:pha                     // Save accu
+e10d: 8d 15 d0  -         sta DIS_00              // Save the xpos to the 
+e110: a9 03     -         lda #CMD_SET_CURSOR_X
+e112: 8d 14 d0  -         sta DISCMD              // Write the command. Will raise the irq                                         
+e115: ad 13 d0  -         lda DISCR
+e118: 09 80     -         ora #$80
+e11a: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+e11d: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
+e120: 30 fb     -         bmi !wait-              // No! Let's wait
+e122: 68        -         pla                     // Restore input parameter in accu
+e123: 60        -         rts                     // Return
+e124: 48        - set_cursor_y_:pha                     // Save accu
+e125: 8d 15 d0  -         sta DIS_00              // Save the xpos to the 
+e128: a9 04     -         lda #CMD_SET_CURSOR_Y
+e12a: 8d 14 d0  -         sta DISCMD
+e12d: ad 13 d0  -         lda DISCR
+e130: 09 80     -         ora #$80
+e132: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+e135: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
+e138: 30 fb     -         bmi !wait-              // No! Let's wait
+e13a: 68        -         pla                     // Restore input parameter in accu
+e13b: 60        -         rts                     // Return
+e13c: 48        - set_fg_color_:pha                     // Save accu
+e13d: 8d 15 d0  -         sta DIS_00              // Save the xpos to the 
+e140: a9 07     -         lda #CMD_SET_FG_COLOR
+e142: 8d 14 d0  -         sta DISCMD
+e145: ad 13 d0  -         lda DISCR
+e148: 09 80     -         ora #$80
+e14a: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+e14d: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
+e150: 30 fb     -         bmi !wait-              // No! Let's wait
+e152: 68        -         pla                     // Restore input parameter in accu
+e153: 60        -         rts                     // Return
+e154: 48        - set_bg_color_:pha                     // Save accu
+e155: 8d 15 d0  -         sta DIS_00              // Save the xpos to the 
+e158: a9 08     -         lda #CMD_SET_BG_COLOR
+e15a: 8d 14 d0  -         sta DISCMD
+e15d: ad 13 d0  -         lda DISCR
+e160: 09 80     -         ora #$80
+e162: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+e165: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
+e168: 30 fb     -         bmi !wait-              // No! Let's wait
+e16a: 68        -         pla                     // Restore input parameter in accu
+e16b: 60        -         rts                     // Return
+e16c: a9 01     - get_xpos_:lda #CMD_GET_CURSOR_X
+e16e: 8d 14 d0  -         sta DISCMD
+e171: ad 13 d0  -         lda DISCR
+e174: 09 80     -         ora #$80
+e176: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+e179: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
+e17c: 30 fb     -         bmi !wait-              // No! Let's wait
+e17e: ad 15 d0  -         lda DIS_00
 e181: 60        -         rts                     // Return
-e182: 48        - set_bg_color_:pha                     // Save accu
-e183: 8d 15 d0  -         sta DIS_00              // Save the xpos to the 
-e186: a9 08     -         lda #CMD_SET_BG_COLOR
-e188: 8d 14 d0  -         sta DISCMD
-e18b: ad 13 d0  -         lda DISCR
-e18e: 09 80     -         ora #$80
-e190: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
-e193: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
-e196: 30 fb     -         bmi !wait-              // No! Let's wait
-e198: 68        -         pla                     // Restore input parameter in accu
-e199: 60        -         rts                     // Return
-e19a: a9 01     - get_xpos_:lda #CMD_GET_CURSOR_X
-e19c: 8d 14 d0  -         sta DISCMD
-e19f: ad 13 d0  -         lda DISCR
-e1a2: 09 80     -         ora #$80
-e1a4: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
-e1a7: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
-e1aa: 30 fb     -         bmi !wait-              // No! Let's wait
-e1ac: ad 15 d0  -         lda DIS_00
+e182: a9 02     - get_ypos_:lda #CMD_GET_CURSOR_Y
+e184: 8d 14 d0  -         sta DISCMD
+e187: ad 13 d0  -         lda DISCR
+e18a: 09 80     -         ora #$80
+e18c: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+e18f: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
+e192: 30 fb     -         bmi !wait-              // No! Let's wait
+e194: ad 15 d0  -         lda DIS_00
+e197: 60        -         rts                     // Return
+e198: 48        - print_char_:pha                     // Save accu
+e199: 8d 15 d0  -         sta DIS_00              // Save the char to the 
+e19c: a9 0d     -         lda #CMD_WRITE_CHAR
+e19e: 8d 14 d0  -         sta DISCMD
+e1a1: ad 13 d0  -         lda DISCR
+e1a4: 09 80     -         ora #$80
+e1a6: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+e1a9: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
+e1ac: 30 fb     -         bmi !wait-              // No! Let's wait
+e1ae: 68        -         pla                     // Restore input parameter in accu
 e1af: 60        -         rts                     // Return
-e1b0: a9 02     - get_ypos_:lda #CMD_GET_CURSOR_Y
-e1b2: 8d 14 d0  -         sta DISCMD
-e1b5: ad 13 d0  -         lda DISCR
-e1b8: 09 80     -         ora #$80
-e1ba: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
-e1bd: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
-e1c0: 30 fb     -         bmi !wait-              // No! Let's wait
-e1c2: ad 15 d0  -         lda DIS_00
-e1c5: 60        -         rts                     // Return
-e1c6: 48        - print_char_:pha                     // Save accu
-e1c7: 8d 15 d0  -         sta DIS_00              // Save the char to the 
-e1ca: a9 0d     -         lda #CMD_WRITE_CHAR
-e1cc: 8d 14 d0  -         sta DISCMD
-e1cf: ad 13 d0  -         lda DISCR
-e1d2: 09 80     -         ora #$80
-e1d4: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
-e1d7: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
-e1da: 30 fb     -         bmi !wait-              // No! Let's wait
-e1dc: 68        -         pla                     // Restore input parameter in accu
-e1dd: 60        -         rts                     // Return
-e1de: a0 00     - print_text_:ldy #0              // Index for the char within the string
-e1e0: b1 e0     -         lda (zpRegE0),y     // load character
-e1e2: f0 07     -         beq !end+
-e1e4: 20 c6 e1  -         jsr print_char_
-e1e7: c8        -         iny
-e1e8: 4c e0 e1  -         jmp !next-
-e1eb: 60        -         rts
-e1ec: 48        - print_hex_:pha
-e1ed: a9 00     -         lda #<hex_chars
-e1ef: 85 e0     -         sta zpRegE0
-e1f1: a9 f0     -         lda #>hex_chars
-e1f3: 85 e1     -         sta zpRegE1
-e1f5: 68        -         pla
-e1f6: 48        -         pha
-e1f7: 4a        -         lsr
-e1f8: 4a        -         lsr
-e1f9: 4a        -         lsr
-e1fa: 4a        -         lsr
-e1fb: 29 0f     -         and #$0f
-e1fd: a8        -         tay
-e1fe: b1 e0     -         lda (zpRegE0),y
-e200: 20 c6 e1  -         jsr print_char_
-e203: 68        -         pla
-e204: 48        -         pha
-e205: 29 0f     -         and #$0f
-e207: a8        -         tay
-e208: b1 e0     -         lda (zpRegE0),y
-e20a: 20 c6 e1  -         jsr print_char_
-e20d: 68        -         pla
-e20e: 60        -         rts
-e20f: a9 28     - debug_register_:lda #40             // X Position
-e211: 20 03 e0  -         jsr set_cursor_x    
-e214: a9 01     -         lda #1              // Y Position
-e216: 20 06 e0  -         jsr set_cursor_y
-e219: a9 fe     -         lda #$fe            // Testwert, der ausgegeben werden soll
-e21b: 20 ec e1  -         jsr print_hex_
-e21e: a9 20     -         lda #' '
-e220: 20 c6 e1  -         jsr print_char_
-e223: a9 0b     -         lda #$0b            // Testwert, der ausgegeben werden soll
-e225: 20 ec e1  -         jsr print_hex_
-e228: 60        -         rts
-e229: 48        - byte_to_hex:pha                     // Save value to stack.
-e22a: 29 0f     -         and #%00001111
-e22c: 85 e0     -         sta zpRegE0             // store the lower nibble
-e22e: 68        -         pla                     // Load the original value
-e22f: 48        -         pha                     // and save it again
-e230: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
-e231: 4a        -         lsr
-e232: 4a        -         lsr
-e233: 4a        -         lsr
-e234: 85 e1     -         sta zpRegE1             // store the higher nibble
-e236: 68        -         pla                     // restore the accu
-e237: 60        -         rts
-e238: a5 e0     - convert565:lda zpRegE0             // red value
-e23a: 0a        -         asl                     // shift three to the left as we
-e23b: 0a        -         asl                     // need to move the lower 5 bits of red
-e23c: 0a        -         asl                     // to the bits 7-5
-e23d: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
-e23f: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
-e241: 4a        -         lsr                     // lower bits of the output highbyte
-e242: 4a        -         lsr
-e243: 4a        -         lsr
-e244: 29 07     -         and #%00000111          // Only the lower three bits.
-e246: 05 e0     -         ora zpRegE0             // combine this with the compressed red
-e248: 85 e0     -         sta zpRegE0             // Store the final high byte
-e24a: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
-e24c: 0a        -         asl                     // Shift everything 5 bits to the left and fill
-e24d: 0a        -         asl                     // it with zeros
-e24e: 0a        -         asl
-e24f: 0a        -         asl
-e250: 0a        -         asl
-e251: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
-e253: a5 e2     -         lda zpRegE2             // Load blue
-e255: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
-e257: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
-e259: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
-e25b: 60        -         rts
+e1b0: 8c c1 e1  - print_text_:sty (!end+)+1    // Save y register
+e1b3: a0 00     -         ldy #0              // Index for the char within the string
+e1b5: b1 e0     -         lda (zpRegE0),y     // load character
+e1b7: f0 07     -         beq !end+
+e1b9: 20 98 e1  -         jsr print_char_
+e1bc: c8        -         iny
+e1bd: 4c b5 e1  -         jmp !next-
+e1c0: a0 00     -         ldy #0
+e1c2: a8        -         tay
+e1c3: 68        -         pla
+e1c4: 60        -         rts
+e1c5: 48        - print_hex_:pha
+e1c6: a9 00     -         lda #<hex_chars
+e1c8: 85 e0     -         sta zpRegE0
+e1ca: a9 f0     -         lda #>hex_chars
+e1cc: 85 e1     -         sta zpRegE1
+e1ce: 68        -         pla
+e1cf: 48        -         pha
+e1d0: 4a        -         lsr
+e1d1: 4a        -         lsr
+e1d2: 4a        -         lsr
+e1d3: 4a        -         lsr
+e1d4: 29 0f     -         and #$0f
+e1d6: a8        -         tay
+e1d7: b1 e0     -         lda (zpRegE0),y
+e1d9: 20 98 e1  -         jsr print_char_
+e1dc: 68        -         pla
+e1dd: 48        -         pha
+e1de: 29 0f     -         and #$0f
+e1e0: a8        -         tay
+e1e1: b1 e0     -         lda (zpRegE0),y
+e1e3: 20 98 e1  -         jsr print_char_
+e1e6: 68        -         pla
+e1e7: 60        -         rts
+e1e8: a9 28     - debug_register_:lda #40             // X Position
+e1ea: 20 03 e0  -         jsr set_cursor_x    
+e1ed: a9 01     -         lda #1              // Y Position
+e1ef: 20 06 e0  -         jsr set_cursor_y
+e1f2: a9 fe     -         lda #$fe            // Testwert, der ausgegeben werden soll
+e1f4: 20 c5 e1  -         jsr print_hex_
+e1f7: a9 20     -         lda #' '
+e1f9: 20 98 e1  -         jsr print_char_
+e1fc: a9 0b     -         lda #$0b            // Testwert, der ausgegeben werden soll
+e1fe: 20 c5 e1  -         jsr print_hex_
+e201: 60        -         rts
+e202: 48        - byte_to_hex:pha                     // Save value to stack.
+e203: 29 0f     -         and #%00001111
+e205: 85 e0     -         sta zpRegE0             // store the lower nibble
+e207: 68        -         pla                     // Load the original value
+e208: 48        -         pha                     // and save it again
+e209: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
+e20a: 4a        -         lsr
+e20b: 4a        -         lsr
+e20c: 4a        -         lsr
+e20d: 85 e1     -         sta zpRegE1             // store the higher nibble
+e20f: 68        -         pla                     // restore the accu
+e210: 60        -         rts
+e211: a5 e0     - convert565:lda zpRegE0             // red value
+e213: 0a        -         asl                     // shift three to the left as we
+e214: 0a        -         asl                     // need to move the lower 5 bits of red
+e215: 0a        -         asl                     // to the bits 7-5
+e216: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
+e218: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
+e21a: 4a        -         lsr                     // lower bits of the output highbyte
+e21b: 4a        -         lsr
+e21c: 4a        -         lsr
+e21d: 29 07     -         and #%00000111          // Only the lower three bits.
+e21f: 05 e0     -         ora zpRegE0             // combine this with the compressed red
+e221: 85 e0     -         sta zpRegE0             // Store the final high byte
+e223: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
+e225: 0a        -         asl                     // Shift everything 5 bits to the left and fill
+e226: 0a        -         asl                     // it with zeros
+e227: 0a        -         asl
+e228: 0a        -         asl
+e229: 0a        -         asl
+e22a: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
+e22c: a5 e2     -         lda zpRegE2             // Load blue
+e22e: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
+e230: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
+e232: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
+e234: 60        -         rts
 
 [Kernel Data]
 f000: 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46  - hex_chars:.text "0123456789ABCDEF"
-f010: 57 05 0c 03 0f 0d 05 20 14 0f 20 46 09 12 13 14  - msg_01: .text "Welcome to FirstKlaas OS v0.1"
-f020: 4b 0c 01 01 13 20 4f 53 20 16 30 2e 31          
+f010: 57 65 6c 63 6f 6d 65 20 74 6f 20 46 69 72 73 74  - msg_01: .text "Welcome to FirstKlaas OS v0.1"
+f020: 4b 6c 61 61 73 20 4f 53 20 76 30 2e 31          

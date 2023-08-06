@@ -16,55 +16,6 @@ get_key_:       lda KBDCR               // Load the keyboard control register
                 lda KBD                 // Current key code to accu
                 rts                     // Return
 
-/* ----------------------------------------------------------------------------
-    Prints a 0 terminated text string out.
-    x pos is incremented automatically. 
-    Currently noch checks are performed, if the text fits on a line.
-    Starting address of the text is stored in zpRegE0 (lowbyte) and
-    zpRegE1 (highbyte).
-
-    The text is printed starting at the current cursor position.
-
-    Params:
-        zpRegE0 : Text address in memory (lowbyte)
-        zpRegE1 : Text address in memory (highbyte)
-  
-    Saved register:
-        A,X,Y
-
-    Since         : 31.07.2023
-    Last modified : 31.07.2023
-   ----------------------------------------------------------------------------
-*/
-print_string:   pha                     // Save accu
-                txa
-                pha
-                tya
-                pha                     // Save y register
-!irq:
-                lda DISCR
-                and #$80
-                bne !irq-               // IRQ still active. Wait until cleared
-                ldx DIS_00              // Get initial xpos
-                ldy #0
-!loop:
-                lda (zpRegE0),y         // Read character from memory
-                beq !end+               // On 0 we are done
-                sta DIS                 // Write character
-                lda DISCR
-                ora #$80
-                sta DISCR               // Set IRQ Flag
-                inx                     // Next xpos
-                stx DIS_01              // Update xpos for the next character
-                iny                     // Next character index
-                jmp !loop-
-!end:
-                pla                     // restore y
-                tay
-                pla
-                tax
-                pla                     // restore accu
-                rts
                 
 /* ----------------------------------------------------------------------------
     Sets the x cursor position.
@@ -199,13 +150,17 @@ print_char_:    pha                     // Save accu
     Last modified : 06.08.2023
    ----------------------------------------------------------------------------
 */
-print_text_:    ldy #0              // Index for the char within the string
+print_text_:    sty (!end+)+1    // Save y register
+                ldy #0              // Index for the char within the string
 !next:          lda (zpRegE0),y     // load character
                 beq !end+
                 jsr print_char_
                 iny
                 jmp !next-
-!end:           rts
+!end:           ldy #0
+                tay
+                pla
+                rts
 
 /* ----------------------------------------------------------------------------
     convert a single byte to two hex values (not characters).

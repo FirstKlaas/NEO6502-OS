@@ -28,13 +28,14 @@ start:          ldx #$ff    // Set the stackpointer to
                 jsr set_cursor_x_
                 lda #3
                 jsr set_fg_color_
-                lda <welcome
+                lda #<welcome
                 sta zpRegE0
-                lda >welcome
+                lda #>welcome
                 sta zpRegE1
                 jsr print_text_
 end:
                 jmp end
 
-welcome:        .text "Welcome to the pleasure dome"
+welcome:        .encoding "ascii"
+                .text "Welcome to the pleasure Dome!"
                 .byte 0
