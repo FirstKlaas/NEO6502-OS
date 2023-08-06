@@ -54,12 +54,14 @@ enum {
 } TDisplayCommand;
 
 void initDisplay(TContextPtr ctx);
+/*
 void setColor(uint8_t vColor);
 void setCursor(TContextPtr ctx, uint8_t x, uint8_t y);
 void writeChar(TContextPtr ctx, uint8_t c);
 void updateDisplay();
 void printWelcomeMsg(TContextPtr ctx);
-
+*/
+void updateDisplay();
 boolean memReadDisplayRegister(TContextPtr ctx);
 boolean memWriteDisplayRegister(TContextPtr ctx);
 

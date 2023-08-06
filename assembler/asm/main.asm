@@ -22,12 +22,16 @@ start:          ldx #$ff    // Set the stackpointer to
 
                 jsr debug_register_
                 
-                lda #1
-                jsr set_cursor_y_
-                lda #0
-                jsr set_cursor_x_
-                lda #3
-                jsr set_fg_color_
+                SetCursorI(0,0)
+                SetForgroundColorI(COLOR_GREEN)
+                lda #<border_top
+                sta zpRegE0
+                lda #>border_top
+                sta zpRegE1
+                jsr print_text_
+
+                SetForgroundColorI(COLOR_AMBER)
+                SetCursorI(2,1)
                 lda #<welcome
                 sta zpRegE0
                 lda #>welcome
@@ -35,6 +39,9 @@ start:          ldx #$ff    // Set the stackpointer to
                 jsr print_text_
 end:
                 jmp end
+
+border_top:     .byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
+                .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
 
 welcome:        .encoding "ascii"
                 .text "Welcome to the pleasure Dome!"

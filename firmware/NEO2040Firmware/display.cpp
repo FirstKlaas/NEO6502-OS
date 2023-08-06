@@ -2,7 +2,7 @@
 #include "addr.h"
 #include <PicoDVI.h>
 
-#define DEBUG_DISPLAY
+//#define DEBUG_DISPLAY
 
 // Pico HDMI for Olimex Neo6502 
 static const struct dvi_serialiser_cfg dvi_cfg = { 
@@ -31,6 +31,13 @@ struct {
 
 uint8_t buffer[] = {12,15,67};
 
+void setColor(uint8_t vColor) {
+  screendata.currentColor = vColor;
+  Serial.printf("Setting color %02x %02d\n", vColor, vColor);
+  display.setTextColor(vColor);
+}
+
+
 void initDisplay(TContextPtr ctx) {
 
   if (!display.begin()) {
@@ -51,7 +58,7 @@ void initDisplay(TContextPtr ctx) {
   display.setColor(6, 0xF8F9);   // Magenta
   display.setColor(7, convertColor565(255,191,0));   // Amber
   
-  display.setColor(255, 0xFFFF); // Last palette entry = White
+  display.setColor(255, 0xFFFF); // Last palette entry = Whi
   // Clear back framebuffer
   display.fillScreen(0);
   display.setFont();             // Use default font
@@ -61,13 +68,9 @@ void initDisplay(TContextPtr ctx) {
   display.swap(false, true);     // Duplicate same palette into front & back buffers
   screendata.needsRefresh = 0;
   display.setCursor(1,0);
-  setColor(7);
+  setColor(255);
 };
 
-void setColor(uint8_t vColor) {
-  screendata.currentColor = vColor;
-  display.setTextColor(vColor);
-}
 
 void setCursor(TContextPtr ctx, uint8_t x, uint8_t y) {
   uint8_t ox(screendata.currentXpos);
@@ -115,6 +118,13 @@ void getCursorY(TContextPtr ctx) {
   ctx->reg.DIS00 = screendata.currentYpos;
 }
 
+void updateDisplay() {
+  if (screendata.needsRefresh) {
+    display.swap(true,false);
+  };
+  screendata.needsRefresh = 0;
+}
+
 void writeChar(TContextPtr ctx, uint8_t c) {
   // Cursor position is off screen, do nothing
   if (screendata.currentXpos >= LINECHARS || screendata.currentYpos >= LINES) return;
@@ -138,12 +148,6 @@ void writeHex(TContextPtr ctx, uint8_t v) {
   updateDisplay();
 }
 
-void updateDisplay() {
-  if (screendata.needsRefresh) {
-    display.swap(true,false);
-  };
-  screendata.needsRefresh = 0;
-}
 
 void printWelcomeMsg(TContextPtr ctx) {
 }
@@ -164,7 +168,7 @@ void executeCommand(TContextPtr ctx) {
       screendata.needsRefresh++;
       break;
     case CMD_SET_FG_COLOR:
-      //Serial.printf("Set color %d\n", ctx->reg.DIS00);
+      Serial.printf("Set color %d\n", ctx->reg.DIS00);
       setColor(ctx->reg.DIS00);
       break;
     case CMD_GET_CURSOR_X:

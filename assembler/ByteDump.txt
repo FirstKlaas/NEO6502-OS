@@ -6,21 +6,37 @@
 0806: 09 0c     -         ora #$0C    // and wrap flag
 0808: 8d 13 d0  -         sta DISCR                
 080b: 20 eb e1  -         jsr debug_register_
-080e: a9 01     -         lda #1
-0810: 20 24 e1  -         jsr set_cursor_y_
-0813: a9 00     -         lda #0
-0815: 20 0c e1  -         jsr set_cursor_x_
-0818: a9 03     -         lda #3
+080e: a9 00     -         lda #xpos
+0810: 20 0c e1  -         jsr set_cursor_x_
+0813: a9 00     -         lda #ypos
+0815: 20 24 e1  -         jsr set_cursor_y_    
+0818: a9 02     -         lda #color
 081a: 20 3c e1  -         jsr set_fg_color_
-081d: a9 2b     -         lda #<welcome
+081d: a9 45     -         lda #<border_top
 081f: 85 e0     -         sta zpRegE0
-0821: a9 08     -         lda #>welcome
+0821: a9 08     -         lda #>border_top
 0823: 85 e1     -         sta zpRegE1
 0825: 20 b0 e1  -         jsr print_text_
-0828: 4c 28 08  - end:    jmp end
-082b: 57 65 6c 63 6f 6d 65 20 74 6f 20 74 68 65 20 70  - welcome:.text "Welcome to the pleasure Dome!"
-083b: 6c 65 61 73 75 72 65 20 44 6f 6d 65 21          
-0848: 00        -         .byte 0
+0828: a9 07     -         lda #color
+082a: 20 3c e1  -         jsr set_fg_color_
+082d: a9 02     -         lda #xpos
+082f: 20 0c e1  -         jsr set_cursor_x_
+0832: a9 01     -         lda #ypos
+0834: 20 24 e1  -         jsr set_cursor_y_    
+0837: a9 70     -         lda #<welcome
+0839: 85 e0     -         sta zpRegE0
+083b: a9 08     -         lda #>welcome
+083d: 85 e1     -         sta zpRegE1
+083f: 20 b0 e1  -         jsr print_text_
+0842: 4c 42 08  - end:    jmp end
+0845: c8 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_top:.byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
+0855: cc cc cc cc                                     
+0859: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
+0869: cc cc cc cc                                     
+086d: cc ba 00  -         .byte $cc,$ba, $00
+0870: 57 65 6c 63 6f 6d 65 20 74 6f 20 74 68 65 20 70  - welcome:.text "Welcome to the pleasure Dome!"
+0880: 6c 65 61 73 75 72 65 20 44 6f 6d 65 21          
+088d: 00        -         .byte 0
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_
@@ -58,7 +74,7 @@ e138: 30 fb     -         bmi !wait-              // No! Let's wait
 e13a: 68        -         pla                     // Restore input parameter in accu
 e13b: 60        -         rts                     // Return
 e13c: 48        - set_fg_color_:pha                     // Save accu
-e13d: 8d 15 d0  -         sta DIS_00              // Save the xpos to the 
+e13d: 8d 15 d0  -         sta DIS_00              // Save the color to the 
 e140: a9 07     -         lda #CMD_SET_FG_COLOR
 e142: 8d 14 d0  -         sta DISCMD
 e145: ad 13 d0  -         lda DISCR
@@ -146,102 +162,100 @@ e1eb: a9 28     - debug_register_:lda #xpos
 e1ed: 20 0c e1  -         jsr set_cursor_x_
 e1f0: a9 01     -         lda #ypos
 e1f2: 20 24 e1  -         jsr set_cursor_y_    
-e1f5: a9 03     -         lda #color
-e1f7: 8d 15 d0  -         sta DIS_00
-e1fa: 20 3c e1  -         jsr set_fg_color_
-e1fd: a9 8e     -         lda #<debug_txt_01
-e1ff: 85 e0     -         sta zpRegE0
-e201: a9 e2     -         lda #>debug_txt_01
-e203: 85 e1     -         sta zpRegE1
-e205: 20 b0 e1  -         jsr print_text_
-e208: a9 07     -         lda #color
-e20a: 8d 15 d0  -         sta DIS_00
-e20d: 20 3c e1  -         jsr set_fg_color_
-e210: a9 2e     -         lda #xpos
-e212: 20 0c e1  -         jsr set_cursor_x_
-e215: a9 01     -         lda #ypos
-e217: 20 24 e1  -         jsr set_cursor_y_    
-e21a: ad 14 d0  -         lda addr
-e21d: 20 c8 e1  -         jsr print_hex_
-e220: a9 20     -         lda #char
-e222: 20 98 e1  -         jsr print_char_
-e225: ad 13 d0  -         lda addr
-e228: 20 c8 e1  -         jsr print_hex_
-e22b: a9 28     -         lda #xpos
-e22d: 20 0c e1  -         jsr set_cursor_x_
-e230: a9 02     -         lda #ypos
-e232: 20 24 e1  -         jsr set_cursor_y_    
-e235: ad 15 d0  -         lda addr
-e238: 20 c8 e1  -         jsr print_hex_
-e23b: a9 20     -         lda #char
-e23d: 20 98 e1  -         jsr print_char_
-e240: ad 16 d0  -         lda addr
-e243: 20 c8 e1  -         jsr print_hex_
-e246: a9 20     -         lda #char
-e248: 20 98 e1  -         jsr print_char_
-e24b: ad 17 d0  -         lda addr
-e24e: 20 c8 e1  -         jsr print_hex_
-e251: a9 20     -         lda #char
-e253: 20 98 e1  -         jsr print_char_
-e256: ad 18 d0  -         lda addr
-e259: 20 c8 e1  -         jsr print_hex_
-e25c: a9 28     -         lda #xpos
-e25e: 20 0c e1  -         jsr set_cursor_x_
-e261: a9 03     -         lda #ypos
-e263: 20 24 e1  -         jsr set_cursor_y_    
-e266: ad 19 d0  -         lda addr
-e269: 20 c8 e1  -         jsr print_hex_
-e26c: a9 20     -         lda #char
-e26e: 20 98 e1  -         jsr print_char_
-e271: ad 1a d0  -         lda addr
-e274: 20 c8 e1  -         jsr print_hex_
-e277: a9 20     -         lda #char
-e279: 20 98 e1  -         jsr print_char_
-e27c: ad 1b d0  -         lda addr
-e27f: 20 c8 e1  -         jsr print_hex_
-e282: a9 20     -         lda #char
-e284: 20 98 e1  -         jsr print_char_
-e287: ad 1c d0  -         lda addr
-e28a: 20 c8 e1  -         jsr print_hex_
-e28d: 60        -         rts
-e28e: 44 49 53 50 4c                                   - debug_txt_01:.text "DISPL"
-e293: 00        -         .byte 0
-e294: 48        - byte_to_hex:pha                     // Save value to stack.
-e295: 29 0f     -         and #%00001111
-e297: 85 e0     -         sta zpRegE0             // store the lower nibble
-e299: 68        -         pla                     // Load the original value
-e29a: 48        -         pha                     // and save it again
-e29b: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
-e29c: 4a        -         lsr
-e29d: 4a        -         lsr
-e29e: 4a        -         lsr
-e29f: 85 e1     -         sta zpRegE1             // store the higher nibble
-e2a1: 68        -         pla                     // restore the accu
-e2a2: 60        -         rts
-e2a3: a5 e0     - convert565:lda zpRegE0             // red value
-e2a5: 0a        -         asl                     // shift three to the left as we
-e2a6: 0a        -         asl                     // need to move the lower 5 bits of red
-e2a7: 0a        -         asl                     // to the bits 7-5
-e2a8: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
-e2aa: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
-e2ac: 4a        -         lsr                     // lower bits of the output highbyte
-e2ad: 4a        -         lsr
-e2ae: 4a        -         lsr
-e2af: 29 07     -         and #%00000111          // Only the lower three bits.
-e2b1: 05 e0     -         ora zpRegE0             // combine this with the compressed red
-e2b3: 85 e0     -         sta zpRegE0             // Store the final high byte
-e2b5: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
-e2b7: 0a        -         asl                     // Shift everything 5 bits to the left and fill
-e2b8: 0a        -         asl                     // it with zeros
-e2b9: 0a        -         asl
-e2ba: 0a        -         asl
-e2bb: 0a        -         asl
-e2bc: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
-e2be: a5 e2     -         lda zpRegE2             // Load blue
-e2c0: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
-e2c2: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
-e2c4: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
-e2c6: 60        -         rts
+e1f5: a9 05     -         lda #color
+e1f7: 20 3c e1  -         jsr set_fg_color_
+e1fa: a9 88     -         lda #<debug_txt_01
+e1fc: 85 e0     -         sta zpRegE0
+e1fe: a9 e2     -         lda #>debug_txt_01
+e200: 85 e1     -         sta zpRegE1
+e202: 20 b0 e1  -         jsr print_text_
+e205: a9 03     -         lda #color
+e207: 20 3c e1  -         jsr set_fg_color_
+e20a: a9 2e     -         lda #xpos
+e20c: 20 0c e1  -         jsr set_cursor_x_
+e20f: a9 01     -         lda #ypos
+e211: 20 24 e1  -         jsr set_cursor_y_    
+e214: ad 14 d0  -         lda addr
+e217: 20 c8 e1  -         jsr print_hex_
+e21a: a9 20     -         lda #char
+e21c: 20 98 e1  -         jsr print_char_
+e21f: ad 13 d0  -         lda addr
+e222: 20 c8 e1  -         jsr print_hex_
+e225: a9 28     -         lda #xpos
+e227: 20 0c e1  -         jsr set_cursor_x_
+e22a: a9 02     -         lda #ypos
+e22c: 20 24 e1  -         jsr set_cursor_y_    
+e22f: ad 15 d0  -         lda addr
+e232: 20 c8 e1  -         jsr print_hex_
+e235: a9 20     -         lda #char
+e237: 20 98 e1  -         jsr print_char_
+e23a: ad 16 d0  -         lda addr
+e23d: 20 c8 e1  -         jsr print_hex_
+e240: a9 20     -         lda #char
+e242: 20 98 e1  -         jsr print_char_
+e245: ad 17 d0  -         lda addr
+e248: 20 c8 e1  -         jsr print_hex_
+e24b: a9 20     -         lda #char
+e24d: 20 98 e1  -         jsr print_char_
+e250: ad 18 d0  -         lda addr
+e253: 20 c8 e1  -         jsr print_hex_
+e256: a9 28     -         lda #xpos
+e258: 20 0c e1  -         jsr set_cursor_x_
+e25b: a9 03     -         lda #ypos
+e25d: 20 24 e1  -         jsr set_cursor_y_    
+e260: ad 19 d0  -         lda addr
+e263: 20 c8 e1  -         jsr print_hex_
+e266: a9 20     -         lda #char
+e268: 20 98 e1  -         jsr print_char_
+e26b: ad 1a d0  -         lda addr
+e26e: 20 c8 e1  -         jsr print_hex_
+e271: a9 20     -         lda #char
+e273: 20 98 e1  -         jsr print_char_
+e276: ad 1b d0  -         lda addr
+e279: 20 c8 e1  -         jsr print_hex_
+e27c: a9 20     -         lda #char
+e27e: 20 98 e1  -         jsr print_char_
+e281: ad 1c d0  -         lda addr
+e284: 20 c8 e1  -         jsr print_hex_
+e287: 60        -         rts
+e288: 44 49 53 50 4c                                   - debug_txt_01:.text "DISPL"
+e28d: 00        -         .byte 0
+e28e: 48        - byte_to_hex:pha                     // Save value to stack.
+e28f: 29 0f     -         and #%00001111
+e291: 85 e0     -         sta zpRegE0             // store the lower nibble
+e293: 68        -         pla                     // Load the original value
+e294: 48        -         pha                     // and save it again
+e295: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
+e296: 4a        -         lsr
+e297: 4a        -         lsr
+e298: 4a        -         lsr
+e299: 85 e1     -         sta zpRegE1             // store the higher nibble
+e29b: 68        -         pla                     // restore the accu
+e29c: 60        -         rts
+e29d: a5 e0     - convert565:lda zpRegE0             // red value
+e29f: 0a        -         asl                     // shift three to the left as we
+e2a0: 0a        -         asl                     // need to move the lower 5 bits of red
+e2a1: 0a        -         asl                     // to the bits 7-5
+e2a2: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
+e2a4: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
+e2a6: 4a        -         lsr                     // lower bits of the output highbyte
+e2a7: 4a        -         lsr
+e2a8: 4a        -         lsr
+e2a9: 29 07     -         and #%00000111          // Only the lower three bits.
+e2ab: 05 e0     -         ora zpRegE0             // combine this with the compressed red
+e2ad: 85 e0     -         sta zpRegE0             // Store the final high byte
+e2af: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
+e2b1: 0a        -         asl                     // Shift everything 5 bits to the left and fill
+e2b2: 0a        -         asl                     // it with zeros
+e2b3: 0a        -         asl
+e2b4: 0a        -         asl
+e2b5: 0a        -         asl
+e2b6: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
+e2b8: a5 e2     -         lda zpRegE2             // Load blue
+e2ba: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
+e2bc: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
+e2be: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
+e2c0: 60        -         rts
 
 [Kernel Data]
 f000: 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46  - hex_chars:.text "0123456789ABCDEF"

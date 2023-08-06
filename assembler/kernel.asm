@@ -48,14 +48,14 @@
                 .const CMD_DRAW_HLINE       = $15
                 .const CMD_DRAW_VLINE       = $16
 
-                .const COLOR_BLACK          = $01
-                .const COLOR_RED            = $02
-                .const COLOR_GREEN          = $03
-                .const COLOR_YELLOW         = $04
-                .const COLOR_BLUE           = $05
-                .const COLOR_ORANGE         = $06
-                .const COLOR_MAGENTA        = $07
-                .const COLOR_AMBER          = $08
+                .const COLOR_BLACK          = $00
+                .const COLOR_RED            = $01
+                .const COLOR_GREEN          = $02
+                .const COLOR_YELLOW         = $03
+                .const COLOR_BLUE           = $04
+                .const COLOR_ORANGE         = $05
+                .const COLOR_MAGENTA        = $06
+                .const COLOR_AMBER          = $07
                 .const COLOR_WHITE          = $ff 
 
 /* ----------------------------------------------------------------------------

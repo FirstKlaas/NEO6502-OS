@@ -1,3 +1,26 @@
+.macro SetCursorI(xpos, ypos) {
+    lda #xpos
+    jsr set_cursor_x_
+    lda #ypos
+    jsr set_cursor_y_    
+}
+
+.macro HexPrintAddr(addr) {
+    lda addr
+    jsr print_hex_
+}
+
+.macro SetForgroundColorI(color) {
+    lda #color
+    jsr set_fg_color_
+}
+
+.macro PrintCharI(char) {
+    lda #char
+    jsr print_char_
+}
+
+
 /*  ----------------------------------------------------------------------------
     Wait for the next character from the Keyboard and store it in the accu.
     Modifiers are stored in the X register
@@ -72,7 +95,7 @@ set_cursor_y_:  pha                     // Save accu
                 rts                     // Return
 
 set_fg_color_:  pha                     // Save accu
-                sta DIS_00              // Save the xpos to the 
+                sta DIS_00              // Save the color to the 
                                         // display register
                 lda #CMD_SET_FG_COLOR
                 sta DISCMD

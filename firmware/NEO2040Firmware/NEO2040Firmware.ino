@@ -50,10 +50,10 @@ void setup()
   reset6502();
 
   sleep_ms(2000);
-  printWelcomeMsg(ctxPtr);
+  //printWelcomeMsg(ctxPtr);
   
   
-  for (int i=0; i<5000; i++)
+  for (int i=0; i<15000; i++)
     tick6502(ctxPtr);
     updateDisplay();
     
