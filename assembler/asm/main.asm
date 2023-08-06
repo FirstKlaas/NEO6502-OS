@@ -28,11 +28,13 @@ start:          ldx #$ff    // Set the stackpointer to
                 jsr set_cursor_x_
                 lda #3
                 jsr set_fg_color_
-                ldx #60
-loop:           
-                lda #'A'
-                jsr print_char_
-                dex
-                bne loop
+                lda <welcome
+                sta zpRegE0
+                lda >welcome
+                sta zpRegE1
+                jsr print_text_
 end:
                 jmp end
+
+welcome:        .text "Welcome to the pleasure dome"
+                .byte 0

@@ -184,6 +184,29 @@ print_char_:    pha                     // Save accu
                 pla                     // Restore input parameter in accu
                 rts                     // Return
 
+
+/* ----------------------------------------------------------------------------
+    Print a 0 terminated string at the current cursor position.
+  
+    Params In:
+        zpRegE0   : Low byte of the string address
+        zpRegE1   : High byte of the string address
+
+    Params Out:
+        None
+
+    Since         : 06.08.2023
+    Last modified : 06.08.2023
+   ----------------------------------------------------------------------------
+*/
+print_text_:    ldy #0              // Index for the char within the string
+!next:          lda (zpRegE0),y     // load character
+                beq !end+
+                jsr print_char_
+                iny
+                jmp !next-
+!end:           rts
+
 /* ----------------------------------------------------------------------------
     convert a single byte to two hex values (not characters).
     The value to be converted has to be in the accu and is left unchanged
@@ -205,7 +228,20 @@ print_hex_:     pha
                 sta zpRegE0
                 lda #>hex_chars
                 sta zpRegE1
-                ldy #10
+                pla
+                pha
+                lsr
+                lsr
+                lsr
+                lsr
+                and #$0f
+                tay
+                lda (zpRegE0),y
+                jsr print_char_
+                pla
+                pha
+                and #$0f
+                tay
                 lda (zpRegE0),y
                 jsr print_char_
                 pla

@@ -5,19 +5,14 @@
 0803: ad 13 d0  -         lda DISCR   // Set the auto adjust 
 0806: 09 0c     -         ora #$0C    // and wrap flag
 0808: 8d 13 d0  -         sta DISCR                
-080b: 20 f0 e1  -         jsr debug_register_
+080b: 20 0f e2  -         jsr debug_register_
 080e: a9 01     -         lda #1
 0810: 20 52 e1  -         jsr set_cursor_y_
 0813: a9 00     -         lda #0
 0815: 20 3a e1  -         jsr set_cursor_x_
 0818: a9 03     -         lda #3
 081a: 20 6a e1  -         jsr set_fg_color_
-081d: a2 3c     -         ldx #60
-081f: a9 41     - loop:   lda #'A'
-0821: 20 c6 e1  -         jsr print_char_
-0824: ca        -         dex
-0825: d0 f8     -         bne loop
-0827: 4c 27 08  - end:    jmp end
+081d: 4c 1d 08  - end:    jmp end
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_
@@ -131,59 +126,83 @@ e1d7: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is c
 e1da: 30 fb     -         bmi !wait-              // No! Let's wait
 e1dc: 68        -         pla                     // Restore input parameter in accu
 e1dd: 60        -         rts                     // Return
-e1de: 48        - print_hex_:pha
-e1df: a9 00     -         lda #<hex_chars
-e1e1: 85 e0     -         sta zpRegE0
-e1e3: a9 f0     -         lda #>hex_chars
-e1e5: 85 e1     -         sta zpRegE1
-e1e7: a0 0a     -         ldy #10
-e1e9: b1 e0     -         lda (zpRegE0),y
-e1eb: 20 c6 e1  -         jsr print_char_
-e1ee: 68        -         pla
-e1ef: 60        -         rts
-e1f0: a9 28     - debug_register_:lda #40
-e1f2: 20 03 e0  -         jsr set_cursor_x
-e1f5: a9 01     -         lda #1
-e1f7: 20 06 e0  -         jsr set_cursor_y
-e1fa: a9 fe     -         lda #$fe
-e1fc: 20 de e1  -         jsr print_hex_
-e1ff: 60        -         rts
-e200: 48        - byte_to_hex:pha                     // Save value to stack.
-e201: 29 0f     -         and #%00001111
-e203: 85 e0     -         sta zpRegE0             // store the lower nibble
-e205: 68        -         pla                     // Load the original value
-e206: 48        -         pha                     // and save it again
-e207: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
-e208: 4a        -         lsr
-e209: 4a        -         lsr
-e20a: 4a        -         lsr
-e20b: 85 e1     -         sta zpRegE1             // store the higher nibble
-e20d: 68        -         pla                     // restore the accu
+e1de: a0 00     - print_text_:ldy #0              // Index for the char within the string
+e1e0: b1 e0     -         lda (zpRegE0),y     // load character
+e1e2: f0 07     -         beq !end+
+e1e4: 20 c6 e1  -         jsr print_char_
+e1e7: c8        -         iny
+e1e8: 4c e0 e1  -         jmp !next-
+e1eb: 60        -         rts
+e1ec: 48        - print_hex_:pha
+e1ed: a9 00     -         lda #<hex_chars
+e1ef: 85 e0     -         sta zpRegE0
+e1f1: a9 f0     -         lda #>hex_chars
+e1f3: 85 e1     -         sta zpRegE1
+e1f5: 68        -         pla
+e1f6: 48        -         pha
+e1f7: 4a        -         lsr
+e1f8: 4a        -         lsr
+e1f9: 4a        -         lsr
+e1fa: 4a        -         lsr
+e1fb: 29 0f     -         and #$0f
+e1fd: a8        -         tay
+e1fe: b1 e0     -         lda (zpRegE0),y
+e200: 20 c6 e1  -         jsr print_char_
+e203: 68        -         pla
+e204: 48        -         pha
+e205: 29 0f     -         and #$0f
+e207: a8        -         tay
+e208: b1 e0     -         lda (zpRegE0),y
+e20a: 20 c6 e1  -         jsr print_char_
+e20d: 68        -         pla
 e20e: 60        -         rts
-e20f: a5 e0     - convert565:lda zpRegE0             // red value
-e211: 0a        -         asl                     // shift three to the left as we
-e212: 0a        -         asl                     // need to move the lower 5 bits of red
-e213: 0a        -         asl                     // to the bits 7-5
-e214: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
-e216: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
-e218: 4a        -         lsr                     // lower bits of the output highbyte
-e219: 4a        -         lsr
-e21a: 4a        -         lsr
-e21b: 29 07     -         and #%00000111          // Only the lower three bits.
-e21d: 05 e0     -         ora zpRegE0             // combine this with the compressed red
-e21f: 85 e0     -         sta zpRegE0             // Store the final high byte
-e221: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
-e223: 0a        -         asl                     // Shift everything 5 bits to the left and fill
-e224: 0a        -         asl                     // it with zeros
-e225: 0a        -         asl
-e226: 0a        -         asl
-e227: 0a        -         asl
-e228: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
-e22a: a5 e2     -         lda zpRegE2             // Load blue
-e22c: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
-e22e: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
-e230: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
-e232: 60        -         rts
+e20f: a9 28     - debug_register_:lda #40             // X Position
+e211: 20 03 e0  -         jsr set_cursor_x    
+e214: a9 01     -         lda #1              // Y Position
+e216: 20 06 e0  -         jsr set_cursor_y
+e219: a9 fe     -         lda #$fe            // Testwert, der ausgegeben werden soll
+e21b: 20 ec e1  -         jsr print_hex_
+e21e: a9 20     -         lda #' '
+e220: 20 c6 e1  -         jsr print_char_
+e223: a9 0b     -         lda #$0b            // Testwert, der ausgegeben werden soll
+e225: 20 ec e1  -         jsr print_hex_
+e228: 60        -         rts
+e229: 48        - byte_to_hex:pha                     // Save value to stack.
+e22a: 29 0f     -         and #%00001111
+e22c: 85 e0     -         sta zpRegE0             // store the lower nibble
+e22e: 68        -         pla                     // Load the original value
+e22f: 48        -         pha                     // and save it again
+e230: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
+e231: 4a        -         lsr
+e232: 4a        -         lsr
+e233: 4a        -         lsr
+e234: 85 e1     -         sta zpRegE1             // store the higher nibble
+e236: 68        -         pla                     // restore the accu
+e237: 60        -         rts
+e238: a5 e0     - convert565:lda zpRegE0             // red value
+e23a: 0a        -         asl                     // shift three to the left as we
+e23b: 0a        -         asl                     // need to move the lower 5 bits of red
+e23c: 0a        -         asl                     // to the bits 7-5
+e23d: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
+e23f: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
+e241: 4a        -         lsr                     // lower bits of the output highbyte
+e242: 4a        -         lsr
+e243: 4a        -         lsr
+e244: 29 07     -         and #%00000111          // Only the lower three bits.
+e246: 05 e0     -         ora zpRegE0             // combine this with the compressed red
+e248: 85 e0     -         sta zpRegE0             // Store the final high byte
+e24a: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
+e24c: 0a        -         asl                     // Shift everything 5 bits to the left and fill
+e24d: 0a        -         asl                     // it with zeros
+e24e: 0a        -         asl
+e24f: 0a        -         asl
+e250: 0a        -         asl
+e251: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
+e253: a5 e2     -         lda zpRegE2             // Load blue
+e255: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
+e257: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
+e259: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
+e25b: 60        -         rts
 
 [Kernel Data]
 f000: 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46  - hex_chars:.text "0123456789ABCDEF"
