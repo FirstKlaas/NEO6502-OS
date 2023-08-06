@@ -50,7 +50,24 @@ enum {
   // Graphics Commands
   CMD_DRAW_LINE       = 0x14,
   CMD_DRAW_HLINE      = 0x15,
-  CMD_DRAW_VLINE      = 0x16
+  CMD_DRAW_VLINE      = 0x16,
+
+  // Sprite handling
+  CMD_SPRITE_SET_POSITION   = 0x40,
+  CMD_SPRITE_GET_POSITION   = 0x41,
+  CMD_SPRITE_SET_DIMENSIONS = 0x42,
+  CMD_SPRITE_GET_DIMENSIONS = 0x43,
+  CMD_SPRITE_SET_ADRESS     = 0x44,
+  CMD_SPRITE_GET_ADRESS     = 0x45,
+  CMD_SPRITE_SET_COLOR      = 0x46,
+  CMD_SPRITE_GET_COLOR      = 0x47,
+  CMD_SPRITE_SET_FLAGS      = 0x48,
+  CMD_SPRITE_GET_FLAGS      = 0x49
+  
+  
+  
+  
+  
 } TDisplayCommand;
 
 void initDisplay(TContextPtr ctx);

@@ -23,7 +23,7 @@
 082f: 20 0c e1  -         jsr set_cursor_x_
 0832: a9 01     -         lda #ypos
 0834: 20 24 e1  -         jsr set_cursor_y_    
-0837: a9 70     -         lda #<welcome
+0837: a9 6d     -         lda #<welcome
 0839: 85 e0     -         sta zpRegE0
 083b: a9 08     -         lda #>welcome
 083d: 85 e1     -         sta zpRegE1
@@ -31,12 +31,11 @@
 0842: 4c 42 08  - end:    jmp end
 0845: c8 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_top:.byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
 0855: cc cc cc cc                                     
-0859: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
-0869: cc cc cc cc                                     
-086d: cc ba 00  -         .byte $cc,$ba, $00
-0870: 57 65 6c 63 6f 6d 65 20 74 6f 20 74 68 65 20 70  - welcome:.text "Welcome to the pleasure Dome!"
-0880: 6c 65 61 73 75 72 65 20 44 6f 6d 65 21          
-088d: 00        -         .byte 0
+0859: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
+0869: cc cc ba 00                                     
+086d: 57 65 6c 63 6f 6d 65 20 74 6f 20 74 68 65 20 70  - welcome:.text "Welcome to the pleasure Dome!"
+087d: 6c 65 61 73 75 72 65 20 44 6f 6d 65 21          
+088a: 00        -         .byte 0
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_

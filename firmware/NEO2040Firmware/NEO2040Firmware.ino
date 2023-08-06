@@ -52,11 +52,11 @@ void setup()
   sleep_ms(2000);
   //printWelcomeMsg(ctxPtr);
   
-  
+  /**
   for (int i=0; i<15000; i++)
     tick6502(ctxPtr);
     updateDisplay();
-    
+  **/  
 }
 
 void loop() {
@@ -65,5 +65,4 @@ void loop() {
     updateDisplay();
     lastClockTS = millis();
   }
-  // put your main code here, to run repeatedly:
 }

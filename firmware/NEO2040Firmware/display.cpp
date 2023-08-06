@@ -14,6 +14,16 @@ static const struct dvi_serialiser_cfg dvi_cfg = {
 };
 DVIGFX8 display(DVI_RES_320x240p60, true, dvi_cfg);
 
+typedef struct {
+  uint16_t width;
+  uint16_t height;
+  uint16_t x;
+  uint16_t y;
+  uint8_t  flags;
+  uint8_t  color;  
+  uint16_t address;
+} TSprite, *TSpritePtr;
+
 struct {
   uint16_t x;         // X position in pixel
   uint16_t y;         // Y position in pixel
@@ -26,17 +36,27 @@ struct {
   uint8_t currentYpos;  // Y position in character
 
   uint32_t needsRefresh;  // If > 0: Screen will be updated.
-
+  TSprite sprites[32];
+  
 } screendata;
 
 uint8_t buffer[] = {12,15,67};
 
 void setColor(uint8_t vColor) {
   screendata.currentColor = vColor;
-  Serial.printf("Setting color %02x %02d\n", vColor, vColor);
   display.setTextColor(vColor);
 }
 
+const uint8_t bitti[] = { 
+  0xea, 0xea, 0xea,
+  0xea, 0xea, 0xea,
+  0xea, 0xea, 0xea,
+  0xea, 0xea, 0xea,
+  0xea, 0xea, 0xea,
+  0xea, 0xea, 0xea,
+  0xea, 0xea, 0xea,
+  0xea, 0xea, 0xea
+};
 
 void initDisplay(TContextPtr ctx) {
 
@@ -66,9 +86,11 @@ void initDisplay(TContextPtr ctx) {
   display.setTextSize(1);        // Default size
   display.setTextWrap(false);
   display.swap(false, true);     // Duplicate same palette into front & back buffers
-  screendata.needsRefresh = 0;
+  screendata.needsRefresh = 1;
   display.setCursor(1,0);
   setColor(255);
+
+  display.drawBitmap(100,100,bitti,24,8,2);
 };
 
 
@@ -80,15 +102,8 @@ void setCursor(TContextPtr ctx, uint8_t x, uint8_t y) {
   screendata.currentYpos = y;
 
   if (x >= LINECHARS && (ctx->reg.DISCR & AUTO_WRAP_FLAG)) {
-    //screendata.currentXpos = 0;
-    //screendata.currentYpos = y+1;
     screendata.currentXpos = (x % LINECHARS);
     screendata.currentYpos += (x / LINECHARS);
-    /*
-      Serial.printf("######## Wrapping: %02d %02d\n", x, y);
-      Serial.printf("                   %02d %02d\n", screendata.currentXpos, screendata.currentYpos);
-      Serial.printf("                   %02d %02d\n", ox, oy);
-    */
   };
 
   screendata.x = screendata.currentXpos * FONT_CHAR_WIDTH + screendata.offset_x;
@@ -138,18 +153,8 @@ void writeChar(TContextPtr ctx, uint8_t c) {
   }
 }
 
-char HEXCHARS[] = "0123456789ABCDEF";
-
-void writeHex(TContextPtr ctx, uint8_t v) {
-  display.write(HEXCHARS[(v >> 4) & 0x0f]);
-  setCursor(ctx, screendata.currentXpos+1, screendata.currentYpos);
-  display.write(HEXCHARS[v & 0x0f]);
-  setCursor(ctx, screendata.currentXpos+2, screendata.currentYpos);
-  updateDisplay();
-}
-
-
-void printWelcomeMsg(TContextPtr ctx) {
+const TSpritePtr getSprite(const TContextPtr ctx) {
+  return screendata.sprites + (ctx->reg.DIS00 & 0x1f);
 }
 
 void executeCommand(TContextPtr ctx) {
@@ -168,7 +173,6 @@ void executeCommand(TContextPtr ctx) {
       screendata.needsRefresh++;
       break;
     case CMD_SET_FG_COLOR:
-      Serial.printf("Set color %d\n", ctx->reg.DIS00);
       setColor(ctx->reg.DIS00);
       break;
     case CMD_GET_CURSOR_X:
@@ -177,6 +181,39 @@ void executeCommand(TContextPtr ctx) {
     case CMD_GET_CURSOR_Y:
       getCursorY(ctx);
       break;
+
+    case CMD_SPRITE_GET_ADRESS:
+      const TSpritePtr sprite(getSprite(ctx));
+      ctx->reg.DIS01 = sprite->address & 0xff;
+      ctx->reg.DIS02 = (sprite->address >> 8) & 0xff;
+      break; 
+
+    case CMD_SPRITE_SET_ADRESS:
+      const TSpritePtr sprite(getSprite(ctx));
+      const uint16_t address(ctx->reg.DIS01 | (ctx->reg.DIS02 << 8));
+      sprite->address = address;
+      break;
+
+    case CMD_SPRITE_GET_POSITION:
+      const TSpritePtr sprite(getSprite(ctx));
+      const uint16_t xpos_high((sprite->x >> 8) & 0xff);
+      const uint8_t xpos_low(sprite->x & 0xff);
+      ctx->reg.DIS01 = xpos_low;
+      ctx->reg.DIS02 = xpos_high;
+      ctx->reg.DIS03 = ypos;
+      break;
+
+    case CMD_SPRITE_SET_POSITION:
+      const TSpritePtr sprite(getSprite(ctx));
+      const uint16_t xpos(ctx->reg.DIS01 | (ctx->reg.DIS02 << 8));
+      const uint8_t ypos(ctx->reg.DIS03);
+      sprite->x = xpos;
+      sprite->y = ypos;
+      break;
+
+    case CMD_SPRITE_SET_COLOR:
+      const TSpritePtr sprite(getSprite(ctx));
+      sprite->color = ctx->reg.DIS01;
   }
   ctx->reg.DISCR &= 0x7f; // Clear IRQ flag. Leave the rest
 }
