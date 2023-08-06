@@ -60,6 +60,8 @@ void initDisplay(TContextPtr ctx) {
   display.setTextWrap(false);
   display.swap(false, true);     // Duplicate same palette into front & back buffers
   screendata.needsRefresh = 0;
+  display.setCursor(1,0);
+  setColor(7);
 };
 
 void setColor(uint8_t vColor) {
@@ -144,15 +146,6 @@ void updateDisplay() {
 }
 
 void printWelcomeMsg(TContextPtr ctx) {
-  screendata.needsRefresh++;
-  display.setCursor(1,0);
-  setColor(7);
-  display.print("NEO6502");
-  setCursor(ctx,0,4);
-  writeChar(ctx, 'M');
-  setCursor(ctx,0,5);
-  writeChar(ctx, 'D');
-  display.swap(true,false);
 }
 
 void executeCommand(TContextPtr ctx) {

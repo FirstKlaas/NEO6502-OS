@@ -150,7 +150,8 @@ print_char_:    pha                     // Save accu
     Last modified : 06.08.2023
    ----------------------------------------------------------------------------
 */
-print_text_:    sty (!end+)+1    // Save y register
+print_text_:    sty (!end+)+1       // Save y register
+                sta (!end+)+3
                 ldy #0              // Index for the char within the string
 !next:          lda (zpRegE0),y     // load character
                 beq !end+
@@ -158,8 +159,7 @@ print_text_:    sty (!end+)+1    // Save y register
                 iny
                 jmp !next-
 !end:           ldy #0
-                tay
-                pla
+                lda #0
                 rts
 
 /* ----------------------------------------------------------------------------
