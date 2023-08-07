@@ -62,6 +62,8 @@ void setup()
 void loop() {
   tick6502(ctxPtr);
   if ((millis() - lastClockTS) >= FRAMETIME) {
+    animateAlien(ctxPtr);
+    drawSprites(ctxPtr);
     updateDisplay();
     lastClockTS = millis();
   }

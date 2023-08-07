@@ -1,3 +1,14 @@
+.const SPRITE_ENABLE_FLAG = $40
+
+init_sprites_:  lda DISCR
+                ora #SPRITE_ENABLE_FLAG
+                sta DISCR               // Enable sprites                    
+                ldx #0                  // Set pixel data pointer for sprite 0
+                lda #<SPACE_ALIEN_A
+                sta SPRITE_DATA_LO, x
+                lda #>SPACE_ALIEN_A
+                sta SPRITE_DATA_HI, x
+                lda #<SPRITE_DEFINITON_BLOCK // Set sprite definiton block data
 .macro SetSpriteAddress(index, address) {
     ldx #index
     lda #<address
@@ -14,9 +25,9 @@ init_sprites_:  SetSpriteAddress(0, SPACE_ALIEN_A)
                 sta DIS_00
                 lda #>SPRITE_DEFINITON_BLOCK
                 sta DIS_01
-                lda #32                 // 32 Sprites
+                lda #32                 // Set number of sprites
                 sta DIS_02
-                lda #CMD_SET_SDB
+                lda #CMD_SET_SDB        // Set command
                 sta DISCMD              // Write the command. Will raise the irq                                         
                 lda DISCR
                 ora #$80
