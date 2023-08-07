@@ -11,11 +11,11 @@
 #define REG_DIS_END         0xD01C
 
 #define REG_DIS_ADDR        0xD012  // Display Register. The charcter to write to
-                                  // the screen at the current position
+                                    // the screen at the current position
 #define REG_DISCR_ADDR      0xD013  // Display Control register.
-                                  // Bit 7: IRQ Bit
-                                  // Bit 6: Reserved
-                                  // Bit 0-5: Command / 63 commands possible
+                                    // Bit 7: IRQ Bit
+                                    // Bit 6: Spites enable flag
+                                  
 #define REG_DIS_CMD_ADDR    0xD014
 #define REG_DIS_00_ADDR     0xD015
 #define REG_DIS_01_ADDR     0xD016

@@ -31,7 +31,7 @@ typedef struct {
 } TSprite, *TSpritePtr;
 
 typedef struct {
-  uint8_t  number_of_sprites;
+  uint8_t  count;
   uint16_t address;
   uint8_t* flags;
   uint8_t* xpos;
@@ -62,7 +62,17 @@ struct {
 uint8_t buffer[] = {12,15,67};
 
 inline __attribute__((always_inline))
-const uint16_t convertColor565(uint8_t r, uint8_t g, uint8_t b) {
+uint16_t getSpriteOffset(TContextPtr ctx, uint8_t index) {
+  return ((screendata.sdb.data_hi[index]<<8)|screendata.sdb.data_lo[index]);
+}
+
+inline __attribute__((always_inline))
+uint8_t* getSpriteDataPtr(TContextPtr ctx, uint8_t index) {
+  return ctx->memory + getSpriteOffset(ctx, index);
+}
+
+inline __attribute__((always_inline))
+uint16_t convertColor565(uint8_t r, uint8_t g, uint8_t b) {
   return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 }
 
@@ -520,24 +530,68 @@ void executeCommand(TContextPtr ctx) {
     case CMD_SET_SDB:
       {
         screendata.sdb.address = ((ctx->reg.DIS01 << 8) | ctx->reg.DIS00);
+        screendata.sdb.count = ctx->reg.DIS02;
         screendata.sdb.flags = ctx->memory + screendata.sdb.address;
-        screendata.sdb.xpos = screendata.sdb.flags + screendata.sdb.number_of_sprites;
-        screendata.sdb.ypos = screendata.sdb.xpos + screendata.sdb.number_of_sprites;
-        screendata.sdb.color = screendata.sdb.ypos + screendata.sdb.number_of_sprites;
-        screendata.sdb.width = screendata.sdb.color + screendata.sdb.number_of_sprites;
-        screendata.sdb.height = screendata.sdb.width + screendata.sdb.number_of_sprites;
-        screendata.sdb.data_lo = screendata.sdb.height + screendata.sdb.number_of_sprites;
+        screendata.sdb.xpos = screendata.sdb.flags + screendata.sdb.count;
+        screendata.sdb.ypos = screendata.sdb.xpos + screendata.sdb.count;
+        screendata.sdb.color = screendata.sdb.ypos + screendata.sdb.count;
+        screendata.sdb.width = screendata.sdb.color + screendata.sdb.count;
+        screendata.sdb.height = screendata.sdb.width + screendata.sdb.count;
+        screendata.sdb.data_lo = screendata.sdb.height + screendata.sdb.count;
+        screendata.sdb.data_hi = screendata.sdb.data_lo + screendata.sdb.count;
+        
         Serial.printf(
           "Sprite initalisation: Address %04x | Count %02d | width %02d | height %02d\n",
           screendata.sdb.address,
-          screendata.sdb.number_of_sprites,
+          screendata.sdb.count,
           screendata.sdb.width[0],
           screendata.sdb.height[0]
         );
+
+        uint16_t offset = getSpriteOffset(ctx, 0); 
+        /*
+        Serial.printf(
+          "Data address: $%02x%02x | Offset %04x | %02x %02x\n",
+          screendata.sdb.data_hi[0],
+          screendata.sdb.data_lo[0],
+          offset,
+          ctx->memory[offset],
+          ctx->memory[offset+1]
+        );
+        */
+        /*
+        display.drawBitmap(
+          100,
+          100, 
+          getSpriteDataPtr(ctx,0), 
+          screendata.sdb.width[0],
+          screendata.sdb.height[0],
+          AQUA);
+        screendata.needsRefresh++;
+        */
       };
-      break
+      break;
   }
   ctx->reg.DISCR &= 0x7f; // Clear IRQ flag. Leave the rest
+}
+
+void drawSprites(TContextPtr ctx) {
+  if (ctx->reg.DISCR & 0x40) {
+    for (uint8_t i=0; i< screendata.sdb.count; i++) {
+      if (screendata.sdb.flags[i] & 0x80) {
+        display.drawBitmap(
+          screendata.sdb.xpos[i],
+          screendata.sdb.ypos[i], 
+          getSpriteDataPtr(ctx,i), 
+          screendata.sdb.width[i],
+          screendata.sdb.height[i],
+          screendata.sdb.color[i]);
+      };
+    };
+    screendata.needsRefresh++;
+  } else {
+    Serial.printf("Sprites disabled %02x\n", ctx->reg.DISCR);
+  };
 }
 
 boolean memReadDisplayRegister(TContextPtr ctx) {
@@ -576,4 +630,13 @@ boolean memWriteDisplayRegister(TContextPtr ctx) {
       executeCommand(ctx); // Execute command and clear irq flag
   }
   return true;    
+ }
+
+ void animateAlien(TContextPtr ctx) {
+  uint8_t color = screendata.sdb.color[0];
+  screendata.sdb.color[0] = BLACK;
+  drawSprites(ctx);
+  screendata.sdb.color[0] = color;
+  screendata.sdb.xpos[0]++;
+  screendata.needsRefresh++;
  }
