@@ -14,15 +14,22 @@
 #define LINES             SCREEN_HEIGHT / (FONT_CHAR_HEIGHT + 1)
 #define LINECHARS         52 //SCREEN_WIDTH / FONT_CHAR_WIDTH
 
-#define COLOR_BLACK   0
-#define COLOR_RED     1
-#define COLOR_GREEN   2
-#define COLOR_YELLOW  3
-#define COLOR_BLUE    4
-#define COLOR_ORANGE  5
-#define COLOR_MAGENTA 6
-#define COLOR_AMBER   7
-#define COLOR_WHITE   255
+#define BLACK                 0x00
+#define MAROON                0x01
+#define GREEN                 0x02
+#define OLIVE                 0x03
+#define NAVY                  0x04
+#define PURPLE                0x05
+#define TEAL                  0x06
+#define SILVER                0x07
+#define GREY                  0x08
+#define RED                   0x09
+#define LIME                  0x0a
+#define YELLOW                0x0b
+#define BLUE                  0x0c
+#define FUCHSIA               0x0d
+#define AQUA                  0x0e
+#define WHITE                 0x0f
 
 enum {
   CMD_NOP             = 0x00,
@@ -51,6 +58,8 @@ enum {
   CMD_DRAW_LINE       = 0x14,
   CMD_DRAW_HLINE      = 0x15,
   CMD_DRAW_VLINE      = 0x16,
+  CMD_SET_SDB         = 0x17,  // SET Sprite Definition Block Pointer                 
+
 
   // Sprite handling
   CMD_SPRITE_SET_POSITION   = 0x40,
@@ -82,5 +91,4 @@ void updateDisplay();
 boolean memReadDisplayRegister(TContextPtr ctx);
 boolean memWriteDisplayRegister(TContextPtr ctx);
 
-uint16_t convertColor565(uint8_t r, uint8_t g, uint8_t b);
 #endif

@@ -47,27 +47,9 @@
                 .const CMD_DRAW_LINE        = $14
                 .const CMD_DRAW_HLINE       = $15
                 .const CMD_DRAW_VLINE       = $16
+                .const CMD_SET_SDB          = $17                 
 
-                .const CMD_SPRITE_SET_POSITION   = $40,
-                .const CMD_SPRITE_GET_POSITION   = $41,
-                .const CMD_SPRITE_SET_DIMENSIONS = $42,
-                .const CMD_SPRITE_GET_DIMENSIONS = $43,
-                .const CMD_SPRITE_SET_ADRESS     = $44,
-                .const CMD_SPRITE_GET_ADRESS     = $45,
-                .const CMD_SPRITE_SET_COLOR      = $46,
-                .const CMD_SPRITE_GET_COLOR      = $47,
-                .const CMD_SPRITE_SET_FLAGS      = $48,
-                .const CMD_SPRITE_GET_FLAGS      = $49
-
-                .const COLOR_BLACK          = $00
-                .const COLOR_RED            = $01
-                .const COLOR_GREEN          = $02
-                .const COLOR_YELLOW         = $03
-                .const COLOR_BLUE           = $04
-                .const COLOR_ORANGE         = $05
-                .const COLOR_MAGENTA        = $06
-                .const COLOR_AMBER          = $07
-                .const COLOR_WHITE          = $ff 
+.import source "asm/colors.asm"
 
 /* ----------------------------------------------------------------------------
                 ZERO PAGE 
@@ -152,6 +134,7 @@ print_char:     jmp print_char_
                 * = $E100 "Kernel Routines"
 
 .import source "asm/kernel_text_routines.asm"
+.import source "asm/kernel_sprite.asm"
 .import source "asm/debug_register.asm"
 
 

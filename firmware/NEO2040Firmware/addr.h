@@ -26,6 +26,8 @@
 #define REG_DIS_06_ADDR     0xD01B
 #define REG_DIS_07_ADDR     0xD01C
 
+// Register 0xD100 - 0xD1ff = Spriteregister
+
 #define REG_KBD_IRQ_FLAG    0x80    // 10000000b
 #define REG_DIS_IRQ_FLAG    0x80    // 10000000b
 #define SHOW_CURSOR_FLAG    0x02     

@@ -10,6 +10,7 @@
     sta DISCR                
 }
 
+                .const AMBER        = 178
 
 /* ============================================================================
                 MAIN PROGRAM
@@ -30,13 +31,15 @@ start:          ldx #$ff    // Set the stackpointer to
                 sta zpRegE1
                 jsr print_text_
 
-                SetForgroundColorI(COLOR_AMBER)
+                SetForgroundColorI(AMBER)
                 SetCursorI(2,1)
                 lda #<welcome
                 sta zpRegE0
                 lda #>welcome
                 sta zpRegE1
                 jsr print_text_
+                // Spritetest
+                jsr init_sprites_
 end:
                 jmp end
 

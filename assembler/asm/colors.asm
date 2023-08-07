@@ -1,0 +1,16 @@
+                .const COLOR_BLACK            = $00
+                .const COLOR_MAROON           = $01
+                .const COLOR_GREEN            = $02
+                .const COLOR_OLIVE            = $03
+                .const COLOR_NAVY             = $04
+                .const COLOR_PURPLE           = $05
+                .const COLOR_TEAL             = $06
+                .const COLOR_SILVER           = $07
+                .const COLOR_GREY             = $08
+                .const COLOR_RED              = $09
+                .const COLOR_LIME             = $0a
+                .const COLOR_YELLOW           = $0b
+                .const COLOR_BLUE             = $0c
+                .const COLOR_FUCHSIA          = $0d
+                .const COLOR_AQUA             = $0e
+                .const COLOR_WHITE            = $0f

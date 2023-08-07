@@ -2,7 +2,7 @@
 
 
 debug_register_:    SetCursorI(40,1)
-                    SetForgroundColorI(COLOR_ORANGE)
+                    SetForgroundColorI(152)
                     lda #<debug_txt_01
                     sta zpRegE0
                     lda #>debug_txt_01
