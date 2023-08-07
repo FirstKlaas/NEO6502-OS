@@ -1,13 +1,20 @@
-init_sprites_:  ldx #0
-                lda #<SPACE_ALIEN_A
-                sta SPRITE_DATA_LO, x
-                lda #>SPACE_ALIEN_A
-                sta SPRITE_DATA_HI, x
+.macro SetSpriteAddress(index, address) {
+    ldx #index
+    lda #<address
+    sta SPRITE_DATA_LO, x
+    lda #>address
+    sta SPRITE_DATA_HI, x                
+}
+
+init_sprites_:  SetSpriteAddress(0, SPACE_ALIEN_A)
+                SetSpriteAddress(1, SPACE_ALIEN_B)
+
+                // Init the sprite definition block
                 lda #<SPRITE_DEFINITON_BLOCK
                 sta DIS_00
                 lda #>SPRITE_DEFINITON_BLOCK
                 sta DIS_01
-                lda #32
+                lda #32                 // 32 Sprites
                 sta DIS_02
                 lda #CMD_SET_SDB
                 sta DISCMD              // Write the command. Will raise the irq                                         
@@ -18,12 +25,8 @@ init_sprites_:  ldx #0
                 bit DISCR               // Check, if the irg flag is cleared
                 bmi !wait-              // No! Let's wait
                 rts
-
-                    
-
                     
                     
-
 SPACE_ALIEN_A:      .byte %00000010, %01000000
                     .byte %00000111, %11100000
                     .byte %00001111, %11110000
@@ -33,12 +36,40 @@ SPACE_ALIEN_A:      .byte %00000010, %01000000
                     .byte %00000010, %01000000
                     .byte %00000110, %01100000
 
+SPACE_ALIEN_B:      .byte %00000000, %00000000
+                    .byte %00000100, %01000000
+                    .byte %00000011, %10000000
+                    .byte %00000111, %11000000
+                    .byte %00000101, %01000000
+                    .byte %00000111, %11000000
+                    .byte %00001010, %10100000
+                    .byte %00001010, %10100000
+
 SPRITE_DEFINITON_BLOCK:
-SPRITE_FLAGS:       .fill 32, 0
-SPRITE_XPOS:        .fill 32, 0
-SPRITE_YPOS:        .fill 32, 0
-SPRITE_COLOR:       .fill 32, 0
-SPRITE_WIDTH:       .byte 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-SPRITE_HEIGHT:      .byte  8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+SPRITE_FLAGS:       .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 00-07
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+                    
+SPRITE_XPOS:        .byte $10, $10, $00, $00, $00, $00, $00, $00  // Sprite 00-07
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+                    
+SPRITE_COLOR:       .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 00-07
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+                    
+SPRITE_WIDTH:       .byte $10, $10, $00, $00, $00, $00, $00, $00  // Sprite 00-07
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+                    
+SPRITE_HEIGHT:      .byte $08, $08, $00, $00, $00, $00, $00, $00  // Sprite 00-07
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+
 SPRITE_DATA_LO:     .fill 32, 0
 SPRITE_DATA_HI:     .fill 32, 0

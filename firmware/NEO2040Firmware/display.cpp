@@ -441,81 +441,6 @@ void executeCommand(TContextPtr ctx) {
     case CMD_GET_CURSOR_Y:
       getCursorY(ctx);
       break;
-    case CMD_SPRITE_GET_ADRESS: 
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        ctx->reg.DIS01 = sprite->address & 0xff;
-        ctx->reg.DIS02 = (sprite->address >> 8) & 0xff;
-      };
-      break; 
-    
-    case CMD_SPRITE_SET_ADRESS:
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        const uint16_t address(ctx->reg.DIS01 | (ctx->reg.DIS02 << 8));
-        sprite->address = address;
-      };
-      break;
-
-    case CMD_SPRITE_GET_POSITION:
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        ctx->reg.DIS01 = sprite->x;
-        ctx->reg.DIS02 = sprite->y;
-      };
-      break;
-
-    case CMD_SPRITE_SET_POSITION:
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        sprite->x = ctx->reg.DIS01;
-        sprite->y = ctx->reg.DIS02;
-      };
-      break;
-
-    case CMD_SPRITE_GET_COLOR:
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        ctx->reg.DIS01 = sprite->color;
-      };
-      break;
-
-    case CMD_SPRITE_SET_COLOR:
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        sprite->color = ctx->reg.DIS01;
-      };
-      break;
-
-    case CMD_SPRITE_GET_DIMENSIONS:
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        ctx->reg.DIS01 = sprite->width;
-        ctx->reg.DIS02 = sprite->height;
-      };
-      break;
-
-    case CMD_SPRITE_SET_DIMENSIONS:
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        sprite->width = ctx->reg.DIS01;
-        sprite->height = ctx->reg.DIS02;
-      };
-      break;
-
-    case CMD_SPRITE_GET_FLAGS:
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        ctx->reg.DIS01 = sprite->flags;
-      };
-      break;
-
-    case CMD_SPRITE_SET_FLAGS:
-      {
-        const TSpritePtr sprite(getSprite(ctx));
-        sprite->flags = ctx->reg.DIS01;
-      };
-      break;
 
     case CMD_SET_SDB:
       {
@@ -527,13 +452,6 @@ void executeCommand(TContextPtr ctx) {
         screendata.sdb.width = screendata.sdb.color + screendata.sdb.number_of_sprites;
         screendata.sdb.height = screendata.sdb.width + screendata.sdb.number_of_sprites;
         screendata.sdb.data_lo = screendata.sdb.height + screendata.sdb.number_of_sprites;
-        Serial.printf(
-          "Sprite initalisation: Address %04x | Count %02d | width %02d | height %02d\n",
-          screendata.sdb.address,
-          screendata.sdb.number_of_sprites,
-          screendata.sdb.width[0],
-          screendata.sdb.height[0]
-        );
       };
       break
   }
