@@ -29,6 +29,18 @@ start:          ldx #$ff    // Set the stackpointer to
                 txs         // highest possible position.
                 EnableCursorAutoAdjustment()
 
+                // Timer Test
+                // Setting counter start value to 10 aka $000A
+                lda #$f0
+                sta $dc05       // Set hi-byte of timer A latch
+                lda #$00
+                sta $dc04       // Set low-byte of timer A latch
+                lda #$81        // Bit 0: Timer A / Bit 7: Set bits
+                sta $dc0d       // Enable timer A interrupt
+                lda #%00011001  // Bit 4: Load values / Bit 0: Start timer / Bit 3: Stop Timer after IRQ 
+                sta $dc0e       // Load values and start timer
+                // End Test. Timer should now be running            
+
                 jsr debug_register_
                 
                 SetCursorI(0,0)

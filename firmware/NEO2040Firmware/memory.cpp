@@ -3,6 +3,7 @@
 #include "kernel.h"
 #include "addr.h"
 #include "display.h"
+#include "cia6526.h"
 
 //#define DEBUG_MEMORY
 
@@ -48,6 +49,7 @@ void readFromMemory(TContextPtr ctx)
 {
     if (readKeyboard(ctx)) return;
     if (memReadDisplayRegister(ctx)) return;
+    if (memReadCIA(ctx)) return;
 
     // No special register. Store to memory.
     #ifdef DEBUG_MEMORY
@@ -69,6 +71,7 @@ void writeToMemory(TContextPtr ctx)
     #endif
     if (writeKeyboard(ctx)) return;
     if (memWriteDisplayRegister(ctx)) return;
+    if (memWriteCIA(ctx)) return;
     #ifdef DEBUG_MEMORY
     Serial.printf("[W] memory[%04X] <- %02X\n", ctx->address, ctx->data);
     #endif

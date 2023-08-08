@@ -526,7 +526,7 @@ void drawSprites(TContextPtr ctx)
   }
   else
   {
-    Serial.printf("Sprites disabled %02x\n", ctx->reg.DISCR);
+    // Serial.printf("Sprites disabled %02x\n", ctx->reg.DISCR);
   };
 }
 
