@@ -1,6 +1,6 @@
 .const SPRITE_ENABLE_FLAG = $40
 
-.macro SetSpriteAddress(index, address) {
+.macro SetSpriteAddress_IM(index, address) {
     ldx #index
     lda #<address
     sta SPRITE_DATA_LO, x
@@ -8,23 +8,45 @@
     sta SPRITE_DATA_HI, x                
 }
 
-.macro EnableSprite(index) {
+.macro EnableSprite_I(index) {
     ldx #index
     lda SPRITE_FLAGS, x
     ora SPRITE_ENABLE_FLAG
     sta SPRITE_FLAGS, x
 }
 
-.macro DisableSprite(index) {
+.macro DisableSprite_I(index) {
     ldx #index
     lda SPRITE_FLAGS, x
     and ~SPRITE_ENABLE_FLAG
     sta SPRITE_FLAGS, x
 }
 
-init_sprites_:  SetSpriteAddress(0, SPACE_ALIEN_A)
-                SetSpriteAddress(1, SPACE_ALIEN_B)
+.macro GetSpriteYPos_I(index) {
+    ldx #index
+    lda SPRITE_YPOS, x
+}
 
+.macro SetSpriteYPos_II(index, ypos) {
+    ldx #index
+    lda #ypos
+    sta SPRITE_YPOS, x
+}
+
+.macro SetSpriteColor_IA(index) {
+    ldx #index
+    sta SPRITE_COLOR, x
+}
+
+.macro SetSpriteColor_II(index, color) {
+    lda #color
+    SetSpriteColor_IA(index)
+}
+
+init_sprites_:  SetSpriteAddress_IM(0, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(1, SPACE_ALIEN_B)
+                EnableSprite_I(0)
+                EnableSprite_I(1)
                 // Init the sprite definition block
                 lda #<SPRITE_DEFINITON_BLOCK
                 sta DIS_00
