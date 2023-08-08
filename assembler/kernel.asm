@@ -3,6 +3,9 @@
 // --------------------------------
 // @author: <klaas.nebuhr@gmal.com>
 // @version: 0.0.1
+//
+// Documentation for the CIA: https://www.c64-wiki.de/wiki/CIA#CIA_1
+
 
                 .const KBD    = $d010    // Keyboard regster
                 .const KBDCR  = $d011    // Keyboard control register
