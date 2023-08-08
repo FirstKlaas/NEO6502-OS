@@ -2,10 +2,73 @@
 #include <pico/stdlib.h>
 #include "addr.h"
 
+#define USE_IRQB
 
+#define uP_IRQB   22      // UEXT.6 - I2C1_SDA
+#define IRQ_LOW   false
+#define IRQ_HIGH  true
+
+#define TIMER_RESTART_FLAG  0x08 // Bit 3  : 00001000
+#define ICR_IRQ_FLAG        0x80 // Bit 7  : 10000000
+#define ICR_NO_IRQ          0x00 // 
+#define ICR_SOURCE_MASK     0x7f // Bit 0-6: 01111111
+
+inline __attribute__((always_inline))
+void setIRQB(bool irqb) {
+  #ifdef USE_IRQB
+  gpio_put(uP_IRQB, irqb);
+  #endif
+}
+
+inline __attribute__((always_inline))
+void trigger6502IRQ(TContextPtr ctx) {
+  // If IRQ is still active and not acknowledged,
+  // ignore the IRQ request.
+  if (ctx->cia.irq_active) return;
+  setIRQB(IRQ_LOW); // IRQB is active low.
+  ctx->cia.irq_active = true;
+}
+
+inline __attribute__((always_inline))
+void release6502IRQ(TContextPtr ctx) {
+  // If IRQ is not active
+  // ignore the IRQ request.
+  if (!ctx->cia.irq_active) return;
+  setIRQB(IRQ_HIGH); // IRQB is active low.
+  ctx->cia.irq_active = false;
+}
+
+/**
+* Initialization of the CIA Chip.
+* It's not the intention to emulate every feature and every behaviour
+* of the original chip. But to pick some useful things, leave some things
+* out and add some specific stuff. So maybe the name is a bit irritating.
+*
+* All the registers are set to default values. This function should be
+* called only once and after the memory has been initialized.
+*
+* As a difference to the original chip, this implementation handles also
+* keyboard and display interrupts. So we have only a single point for
+* interrupt management.
+*
+* The NEO6502 Rev A board has no out-of-the-box wiring for the IRQB pin.
+* To make this code work, you need to hookup the IRQB pin to one of the UEXT
+* pins and define the correct pin.
+*/ 
 void initCIA(TContextPtr ctx) {
-    ctx->cia.mask = 0;
-    ctx->cia.flags = 0;
+    // Initializing IRQB line.
+    // Because it is active low, we set it high.
+    // Pin BUS.24 needs to we wired to UEXT.22
+    // to make it work.
+    #ifdef USE_IRQB
+    pinMode(uP_IRQB, OUTPUT);
+    setIRQB(IRQ_HIGH); // Because it's and active low signal.
+    #endif
+    ctx->cia.mask  = 0;     // Which interrupts are allowed?
+    ctx->cia.flags = 0;     // Which interrupts have been signaled?
+    // We will trigger in interrupt, when (mask & flags) != 0
+
+
     ctx->cia.timer_a_counter = 0;
     ctx->cia.timer_b_counter = 0;
     ctx->cia.timer_a_start_value = 0;
@@ -14,6 +77,9 @@ void initCIA(TContextPtr ctx) {
     ctx->cia.timer_b_running = false;
 }
 
+/**
+* Check, if a write request to memory is handled by the CIA.
+*/
 boolean memWriteCIA(TContextPtr ctx) {
   if (ctx->address < REG_CIA_PRA || ctx->address > REG_CIA_CRB) return false; // Not our business
 
@@ -22,14 +88,14 @@ boolean memWriteCIA(TContextPtr ctx) {
     case REG_CIA_ICR:
       ctx->memory[ctx->address] = ctx->data;
       if (ctx->data & 0x80) {
-        // Source bit is 1: Every set bit (1) sets the corresponding
+        // Source bit (Bit7) equals 1: Every set bit (1) in data sets the corresponding
         // bit in irq mask
-        ctx->cia.mask |= (ctx->data & 0x0f);
+        ctx->cia.mask |= (ctx->data & ICR_SOURCE_MASK);
 
       } else {
         // Source bit is 0: Every set bit (1) clears the corresponding
         // bit in irq mask
-        ctx->cia.mask &= ((~ctx->data) & 0xf);
+        ctx->cia.mask &= ((~ctx->data) & ICR_SOURCE_MASK);
       }; 
       break;
     case REG_CIA_TA_LO:
@@ -95,23 +161,46 @@ boolean memReadCIA(TContextPtr ctx) {
     // Set the IRQ signaling flag (mask & flags > 0)
     case REG_CIA_ICR:
       if (ctx->cia.flags & ctx->cia.mask) {
-        ctx->data = 0x80;
+        ctx->data = ICR_IRQ_FLAG;
       } else {
-        ctx->data = 0x00;
+        ctx->data = ICR_NO_IRQ;
       };
       // Set the source bits
       ctx->data |= (ctx->cia.flags & CIA_IRQ_MASK);
+      // So the valid information is returned, but only
+      // once.
       // Reading this register automatically clears the 
-      // interrupt flags.
+      // interrupt flags and clears the IRQB interrupt.
       ctx->cia.flags = 0;
-      // TODO: The IRQB line should go high if an irg is pending.
+
+      // Reading also releases the IRQB line and
+      // serves as an aknowledgement for the irq.
+      release6502IRQ(ctx);
 
     default:
       ctx->data = ctx->memory[ctx->address];
   };
   return true;
 }
-
+/**
+* Checks the state of all the ergisters and hardware to
+* see, if an interrupt must be triggered or handled or
+* whatsoever. For the timers, the implementation followed
+* the documentation of the original CIA chip.
+*
+* Further reading: https://www.c64-wiki.de/wiki/CIA#CIA_1
+*
+* TODO:
+* What to do, if we triggered an irq (setting IRQB to low) and another 
+* "interrupt" occurs. Will it be thrown away? Or triggered after the first has been cleared?
+* As an example. Timer B gets an underflow while the irq routine for timer A is still doing things.
+*
+* TODO:
+* Serial stuff not implemented.
+*
+* TODO:
+* Clock stuff not implemented.
+*/
 void checkCIA(TContextPtr ctx) {
   if (ctx->cia.timer_a_running) {
     //Serial.printf("CIA: Timer a is running: %04x [%03d]", ctx->cia.timer_a_counter, ctx->cia.mask);
@@ -120,7 +209,7 @@ void checkCIA(TContextPtr ctx) {
       // Next decrement would generate an underflow (in a signed value)
       // Trigger IRQ (if endabled)
       // Check, if we need to restart the timer.
-      if (ctx->memory[REG_CIA_CRA] & 0x08) {
+      if (ctx->memory[REG_CIA_CRA] & TIMER_RESTART_FLAG) {
         Serial.println("Stopping timer A");
         ctx->cia.timer_a_running = false;
       } else {
@@ -135,6 +224,7 @@ void checkCIA(TContextPtr ctx) {
         // Now trigger the interrupt, by pulling IRQB low.
         // It will stay low, until the IRQ has been aknowledged
         Serial.println("BOOOOOOM. Timer A has underflow.");
+        trigger6502IRQ(ctx);
       } else {
         Serial.println("Timer A underflow, but IRQ not enabled.");
       } 
@@ -144,6 +234,37 @@ void checkCIA(TContextPtr ctx) {
   };
 
   if (ctx->cia.timer_b_running) {
+    //Serial.printf("CIA: Timer B is running: %04x [%03d]", ctx->cia.timer_B_counter, ctx->cia.mask);
+    if (ctx->cia.timer_b_counter == 0) {
+      Serial.printf("Time B is up. CIA_CRB: 0xdc0f = 0x%02x\n",ctx->memory[REG_CIA_CRB]);
+      // Next decrement would generate an underflow (in a signed value)
+      // Trigger IRQ (if endabled)
+      // Check, if we need to restart the timer.
+      if (ctx->memory[REG_CIA_CRB] & TIMER_RESTART_FLAG) {
+        Serial.println("Stopping timer B");
+        ctx->cia.timer_b_running = false;
+      } else {
+        Serial.println("Restarting timer B. Not actively stopping.");
+        ctx->cia.timer_b_counter = ctx->cia.timer_b_start_value;
+      };
+      Serial.printf("IRQ Mask: %02x\n", ctx->cia.mask);
+      if (ctx->cia.mask & TIMER_A_INTERRUPT_FLAG) {
+        // Timer A interrupts are enabled
+        // Setting the source of the IRQ
+        ctx->cia.flags |= TIMER_B_INTERRUPT_FLAG;
+        // Now trigger the interrupt, by pulling IRQB low.
+        // It will stay low, until the IRQ has been aknowledged
+        Serial.println("BOOOOOOM. Timer B has underflow.");
+        trigger6502IRQ(ctx);
+      } else {
+        Serial.println("Timer B underflow, but IRQ not enabled.");
+      } 
+    } else {
+      // At this point we know: counter > 0.
+      ctx->cia.timer_b_counter--;
+    }
 
+    // TODO: Check for serial (keyboard)
+    // TODO check for screenupdate (rasterinterrupt)
   };
 }

@@ -21,15 +21,7 @@
 static TContext ctx;
 static TContextPtr ctxPtr(&ctx);
 
-#define uP_IRQB 22  // UEXT.6 - I2C1_SDA
-#define IRQ_LOW false
-#define IRQ_HIGH true
-
 unsigned long lastClockTS;
-
-inline __attribute__((always_inline)) void setIRQB(boolean irqb) {
-  gpio_put(uP_IRQB, irqb);
-}
 
 void setup() {
   uint8_t cycle(0);
@@ -38,12 +30,6 @@ void setup() {
     ;
   Serial.println("############ NEO6502 FirstKlaas OS v0.0.1 ############");
 
-  // Initializing IRQB line.
-  // Because it is active low, we set it high.
-  // Pin BUS.24 needs to we wired to UEXT.22
-  // to make it work.
-  pinMode(uP_IRQB, OUTPUT);
-  setIRQB(IRQ_HIGH);
   ctx.clock_cycle = 0L;
 
   initmemory(ctxPtr);
