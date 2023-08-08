@@ -1,20 +1,25 @@
 .const SPRITE_ENABLE_FLAG = $40
 
-init_sprites_:  lda DISCR
-                ora #SPRITE_ENABLE_FLAG
-                sta DISCR               // Enable sprites                    
-                ldx #0                  // Set pixel data pointer for sprite 0
-                lda #<SPACE_ALIEN_A
-                sta SPRITE_DATA_LO, x
-                lda #>SPACE_ALIEN_A
-                sta SPRITE_DATA_HI, x
-                lda #<SPRITE_DEFINITON_BLOCK // Set sprite definiton block data
 .macro SetSpriteAddress(index, address) {
     ldx #index
     lda #<address
     sta SPRITE_DATA_LO, x
     lda #>address
     sta SPRITE_DATA_HI, x                
+}
+
+.macro EnableSprite(index) {
+    ldx #index
+    lda SPRITE_FLAGS, x
+    ora SPRITE_ENABLE_FLAG
+    sta SPRITE_FLAGS, x
+}
+
+.macro DisableSprite(index) {
+    ldx #index
+    lda SPRITE_FLAGS, x
+    and ~SPRITE_ENABLE_FLAG
+    sta SPRITE_FLAGS, x
 }
 
 init_sprites_:  SetSpriteAddress(0, SPACE_ALIEN_A)
@@ -37,7 +42,6 @@ init_sprites_:  SetSpriteAddress(0, SPACE_ALIEN_A)
                 bmi !wait-              // No! Let's wait
                 rts
                     
-                    
 SPACE_ALIEN_A:      .byte %00000010, %01000000
                     .byte %00000111, %11100000
                     .byte %00001111, %11110000
@@ -57,7 +61,7 @@ SPACE_ALIEN_B:      .byte %00000000, %00000000
                     .byte %00001010, %10100000
 
 SPRITE_DEFINITON_BLOCK:
-SPRITE_FLAGS:       .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 00-07
+SPRITE_FLAGS:       .byte $40, $40, $00, $00, $00, $00, $00, $00  // Sprite 00-07
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
@@ -67,7 +71,12 @@ SPRITE_XPOS:        .byte $10, $10, $00, $00, $00, $00, $00, $00  // Sprite 00-0
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
-SPRITE_COLOR:       .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 00-07
+SPRITE_YPOS:        .byte $40, $50, $00, $00, $00, $00, $00, $00  // Sprite 00-07
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
+                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+                    
+SPRITE_COLOR:       .byte $0a, $0d, $00, $00, $00, $00, $00, $00  // Sprite 00-07
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32

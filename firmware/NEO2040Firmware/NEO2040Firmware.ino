@@ -21,10 +21,20 @@
 static TContext ctx;
 static TContextPtr ctxPtr(&ctx); 
 
+#define uP_IRQB     22    // UEXT.6 - I2C1_SDA
+#define IRQ_LOW     false
+#define IRQ_HIGH    true
+
 //#define FRAMERATE 10
 //#define FRAME_DURATION_MS  10000 / FRAMERATE
 
 unsigned long lastClockTS;
+
+inline __attribute__((always_inline)) 
+void setIRQB(boolean irqb)
+{
+  gpio_put(uP_IRQB, irqb);
+}
 
 void setup() 
 {
@@ -32,17 +42,15 @@ void setup()
   Serial.begin(9600);
   while (!Serial && millis() < 10000UL);
   Serial.println("############ NEO6502 FirstKlaas OS v0.0.1 ############");
-  // put your setup code here, to run once:
 
-  
-  
-  //display.setFont(&FreeMono12pt7b);
+  // Initializing IRQB line. 
+  // Because it is active low, we set it high.
+  // Pin BUS.24 needs to we wired to UEXT.22
+  // to make it work.
+  pinMode(uP_IRQB, OUTPUT);
+  setIRQB(IRQ_HIGH);
   ctx.clock_cycle = 0L;
-  
-  // Setting text color to amber 
-  //display.setTextColor(convertColor565(255,191,0));
-  //display.setTextColor(0xffff);
-  
+    
   initmemory(ctxPtr);
   initKeyboard(ctxPtr);
   initDisplay(ctxPtr);
