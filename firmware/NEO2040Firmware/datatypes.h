@@ -29,11 +29,35 @@ typedef struct Register_ {
   };
 } TRegister;
 
+// CIA Stuff
+
+#define TIMER_A_INTERRUPT_FLAG  0x01
+#define TIMER_B_INTERRUPT_FLAG  0x02
+#define FRAME_INTERRUPT_FLAG    0x04
+#define KBD_INTERRUPT_FLAG      0x08
+
+#define CIA_IRQ_MASK            0x0f
+
+typedef struct {
+
+  uint16_t timer_a_start_value;
+  uint16_t timer_b_start_value;
+  uint16_t timer_a_counter;
+  uint16_t timer_b_counter; 
+  uint8_t  flags;           // Source of the interrupt
+  uint8_t  mask;            // enabled interupts
+  boolean  timer_a_running;
+  boolean  timer_b_running;   
+  boolean  irq_active;      // IRQ is pending => IRQB is low
+
+} CIA_t, *CIA_Ptr_t;
+
 typedef struct HardwareType_ {
   uint16_t address;
   uint8_t data;
   uint8_t *memory;
-  TRegister reg; 
+  TRegister reg;
+  CIA_t cia; 
   unsigned long clock_cycle;
 } TContext, *TContextPtr;
 

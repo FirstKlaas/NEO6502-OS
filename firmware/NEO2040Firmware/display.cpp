@@ -499,26 +499,6 @@ void executeCommand(TContextPtr ctx)
         screendata.sdb.height[0]);
 
     uint16_t offset = getSpriteOffset(ctx, 0);
-    /*
-    Serial.printf(
-      "Data address: $%02x%02x | Offset %04x | %02x %02x\n",
-      screendata.sdb.data_hi[0],
-      screendata.sdb.data_lo[0],
-      offset,
-      ctx->memory[offset],
-      ctx->memory[offset+1]
-    );
-    */
-    /*
-    display.drawBitmap(
-      100,
-      100,
-      getSpriteDataPtr(ctx,0),
-      screendata.sdb.width[0],
-      screendata.sdb.height[0],
-      AQUA);
-    screendata.needsRefresh++;
-    */
   };
   break;
   }

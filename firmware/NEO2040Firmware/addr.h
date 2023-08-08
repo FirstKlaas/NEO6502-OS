@@ -26,6 +26,24 @@
 #define REG_DIS_06_ADDR     0xD01B
 #define REG_DIS_07_ADDR     0xD01C
 
+// CIA 6526
+#define REG_CIA_PRA         0xDC00  // Not implemented
+#define REG_CIA_PRB         0xDC01  // Not implemented
+#define REG_CIA_DDRA        0xDC01  // Not implemented
+#define REG_CIA_DDRB        0xDC01  // Not implemented
+#define REG_CIA_TA_LO       0xDC04
+#define REG_CIA_TA_HI       0xDC05
+#define REG_CIA_TB_LO       0xDC06
+#define REG_CIA_TB_HI       0xDC07
+#define REG_CIA_TOD_10THSEC 0xDC08
+#define REG_CIA_TOD_SEC     0xDC09
+#define REG_CIA_TOD_MIN     0xDC0A
+#define REG_CIA_TOD_HR      0xDC0B
+#define REG_CIA_SDR         0xDC0C // Not supported
+#define REG_CIA_ICR         0xDC0D
+#define REG_CIA_CRA         0xDC0E
+#define REG_CIA_CRB         0xDC0F
+
 // Register 0xD100 - 0xD1ff = Spriteregister
 
 #define REG_KBD_IRQ_FLAG    0x80    // 10000000b
