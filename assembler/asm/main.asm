@@ -37,7 +37,7 @@ start:          ldx #$ff    // Set the stackpointer to
                 EnableCursorAutoAdjustment()
 
                 jsr debug_register_
-                
+                jsr setup_timer
                 SetCursorI(0,0)
                 SetForgroundColorI(208)
                 PrintText(border_top)
@@ -63,6 +63,7 @@ setup_timer:
                 // Timer Test
                 // Setting counter start value to 10 aka $000A
                 // -----------------------------------------------------
+                sei
                 lda #$f0
                 sta $dc05       // Set hi-byte of timer A latch
                 lda #$00
@@ -75,7 +76,7 @@ setup_timer:
                 sta $dc0e       // Load values and start timer
                 // End Test. Timer should now be running and trigger 
                 // an interrupt to enter the ISR           
-
+                cli
                 rts
 border_top:     .byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
                 .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
@@ -114,15 +115,19 @@ welcome:        .encoding "ascii"
     @last modified  : 08.08.2023 
     ------------------------------------------------------------------------------------
 */
-main_isr:   sta (!end+)+1
-            stx (!end+)+3
-            sty (!end+)+5
+main_isr:   pha
+            txa 
+            pha 
+            tya 
+            pha 
 !begin:     // To see, if it works, lets write something to TIMER B in the CIA, because
             // we will get a debug message in the rp2040 firmware.
             lda #$ff
             sta $dc06  // Timer B low value            
             lda $dc0d  // Clear/acknowledge the IRQ
-!end:       lda #0
-            ldx #0
-            ldy #0
+!end:       pla
+            tay 
+            pla 
+            tax 
+            pla 
             rti
