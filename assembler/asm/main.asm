@@ -37,7 +37,7 @@ start:          ldx #$ff    // Set the stackpointer to
                 EnableCursorAutoAdjustment()
 
                 jsr debug_register_
-                
+                jsr setup_timer
                 SetCursorI(0,0)
                 SetForgroundColorI(208)
                 PrintText(border_top)
@@ -114,15 +114,19 @@ welcome:        .encoding "ascii"
     @last modified  : 08.08.2023 
     ------------------------------------------------------------------------------------
 */
-main_isr:   sta (!end+)+1
-            stx (!end+)+3
-            sty (!end+)+5
+main_isr:   pha
+            txa 
+            pha 
+            tya 
+            pha 
 !begin:     // To see, if it works, lets write something to TIMER B in the CIA, because
             // we will get a debug message in the rp2040 firmware.
             lda #$ff
             sta $dc06  // Timer B low value            
             lda $dc0d  // Clear/acknowledge the IRQ
-!end:       lda #0
-            ldx #0
-            ldy #0
+!end:       pla
+            tay 
+            pla 
+            tax 
+            pla 
             rti

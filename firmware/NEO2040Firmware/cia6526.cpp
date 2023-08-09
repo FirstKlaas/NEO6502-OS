@@ -4,7 +4,7 @@
 
 #define USE_IRQB
 
-#define uP_IRQB   25      // UEXT
+#define uP_IRQB   29      // UEXT
 #define IRQ_LOW   false
 #define IRQ_HIGH  true
 
@@ -13,7 +13,6 @@
 #define ICR_NO_IRQ          0x00 // 
 #define ICR_SOURCE_MASK     0x7f // Bit 0-6: 01111111
 
-inline __attribute__((always_inline))
 void setIRQB(bool irqb) {
   #ifdef USE_IRQB
   gpio_put(uP_IRQB, irqb);
@@ -24,18 +23,19 @@ inline __attribute__((always_inline))
 void trigger6502IRQ(TContextPtr ctx) {
   // If IRQ is still active and not acknowledged,
   // ignore the IRQ request.
-  Serial.printf("CIA   : Trigger IRQB line. State is %d\n", ctx->cia.irq_active);
+  Serial.printf("CIA   : Setting IRQB LO. State is %d\n", ctx->cia.irq_active);
   if (ctx->cia.irq_active) return;
-  Serial.printf("Setting IRQB to low.\n");
+  Serial.println("Setting IRQB to low.");
   setIRQB(IRQ_LOW); // IRQB is active low.
   ctx->cia.irq_active = true;
 }
 
 inline __attribute__((always_inline))
 void release6502IRQ(TContextPtr ctx) {
+  if (!(ctx->cia.irq_active)) return;
   // If IRQ is not active
   // ignore the IRQ request.
-  Serial.printf("CIA   : Releasing IRQB line. State is %d\n", ctx->cia.irq_active);
+  Serial.println("CIA   : Setting IRQB HI");
   setIRQB(IRQ_HIGH); // IRQB is active low.
   ctx->cia.irq_active = false;
 }
@@ -236,6 +236,7 @@ void checkCIA(TContextPtr ctx) {
       } 
     } else {
       ctx->cia.timer_a_counter--;
+      //Serial.printf("Counter: %06d", ctx->cia.timer_a_counter);
     }
   };
 
