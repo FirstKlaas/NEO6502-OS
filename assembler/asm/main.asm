@@ -35,22 +35,6 @@ start:          ldx #$ff    // Set the stackpointer to
                 sta $ffff
 
                 EnableCursorAutoAdjustment()
-                // -----------------------------------------------------
-                // Timer Test
-                // Setting counter start value to 10 aka $000A
-                // -----------------------------------------------------
-                lda #$f0
-                sta $dc05       // Set hi-byte of timer A latch
-                lda #$00
-                sta $dc04       // Set low-byte of timer A latch
-                lda #$81        // Bit 0: Timer A / Bit 7: Set bits
-                sta $dc0d       // Enable timer A interrupt
-                lda #%00011001  // Bit 4: 1 = Load values from latch
-                                // Bit 0: 1 = Start timer 
-                                // Bit 3: 1 = Stop Timer after IRQ 
-                sta $dc0e       // Load values and start timer
-                // End Test. Timer should now be running and trigger 
-                // an interrupt to enter the ISR           
 
                 jsr debug_register_
                 
@@ -74,6 +58,25 @@ start:          ldx #$ff    // Set the stackpointer to
 end:
                 jmp end
 
+setup_timer:
+                // -----------------------------------------------------
+                // Timer Test
+                // Setting counter start value to 10 aka $000A
+                // -----------------------------------------------------
+                lda #$f0
+                sta $dc05       // Set hi-byte of timer A latch
+                lda #$00
+                sta $dc04       // Set low-byte of timer A latch
+                lda #$81        // Bit 0: Timer A / Bit 7: Set bits
+                sta $dc0d       // Enable timer A interrupt
+                lda #%00011001  // Bit 4: 1 = Load values from latch
+                                // Bit 0: 1 = Start timer 
+                                // Bit 3: 1 = Stop Timer after IRQ 
+                sta $dc0e       // Load values and start timer
+                // End Test. Timer should now be running and trigger 
+                // an interrupt to enter the ISR           
+
+                rts
 border_top:     .byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
                 .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
 

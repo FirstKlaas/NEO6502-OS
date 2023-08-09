@@ -21,8 +21,8 @@ void initmemory(TContextPtr ctx)
     ctx->memory = mem;
     mem[0xFFFC] = 0x00;
     mem[0xFFFD] = 0x08;
-    mem[0xFFFE] = 0x00;
-    mem[0xFFFF] = 0x08;
+    mem[0xFFFE] = 0x34;
+    mem[0xFFFF] = 0x09;
     load_kernel_to_memory(mem);
 }
 
@@ -84,6 +84,6 @@ void writeToMemory(TContextPtr ctx)
     #endif
     ctx->memory[ctx->address] = ctx->data;
 
-    if (ctx->address == 0xfffe) Serial.println("Setting ISR vector lowbyte.");
-    if (ctx->address == 0xffff) Serial.println("Setting ISR vector highbyte.");
+    if (ctx->address == 0xfffe) Serial.printf("Setting ISR vector lowbyte. %02x\n", ctx->data);
+    if (ctx->address == 0xffff) Serial.printf("Setting ISR vector highbyte. %02x\n", ctx->data);
 }
