@@ -63,6 +63,7 @@ setup_timer:
                 // Timer Test
                 // Setting counter start value to 10 aka $000A
                 // -----------------------------------------------------
+                sei
                 lda #$f0
                 sta $dc05       // Set hi-byte of timer A latch
                 lda #$00
@@ -75,7 +76,7 @@ setup_timer:
                 sta $dc0e       // Load values and start timer
                 // End Test. Timer should now be running and trigger 
                 // an interrupt to enter the ISR           
-
+                cli
                 rts
 border_top:     .byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
                 .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00

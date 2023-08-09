@@ -2,7 +2,7 @@
 [Main Program]
 0800: a2 ff     - start:  ldx #$ff    // Set the stackpointer to
 0802: 9a        -         txs         // highest possible position.
-0803: a9 37     -         lda #<main_isr
+0803: a9 39     -         lda #<main_isr
 0805: 8d fe ff  -         sta $fffe 
 0808: a9 09     -         lda #>main_isr
 080a: 8d ff ff  -         sta $ffff
@@ -17,7 +17,7 @@
 0822: 20 24 e1  -         jsr set_cursor_y_    
 0825: a9 d0     -         lda #color
 0827: 20 3c e1  -         jsr set_fg_color_
-082a: a9 9e     -         lda #<addr
+082a: a9 a0     -         lda #<addr
 082c: 85 e0     -         sta zpRegE0
 082e: a9 08     -         lda #>addr
 0830: 85 e1     -         sta zpRegE1
@@ -28,7 +28,7 @@
 083c: 20 24 e1  -         jsr set_cursor_y_    
 083f: a9 d0     -         lda #color
 0841: 20 3c e1  -         jsr set_fg_color_
-0844: a9 c6     -         lda #<addr
+0844: a9 c8     -         lda #<addr
 0846: 85 e0     -         sta zpRegE0
 0848: a9 08     -         lda #>addr
 084a: 85 e1     -         sta zpRegE1
@@ -39,7 +39,7 @@
 0856: 20 24 e1  -         jsr set_cursor_y_    
 0859: a9 e9     -         lda #color
 085b: 20 3c e1  -         jsr set_fg_color_
-085e: a9 ee     -         lda #<addr
+085e: a9 f0     -         lda #<addr
 0860: 85 e0     -         sta zpRegE0
 0862: a9 08     -         lda #>addr
 0864: 85 e1     -         sta zpRegE1
@@ -50,52 +50,54 @@
 0870: 20 0c e1  -         jsr set_cursor_x_
 0873: a9 01     -         lda #ypos
 0875: 20 24 e1  -         jsr set_cursor_y_    
-0878: a9 14     -         lda #<addr
+0878: a9 16     -         lda #<addr
 087a: 85 e0     -         sta zpRegE0
 087c: a9 09     -         lda #>addr
 087e: 85 e1     -         sta zpRegE1
 0880: 20 b0 e1  -         jsr print_text_
 0883: 20 eb e1  -         jsr init_sprites_
 0886: 4c 86 08  - end:    jmp end
-0889: a9 f0     - setup_timer:lda #$f0
-088b: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
-088e: a9 00     -         lda #$00
-0890: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
-0893: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
-0895: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
-0898: a9 19     -         lda #%00011001  // Bit 4: 1 = Load values from latch
-089a: 8d 0e dc  -         sta $dc0e       // Load values and start timer
-089d: 60        -         rts
-089e: c8 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_top:.byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
-08ae: cc cc cc cc                                     
-08b2: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
-08c2: cc cc ba 00                                     
-08c6: c7 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_bottom:.byte $c7,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
-08d6: cc cc cc cc                                     
-08da: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$bb,$00
-08ea: cc cc bb 00                                     
-08ee: da da da da da da da da da da da da da da da da  - text_bar:.fill 37,$da 
-08fe: da da da da da da da da da da da da da da da da 
-090e: da da da da da                                  
-0913: 00        -         .byte 0
-0914: 4e 45 2f 4f 53 20 76 30 2e 31 20 2d 20 4b 65 72  - welcome:.text "NE/OS v0.1 - Kernel Size 974 bytes"
-0924: 6e 65 6c 20 53 69 7a 65 20 39 37 34 20 62 79 74 
-0934: 65 73                                           
-0936: 00        -         .byte 0
-0937: 48        - main_isr:pha
-0938: 8a        -         txa 
-0939: 48        -         pha 
-093a: 98        -         tya 
+0889: 78        - setup_timer:sei
+088a: a9 f0     -         lda #$f0
+088c: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
+088f: a9 00     -         lda #$00
+0891: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
+0894: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
+0896: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
+0899: a9 19     -         lda #%00011001  // Bit 4: 1 = Load values from latch
+089b: 8d 0e dc  -         sta $dc0e       // Load values and start timer
+089e: 58        -         cli
+089f: 60        -         rts
+08a0: c8 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_top:.byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
+08b0: cc cc cc cc                                     
+08b4: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
+08c4: cc cc ba 00                                     
+08c8: c7 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_bottom:.byte $c7,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
+08d8: cc cc cc cc                                     
+08dc: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$bb,$00
+08ec: cc cc bb 00                                     
+08f0: da da da da da da da da da da da da da da da da  - text_bar:.fill 37,$da 
+0900: da da da da da da da da da da da da da da da da 
+0910: da da da da da                                  
+0915: 00        -         .byte 0
+0916: 4e 45 2f 4f 53 20 76 30 2e 31 20 2d 20 4b 65 72  - welcome:.text "NE/OS v0.1 - Kernel Size 974 bytes"
+0926: 6e 65 6c 20 53 69 7a 65 20 39 37 34 20 62 79 74 
+0936: 65 73                                           
+0938: 00        -         .byte 0
+0939: 48        - main_isr:pha
+093a: 8a        -         txa 
 093b: 48        -         pha 
-093c: a9 ff     -         lda #$ff
-093e: 8d 06 dc  -         sta $dc06  // Timer B low value            
-0941: ad 0d dc  -         lda $dc0d  // Clear/acknowledge the IRQ
-0944: 68        -         pla
-0945: a8        -         tay 
-0946: 68        -         pla 
-0947: aa        -         tax 
+093c: 98        -         tya 
+093d: 48        -         pha 
+093e: a9 ff     -         lda #$ff
+0940: 8d 06 dc  -         sta $dc06  // Timer B low value            
+0943: ad 0d dc  -         lda $dc0d  // Clear/acknowledge the IRQ
+0946: 68        -         pla
+0947: a8        -         tay 
 0948: 68        -         pla 
-0949: 40        -         rti
+0949: aa        -         tax 
+094a: 68        -         pla 
+094b: 40        -         rti
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_
