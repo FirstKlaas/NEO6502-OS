@@ -118,9 +118,7 @@ main_isr:   sta (!end+)+1
             // we will get a debug message in the rp2040 firmware.
             lda #$ff
             sta $dc06  // Timer B low value            
-            // We don't clear the source, so the IRQB line should stay low and no other
-            // IRQ will be triggered.
-            // The main programm should continue.
+            lda $dc0d  // Clear/acknowledge the IRQ
 !end:       lda #0
             ldx #0
             ldy #0

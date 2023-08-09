@@ -80,15 +80,16 @@
 0920: 6e 65 6c 20 53 69 7a 65 20 39 37 34 20 62 79 74 
 0930: 65 73                                           
 0932: 00        -         .byte 0
-0933: 8d 42 09  - main_isr:sta (!end+)+1
-0936: 8e 44 09  -         stx (!end+)+3
-0939: 8c 46 09  -         sty (!end+)+5
+0933: 8d 45 09  - main_isr:sta (!end+)+1
+0936: 8e 47 09  -         stx (!end+)+3
+0939: 8c 49 09  -         sty (!end+)+5
 093c: a9 ff     -         lda #$ff
 093e: 8d 06 dc  -         sta $dc06  // Timer B low value            
-0941: a9 00     -         lda #0
-0943: a2 00     -         ldx #0
-0945: a0 00     -         ldy #0
-0947: 40        -         rti
+0941: ad 0d dc  -         lda $dc0d  // Clear/acknowledge the IRQ
+0944: a9 00     -         lda #0
+0946: a2 00     -         ldx #0
+0948: a0 00     -         ldy #0
+094a: 40        -         rti
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_

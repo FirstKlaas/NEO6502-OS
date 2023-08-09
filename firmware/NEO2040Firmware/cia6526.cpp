@@ -4,7 +4,7 @@
 
 #define USE_IRQB
 
-#define uP_IRQB   22      // UEXT.6 - I2C1_SDA
+#define uP_IRQB   25      // UEXT
 #define IRQ_LOW   false
 #define IRQ_HIGH  true
 
@@ -24,7 +24,9 @@ inline __attribute__((always_inline))
 void trigger6502IRQ(TContextPtr ctx) {
   // If IRQ is still active and not acknowledged,
   // ignore the IRQ request.
+  Serial.printf("CIA   : Trigger IRQB line. State is %d\n", ctx->cia.irq_active);
   if (ctx->cia.irq_active) return;
+  Serial.printf("Setting IRQB to low.\n");
   setIRQB(IRQ_LOW); // IRQB is active low.
   ctx->cia.irq_active = true;
 }
@@ -33,9 +35,20 @@ inline __attribute__((always_inline))
 void release6502IRQ(TContextPtr ctx) {
   // If IRQ is not active
   // ignore the IRQ request.
-  if (!ctx->cia.irq_active) return;
+  Serial.printf("CIA   : Releasing IRQB line. State is %d\n", ctx->cia.irq_active);
   setIRQB(IRQ_HIGH); // IRQB is active low.
   ctx->cia.irq_active = false;
+}
+
+void setupCIAPins() {
+    // Initializing IRQB line.
+    // Because it is active low, we set it high.
+    // Pin BUS.24 needs to we wired to UEXT.22
+    // to make it work.
+    #ifdef USE_IRQB
+    pinMode(uP_IRQB, OUTPUT);
+    setIRQB(IRQ_HIGH); // Because it's and active low signal.
+    #endif
 }
 
 /**
@@ -56,14 +69,7 @@ void release6502IRQ(TContextPtr ctx) {
 * pins and define the correct pin.
 */ 
 void initCIA(TContextPtr ctx) {
-    // Initializing IRQB line.
-    // Because it is active low, we set it high.
-    // Pin BUS.24 needs to we wired to UEXT.22
-    // to make it work.
-    #ifdef USE_IRQB
-    pinMode(uP_IRQB, OUTPUT);
-    setIRQB(IRQ_HIGH); // Because it's and active low signal.
-    #endif
+    ctx->cia.irq_active = false;
     ctx->cia.mask  = 0;     // Which interrupts are allowed?
     ctx->cia.flags = 0;     // Which interrupts have been signaled?
     // We will trigger in interrupt, when (mask & flags) != 0

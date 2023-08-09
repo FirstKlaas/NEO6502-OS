@@ -3,6 +3,7 @@
 
 #include "datatypes.h"
 
+void setupCIAPins();
 void initCIA(TContextPtr ctx);
 boolean memWriteCIA(TContextPtr ctx);
 boolean memReadCIA(TContextPtr ctx);

@@ -31,7 +31,7 @@ void setup() {
   Serial.println("############ NEO6502 FirstKlaas OS v0.0.1 ############");
 
   ctx.clock_cycle = 0L;
-
+  setupCIAPins();
   initmemory(ctxPtr);
   initKeyboard(ctxPtr);
   initDisplay(ctxPtr);
