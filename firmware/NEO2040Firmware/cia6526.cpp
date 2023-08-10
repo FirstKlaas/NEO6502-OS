@@ -4,7 +4,7 @@
 
 #define USE_IRQB
 
-#define uP_IRQB   29      // UEXT
+#define uP_IRQB   22      // UEXT
 #define IRQ_LOW   false
 #define IRQ_HIGH  true
 
@@ -25,9 +25,14 @@ void trigger6502IRQ(TContextPtr ctx) {
   // ignore the IRQ request.
   Serial.printf("CIA   : Setting IRQB LO. State is %d\n", ctx->cia.irq_active);
   if (ctx->cia.irq_active) return;
+  ctx->cia.irq_active = true;
   Serial.println("Setting IRQB to low.");
   setIRQB(IRQ_LOW); // IRQB is active low.
-  ctx->cia.irq_active = true;
+  asm volatile("nop\nnop\nnop\nnop\nnop\n");
+  /**
+  setIRQB(IRQ_HIGH); // IRQB is active low.  
+  asm volatile("nop\nnop\nnop\nnop\nnop\n");
+  */
 }
 
 inline __attribute__((always_inline))
@@ -37,6 +42,7 @@ void release6502IRQ(TContextPtr ctx) {
   // ignore the IRQ request.
   Serial.println("CIA   : Setting IRQB HI");
   setIRQB(IRQ_HIGH); // IRQB is active low.
+  asm volatile("nop\nnop\nnop\nnop\nnop\n");
   ctx->cia.irq_active = false;
 }
 
@@ -208,6 +214,7 @@ boolean memReadCIA(TContextPtr ctx) {
 * Clock stuff not implemented.
 */
 void checkCIA(TContextPtr ctx) {
+  if (ctx->cia.irq_active) return;
   if (ctx->cia.timer_a_running) {
     //Serial.printf("CIA: Timer a is running: %04x [%03d]", ctx->cia.timer_a_counter, ctx->cia.mask);
     if (ctx->cia.timer_a_counter == 0) {
