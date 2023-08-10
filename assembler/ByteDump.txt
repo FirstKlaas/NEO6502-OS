@@ -2,106 +2,106 @@
 [Main Program]
 0800: a2 ff     - start:  ldx #$ff    // Set the stackpointer to
 0802: 9a        -         txs         // highest possible position.
-0803: a9 41     -         lda #<main_isr
+0803: a9 40     -         lda #<main_isr
 0805: 8d fe ff  -         sta $fffe 
 0808: a9 09     -         lda #>main_isr
 080a: 8d ff ff  -         sta $ffff
-080d: a9 41     -         lda #<main_isr
+080d: a9 40     -         lda #<main_isr
 080f: 8d fa ff  -         sta $fffa 
 0812: a9 09     -         lda #>main_isr
 0814: 8d fb ff  -         sta $fffb
 0817: ad 13 d0  -         lda DISCR   // Set the auto adjust 
 081a: 09 0c     -         ora #$0C    // and wrap flag
 081c: 8d 13 d0  -         sta DISCR                
-081f: 20 59 e3  -         jsr debug_register_
-0822: 20 93 08  -         jsr setup_timer
-0825: a9 00     -         lda #xpos
-0827: 20 0c e1  -         jsr set_cursor_x_
-082a: a9 00     -         lda #ypos
-082c: 20 24 e1  -         jsr set_cursor_y_    
-082f: a9 d0     -         lda #color
-0831: 20 3c e1  -         jsr set_fg_color_
-0834: a9 a8     -         lda #<addr
-0836: 85 e0     -         sta zpRegE0
-0838: a9 08     -         lda #>addr
-083a: 85 e1     -         sta zpRegE1
-083c: 20 b0 e1  -         jsr print_text_
-083f: a9 00     -         lda #xpos
-0841: 20 0c e1  -         jsr set_cursor_x_
-0844: a9 02     -         lda #ypos
-0846: 20 24 e1  -         jsr set_cursor_y_    
-0849: a9 d0     -         lda #color
-084b: 20 3c e1  -         jsr set_fg_color_
-084e: a9 d0     -         lda #<addr
-0850: 85 e0     -         sta zpRegE0
-0852: a9 08     -         lda #>addr
-0854: 85 e1     -         sta zpRegE1
-0856: 20 b0 e1  -         jsr print_text_
-0859: a9 01     -         lda #xpos
-085b: 20 0c e1  -         jsr set_cursor_x_
-085e: a9 01     -         lda #ypos
-0860: 20 24 e1  -         jsr set_cursor_y_    
-0863: a9 e9     -         lda #color
-0865: 20 3c e1  -         jsr set_fg_color_
-0868: a9 f8     -         lda #<addr
-086a: 85 e0     -         sta zpRegE0
-086c: a9 08     -         lda #>addr
-086e: 85 e1     -         sta zpRegE1
-0870: 20 b0 e1  -         jsr print_text_
-0873: a9 b2     -         lda #color
-0875: 20 3c e1  -         jsr set_fg_color_
-0878: a9 02     -         lda #xpos
-087a: 20 0c e1  -         jsr set_cursor_x_
-087d: a9 01     -         lda #ypos
-087f: 20 24 e1  -         jsr set_cursor_y_    
-0882: a9 1e     -         lda #<addr
-0884: 85 e0     -         sta zpRegE0
-0886: a9 09     -         lda #>addr
-0888: 85 e1     -         sta zpRegE1
-088a: 20 b0 e1  -         jsr print_text_
-088d: 20 eb e1  -         jsr init_sprites_
-0890: 4c 90 08  -         jmp !end-
-0893: a9 f0     - setup_timer:lda #$f0
-0895: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
-0898: a9 00     -         lda #$00
-089a: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
-089d: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
-089f: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
-08a2: a9 11     -         lda #%00010001  // Bit 4: 1 = Load values from latch
-08a4: 8d 0e dc  -         sta $dc0e       // Load values and start timer
-08a7: 60        -         rts
-08a8: c8 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_top:.byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
-08b8: cc cc cc cc                                     
-08bc: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
-08cc: cc cc ba 00                                     
-08d0: c7 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_bottom:.byte $c7,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
-08e0: cc cc cc cc                                     
-08e4: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$bb,$00
-08f4: cc cc bb 00                                     
-08f8: da da da da da da da da da da da da da da da da  - text_bar:.fill 37,$da 
-0908: da da da da da da da da da da da da da da da da 
-0918: da da da da da                                  
-091d: 00        -         .byte 0
-091e: 4e 45 2f 4f 53 20 76 30 2e 31 20 2d 20 4b 65 72  - welcome:.text "NE/OS v0.1 - Kernel Size 974 bytes"
-092e: 6e 65 6c 20 53 69 7a 65 20 39 37 34 20 62 79 74 
-093e: 65 73                                           
-0940: 00        -         .byte 0
-0941: 78        - main_isr:sei
-0942: 48        -         pha
-0943: 8a        -         txa 
-0944: 48        -         pha 
-0945: 98        -         tya 
-0946: 48        -         pha 
-0947: ad 0d dc  -         lda $dc0d  // Clear/acknowledge the IRQ
-094a: a9 ff     -         lda #$ff
-094c: 8d 06 dc  -         sta $dc06  // Timer B low value            
-094f: 68        -         pla
-0950: a8        -         tay 
-0951: 68        -         pla 
-0952: aa        -         tax 
-0953: 68        -         pla
-0954: 58        -         cli 
-0955: 40        -         rti
+081f: a9 84     -         lda #$84        // Bit 3: Frame IRQ / Bit 7: Set bits
+0821: 8d 0d dc  -         sta $dc0d       // Enable interrupt
+0824: a9 00     -         lda #xpos
+0826: 20 0c e1  -         jsr set_cursor_x_
+0829: a9 00     -         lda #ypos
+082b: 20 24 e1  -         jsr set_cursor_y_    
+082e: a9 d0     -         lda #color
+0830: 20 3c e1  -         jsr set_fg_color_
+0833: a9 a7     -         lda #<addr
+0835: 85 e0     -         sta zpRegE0
+0837: a9 08     -         lda #>addr
+0839: 85 e1     -         sta zpRegE1
+083b: 20 b0 e1  -         jsr print_text_
+083e: a9 00     -         lda #xpos
+0840: 20 0c e1  -         jsr set_cursor_x_
+0843: a9 02     -         lda #ypos
+0845: 20 24 e1  -         jsr set_cursor_y_    
+0848: a9 d0     -         lda #color
+084a: 20 3c e1  -         jsr set_fg_color_
+084d: a9 cf     -         lda #<addr
+084f: 85 e0     -         sta zpRegE0
+0851: a9 08     -         lda #>addr
+0853: 85 e1     -         sta zpRegE1
+0855: 20 b0 e1  -         jsr print_text_
+0858: a9 01     -         lda #xpos
+085a: 20 0c e1  -         jsr set_cursor_x_
+085d: a9 01     -         lda #ypos
+085f: 20 24 e1  -         jsr set_cursor_y_    
+0862: a9 e9     -         lda #color
+0864: 20 3c e1  -         jsr set_fg_color_
+0867: a9 f7     -         lda #<addr
+0869: 85 e0     -         sta zpRegE0
+086b: a9 08     -         lda #>addr
+086d: 85 e1     -         sta zpRegE1
+086f: 20 b0 e1  -         jsr print_text_
+0872: a9 b2     -         lda #color
+0874: 20 3c e1  -         jsr set_fg_color_
+0877: a9 02     -         lda #xpos
+0879: 20 0c e1  -         jsr set_cursor_x_
+087c: a9 01     -         lda #ypos
+087e: 20 24 e1  -         jsr set_cursor_y_    
+0881: a9 1d     -         lda #<addr
+0883: 85 e0     -         sta zpRegE0
+0885: a9 09     -         lda #>addr
+0887: 85 e1     -         sta zpRegE1
+0889: 20 b0 e1  -         jsr print_text_
+088c: 20 eb e1  -         jsr init_sprites_
+088f: 4c 8f 08  -         jmp !end-
+0892: a9 f0     - setup_timer:lda #$f0
+0894: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
+0897: a9 00     -         lda #$00
+0899: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
+089c: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
+089e: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
+08a1: a9 11     -         lda #%00010001  // Bit 4: 1 = Load values from latch
+08a3: 8d 0e dc  -         sta $dc0e       // Load values and start timer
+08a6: 60        -         rts
+08a7: c8 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_top:.byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
+08b7: cc cc cc cc                                     
+08bb: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
+08cb: cc cc ba 00                                     
+08cf: c7 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_bottom:.byte $c7,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
+08df: cc cc cc cc                                     
+08e3: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$bb,$00
+08f3: cc cc bb 00                                     
+08f7: da da da da da da da da da da da da da da da da  - text_bar:.fill 37,$da 
+0907: da da da da da da da da da da da da da da da da 
+0917: da da da da da                                  
+091c: 00        -         .byte 0
+091d: 4e 45 2f 4f 53 20 76 30 2e 31 20 2d 20 4b 65 72  - welcome:.text "NE/OS v0.1 - Kernel Size 974 bytes"
+092d: 6e 65 6c 20 53 69 7a 65 20 39 37 34 20 62 79 74 
+093d: 65 73                                           
+093f: 00        -         .byte 0
+0940: 78        - main_isr:sei
+0941: 48        -         pha
+0942: 8a        -         txa 
+0943: 48        -         pha 
+0944: 98        -         tya 
+0945: 48        -         pha 
+0946: ad 0d dc  -         lda $dc0d  // Clear/acknowledge the IRQ
+0949: a9 ff     -         lda #$ff
+094b: 8d 06 dc  -         sta $dc06  // Timer B low value            
+094e: 68        -         pla
+094f: a8        -         tay 
+0950: 68        -         pla 
+0951: aa        -         tax 
+0952: 68        -         pla
+0953: 58        -         cli 
+0954: 40        -         rti
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_

@@ -232,7 +232,8 @@ void getCursorY(TContextPtr ctx)
 
 void updateDisplay()
 {
-  if (screendata.needsRefresh)
+  // screendata.needsRefresh
+  if (true)
   {
     display.swap(true, false);
   };
@@ -359,14 +360,16 @@ getSpriteColor(uint8_t index)
 
 void drawSprites(TContextPtr ctx)
 {
-  uint8_t x(screendata.currentXpos), y(screendata.currentYpos), c(screendata.currentColor);
-  setCursor(ctx, 5, 18);
-  writeHexByte(ctx, ctx->reg.DISCR);
-  display.fillScreen(GREEN);
+  screendata.sdb.flags[0] |= 0x40;
+  screendata.sdb.color[0] |= 36;
+  screendata.sdb.flags[1] |= 0x40;
+  screendata.sdb.color[1] |= 42;
+  screendata.sdb.xpos[1] |= 10;
+  screendata.sdb.ypos[1] |= 100;
+  
+  display.fillScreen(41);
   if (ctx->reg.DISCR & 0x40)
   {
-    writeChar(ctx, ' ');
-    writeHexByte(ctx, screendata.sdb.count);
     for (uint8_t i = 0; i < screendata.sdb.count; i++)
     {
       if (screendata.sdb.flags[i] & 0x80)
@@ -377,18 +380,11 @@ void drawSprites(TContextPtr ctx)
             getSpriteDataPtr(ctx, i),
             getSpriteWidth(i),
             getSpriteHeight(i),
-            getSpriteColor(i));
+            29);
       };
     };
     screendata.needsRefresh++;
-  }
-  else
-  {
-    writeChar(ctx, 'N');
-    writeChar(ctx, ' ');
-    writeHexByte(ctx, screendata.sdb.xpos[0]);
   };
-  setCursor(ctx, x, y);
 }
 
 boolean memReadDisplayRegister(TContextPtr ctx)

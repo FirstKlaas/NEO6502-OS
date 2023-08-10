@@ -72,9 +72,9 @@ void loop() {
   gpio_put(uP_CLOCKCYCLE_PIN, false);
   checkCIA(ctxPtr);
   if ((millis() - lastClockTS) >= FRAMETIME) {
-    animateAlien(ctxPtr);
     drawSprites(ctxPtr);
     updateDisplay();
+    requestFrameIinterrupt(ctxPtr);
     lastClockTS = millis();
   }
 }

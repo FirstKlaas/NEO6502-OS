@@ -39,11 +39,13 @@ start:          ldx #$ff    // Set the stackpointer to
                 sta $fffa 
                 lda #>main_isr
                 sta $fffb
-
+                
                 EnableCursorAutoAdjustment()
 
-                jsr debug_register_
-                jsr setup_timer
+                //jsr setup_timer
+                lda #$84        // Bit 3: Frame IRQ / Bit 7: Set bits
+                sta $dc0d       // Enable interrupt
+
                 SetCursorI(0,0)
                 SetForgroundColorI(208)
                 PrintText(border_top)
@@ -63,6 +65,7 @@ start:          ldx #$ff    // Set the stackpointer to
                 jsr init_sprites_
 !end:
                 jmp !end-
+            
 
 setup_timer:
                 // -----------------------------------------------------

@@ -31,13 +31,6 @@ typedef struct Register_ {
 
 // CIA Stuff
 
-#define TIMER_A_INTERRUPT_FLAG  0x01
-#define TIMER_B_INTERRUPT_FLAG  0x02
-#define FRAME_INTERRUPT_FLAG    0x04
-#define KBD_INTERRUPT_FLAG      0x08
-
-#define CIA_IRQ_MASK            0x0f
-
 typedef struct {
 
   uint16_t timer_a_start_value;
