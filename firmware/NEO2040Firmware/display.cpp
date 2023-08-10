@@ -552,12 +552,12 @@ void drawSprites(TContextPtr ctx)
       if (screendata.sdb.flags[i] & 0x80)
       {
         display.drawBitmap(
-            screendata.sdb.xpos[i],
-            screendata.sdb.ypos[i],
+            getSpriteXPos(i),
+            getSPriteYPos(i),
             getSpriteDataPtr(ctx, i),
-            screendata.sdb.width[i],
-            screendata.sdb.height[i],
-            screendata.sdb.color[i]);
+            getSpriteWidth(i),
+            getSpriteHeight(i),
+            getSpriteColor(i));
       };
     };
     screendata.needsRefresh++;
