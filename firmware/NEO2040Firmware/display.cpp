@@ -505,28 +505,68 @@ void executeCommand(TContextPtr ctx)
   ctx->reg.DISCR &= 0x7f; // Clear IRQ flag. Leave the rest
 }
 
+uint8_t HEXVALUES[] = "0123456789ABCDEF";
+
+inline __attribute__((always_inline))
+void writeHexByte(TContextPtr ctx, uint8_t c) {
+  writeChar(ctx, HEXVALUES[c & 0xff]);
+  writeChar(ctx, HEXVALUES[(c >> 8) & 0xff]);
+}
+
+inline __attribute__((always_inline))
+uint8_t getSpriteXPos(uint8_t index) {
+  return screendata.sdb.xpos[index];
+}
+
+inline __attribute__((always_inline))
+uint8_t getSpriteYPos(uint8_t index) {
+  return screendata.sdb.ypos[index];
+}
+
+inline __attribute__((always_inline))
+uint8_t getSpriteWidth(uint8_t index) {
+  return screendata.sdb.width[index];
+}
+
+inline __attribute__((always_inline))
+uint8_t getSpriteHeight(uint8_t index) {
+  return screendata.sdb.height[index];
+}
+
+inline __attribute__((always_inline))
+uint8_t getSpriteColor(uint8_t index) {
+  return screendata.sdb.color[index];
+}
+
 void drawSprites(TContextPtr ctx)
 {
+  setCursor(ctx, 1, 18);
+  writeHexByte(ctx, ctx->reg.DISCR);
+
   if (ctx->reg.DISCR & 0x40)
   {
+    writeChar(ctx, ' ');
+    writeHexByte(ctx, screendata.sdb.count);    
     for (uint8_t i = 0; i < screendata.sdb.count; i++)
     {
       if (screendata.sdb.flags[i] & 0x80)
       {
         display.drawBitmap(
-            screendata.sdb.xpos[i],
-            screendata.sdb.ypos[i],
+            getSpriteXPos(i),
+            getSpriteYPos(i),
             getSpriteDataPtr(ctx, i),
-            screendata.sdb.width[i],
-            screendata.sdb.height[i],
-            screendata.sdb.color[i]);
+            getSpriteWidth(i),
+            getSpriteHeight(i),
+            getSpriteColor(i));
       };
     };
     screendata.needsRefresh++;
   }
   else
   {
-    // Serial.printf("Sprites disabled %02x\n", ctx->reg.DISCR);
+    writeChar(ctx, 'N');
+    writeChar(ctx, ' ');
+    writeHexByte(ctx, screendata.sdb.xpos[0]);
   };
 }
 
