@@ -540,9 +540,10 @@ uint8_t getSpriteColor(uint8_t index) {
 
 void drawSprites(TContextPtr ctx)
 {
-  setCursor(ctx, 1, 18);
+  uint8_t x(screendata.currentXpos), y(screendata.currentYpos), c(screendata.currentColor);
+  setCursor(ctx, 5, 18);
   writeHexByte(ctx, ctx->reg.DISCR);
-
+  display.fillScreen(GREEN);
   if (ctx->reg.DISCR & 0x40)
   {
     writeChar(ctx, ' ');
@@ -568,6 +569,7 @@ void drawSprites(TContextPtr ctx)
     writeChar(ctx, ' ');
     writeHexByte(ctx, screendata.sdb.xpos[0]);
   };
+  setCursor(ctx, x, y);
 }
 
 boolean memReadDisplayRegister(TContextPtr ctx)
@@ -617,6 +619,8 @@ boolean memWriteDisplayRegister(TContextPtr ctx)
 void animateAlien(TContextPtr ctx)
 {
   uint8_t color = screendata.sdb.color[0];
+  ctx->reg.DISCR |= 0x40;
+  screendata.sdb.flags[0] |= 0x80;
   screendata.sdb.color[0] = BLACK;
   drawSprites(ctx);
   screendata.sdb.color[0] = color;
