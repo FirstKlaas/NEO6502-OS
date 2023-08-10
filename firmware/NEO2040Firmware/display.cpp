@@ -553,7 +553,7 @@ void drawSprites(TContextPtr ctx)
       {
         display.drawBitmap(
             getSpriteXPos(i),
-            getSPriteYPos(i),
+            getSpriteYPos(i),
             getSpriteDataPtr(ctx, i),
             getSpriteWidth(i),
             getSpriteHeight(i),
