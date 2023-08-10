@@ -106,8 +106,8 @@ void initDisplay(TContextPtr ctx)
   screendata.offset_x = 1;
   screendata.offset_y = 1;
 
-  display.setColor(0, convertColor565(0x00, 0x00, 0x00));         // Black
-  display.setColor(1, convertColor565(0xff, 0xff, 0xff));         // White
+  display.setColor(0, convertColor565(0x00, 0x00, 0x00)); // Black
+  display.setColor(1, convertColor565(0xff, 0xff, 0xff)); // White
   display.setColor(2, convertColor565(0x13, 0x13, 0x13));
   display.setColor(3, convertColor565(0x1b, 0x1b, 0x1b));
   display.setColor(4, convertColor565(0x27, 0x27, 0x27));
@@ -316,34 +316,44 @@ void executeCommand(TContextPtr ctx)
 
 uint8_t HEXVALUES[] = "0123456789ABCDEF";
 
-inline __attribute__((always_inline))
-void writeHexByte(TContextPtr ctx, uint8_t c) {
+inline __attribute__((always_inline)) void writeHexByte(TContextPtr ctx, uint8_t c)
+{
   writeChar(ctx, HEXVALUES[c & 0xff]);
   writeChar(ctx, HEXVALUES[(c >> 8) & 0xff]);
 }
 
 inline __attribute__((always_inline))
-uint8_t getSpriteXPos(uint8_t index) {
+uint8_t
+getSpriteXPos(uint8_t index)
+{
   return screendata.sdb.xpos[index];
 }
 
 inline __attribute__((always_inline))
-uint8_t getSpriteYPos(uint8_t index) {
+uint8_t
+getSpriteYPos(uint8_t index)
+{
   return screendata.sdb.ypos[index];
 }
 
 inline __attribute__((always_inline))
-uint8_t getSpriteWidth(uint8_t index) {
+uint8_t
+getSpriteWidth(uint8_t index)
+{
   return screendata.sdb.width[index];
 }
 
 inline __attribute__((always_inline))
-uint8_t getSpriteHeight(uint8_t index) {
+uint8_t
+getSpriteHeight(uint8_t index)
+{
   return screendata.sdb.height[index];
 }
 
 inline __attribute__((always_inline))
-uint8_t getSpriteColor(uint8_t index) {
+uint8_t
+getSpriteColor(uint8_t index)
+{
   return screendata.sdb.color[index];
 }
 
@@ -355,7 +365,7 @@ void drawSprites(TContextPtr ctx)
   if (ctx->reg.DISCR & 0x40)
   {
     writeChar(ctx, ' ');
-    writeHexByte(ctx, screendata.sdb.count);    
+    writeHexByte(ctx, screendata.sdb.count);
     for (uint8_t i = 0; i < screendata.sdb.count; i++)
     {
       if (screendata.sdb.flags[i] & 0x80)
