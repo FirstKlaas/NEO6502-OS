@@ -6,7 +6,7 @@
 
 .macro DisableCursorAutoAdjustment() {
     lda DISCR   // Clear the auto adjust 
-    and #$fd    // flag
+    and #$fd    // flag>
     sta DISCR                
 }
 
@@ -34,6 +34,12 @@ start:          ldx #$ff    // Set the stackpointer to
                 lda #>main_isr
                 sta $ffff
 
+                // Setting vector for nmi 
+                lda #<main_isr
+                sta $fffa 
+                lda #>main_isr
+                sta $fffb
+
                 EnableCursorAutoAdjustment()
 
                 jsr debug_register_
@@ -55,28 +61,26 @@ start:          ldx #$ff    // Set the stackpointer to
 
                 // Spritetest
                 jsr init_sprites_
-end:
-                jmp end
+!end:
+                jmp !end-
 
 setup_timer:
                 // -----------------------------------------------------
                 // Timer Test
                 // Setting counter start value to 10 aka $000A
                 // -----------------------------------------------------
-                sei
                 lda #$f0
                 sta $dc05       // Set hi-byte of timer A latch
                 lda #$00
                 sta $dc04       // Set low-byte of timer A latch
                 lda #$81        // Bit 0: Timer A / Bit 7: Set bits
                 sta $dc0d       // Enable timer A interrupt
-                lda #%00011001  // Bit 4: 1 = Load values from latch
+                lda #%00010001  // Bit 4: 1 = Load values from latch
                                 // Bit 0: 1 = Start timer 
                                 // Bit 3: 1 = Stop Timer after IRQ 
                 sta $dc0e       // Load values and start timer
                 // End Test. Timer should now be running and trigger 
                 // an interrupt to enter the ISR           
-                cli
                 rts
 border_top:     .byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
                 .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
@@ -115,19 +119,22 @@ welcome:        .encoding "ascii"
     @last modified  : 08.08.2023 
     ------------------------------------------------------------------------------------
 */
-main_isr:   pha
+main_isr:   
+            sei
+            pha
             txa 
             pha 
             tya 
             pha 
-!begin:     // To see, if it works, lets write something to TIMER B in the CIA, because
+            lda $dc0d  // Clear/acknowledge the IRQ
+            // To see, if it works, lets write something to TIMER B in the CIA, because
             // we will get a debug message in the rp2040 firmware.
             lda #$ff
             sta $dc06  // Timer B low value            
-            lda $dc0d  // Clear/acknowledge the IRQ
-!end:       pla
+            pla
             tay 
             pla 
             tax 
-            pla 
+            pla
+            cli 
             rti

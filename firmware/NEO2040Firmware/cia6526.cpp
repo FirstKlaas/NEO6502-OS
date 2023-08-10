@@ -4,9 +4,9 @@
 
 #define USE_IRQB
 
-#define uP_IRQB 29 // UEXT
-#define IRQ_LOW false
-#define IRQ_HIGH true
+#define uP_IRQB   22      // UEXT
+#define IRQ_LOW   false
+#define IRQ_HIGH  true
 
 #define TIMER_RESTART_FLAG 0x08 // Bit 3  : 00001000
 #define ICR_IRQ_FLAG 0x80       // Bit 7  : 10000000
@@ -25,11 +25,15 @@ inline __attribute__((always_inline)) void trigger6502IRQ(TContextPtr ctx)
   // If IRQ is still active and not acknowledged,
   // ignore the IRQ request.
   Serial.printf("CIA   : Setting IRQB LO. State is %d\n", ctx->cia.irq_active);
-  if (ctx->cia.irq_active)
-    return;
+  if (ctx->cia.irq_active) return;
+  ctx->cia.irq_active = true;
   Serial.println("Setting IRQB to low.");
   setIRQB(IRQ_LOW); // IRQB is active low.
-  ctx->cia.irq_active = true;
+  asm volatile("nop\nnop\nnop\nnop\nnop\n");
+  /**
+  setIRQB(IRQ_HIGH); // IRQB is active low.  
+  asm volatile("nop\nnop\nnop\nnop\nnop\n");
+  */
 }
 
 inline __attribute__((always_inline)) void release6502IRQ(TContextPtr ctx)
@@ -40,6 +44,7 @@ inline __attribute__((always_inline)) void release6502IRQ(TContextPtr ctx)
   // ignore the IRQ request.
   Serial.println("CIA   : Setting IRQB HI");
   setIRQB(IRQ_HIGH); // IRQB is active low.
+  asm volatile("nop\nnop\nnop\nnop\nnop\n");
   ctx->cia.irq_active = false;
 }
 
@@ -207,32 +212,30 @@ boolean memReadCIA(TContextPtr ctx)
   return true;
 }
 /**
- * Checks the state of all the ergisters and hardware to
- * see, if an interrupt must be triggered or handled or
- * whatsoever. For the timers, the implementation followed
- * the documentation of the original CIA chip.
- *
- * Further reading: https://www.c64-wiki.de/wiki/CIA#CIA_1
- *
- * TODO:
- * What to do, if we triggered an irq (setting IRQB to low) and another
- * "interrupt" occurs. Will it be thrown away? Or triggered after the first has been cleared?
- * As an example. Timer B gets an underflow while the irq routine for timer A is still doing things.
- *
- * TODO:
- * Serial stuff not implemented.
- *
- * TODO:
- * Clock stuff not implemented.
- */
-void checkCIA(TContextPtr ctx)
-{
-  if (ctx->cia.timer_a_running)
-  {
-    // Serial.printf("CIA: Timer a is running: %04x [%03d]", ctx->cia.timer_a_counter, ctx->cia.mask);
-    if (ctx->cia.timer_a_counter == 0)
-    {
-      Serial.printf("Time A is up. CIA_CRA: 0xdc0e = 0x%02x\n", ctx->memory[REG_CIA_CRA]);
+* Checks the state of all the ergisters and hardware to
+* see, if an interrupt must be triggered or handled or
+* whatsoever. For the timers, the implementation followed
+* the documentation of the original CIA chip.
+*
+* Further reading: https://www.c64-wiki.de/wiki/CIA#CIA_1
+*
+* TODO:
+* What to do, if we triggered an irq (setting IRQB to low) and another 
+* "interrupt" occurs. Will it be thrown away? Or triggered after the first has been cleared?
+* As an example. Timer B gets an underflow while the irq routine for timer A is still doing things.
+*
+* TODO:
+* Serial stuff not implemented.
+*
+* TODO:
+* Clock stuff not implemented.
+*/
+void checkCIA(TContextPtr ctx) {
+  if (ctx->cia.irq_active) return;
+  if (ctx->cia.timer_a_running) {
+    //Serial.printf("CIA: Timer a is running: %04x [%03d]", ctx->cia.timer_a_counter, ctx->cia.mask);
+    if (ctx->cia.timer_a_counter == 0) {
+      Serial.printf("Time A is up. CIA_CRA: 0xdc0e = 0x%02x\n",ctx->memory[REG_CIA_CRA]);
       // Next decrement would generate an underflow (in a signed value)
       // Trigger IRQ (if endabled)
       // Check, if we need to restart the timer.

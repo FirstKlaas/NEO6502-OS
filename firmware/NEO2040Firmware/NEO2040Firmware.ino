@@ -25,20 +25,37 @@ static TContextPtr ctxPtr(&ctx);
 
 unsigned long lastClockTS;
 
+void signalTest() {
+  uint8_t test_pin(29);
+
+  pinMode(test_pin, OUTPUT);
+  while(true) {
+    gpio_put(test_pin, true);
+    Serial.print("1");
+    delay(1000);
+    gpio_put(test_pin, false);
+    Serial.print("0");
+    delay(1000);
+  }
+}
+
+
 void setup() {
+  //signalTest();
+
+
   uint8_t cycle(0);
   Serial.begin(9600);
-  while (!Serial && millis() < 10000UL)
-    ;
+  while (!Serial && millis() < 10000UL);
   Serial.println("############ NEO6502 FirstKlaas OS v0.0.1 ############");
 
   ctx.clock_cycle = 0L;
   setupCIAPins();
-  initmemory(ctxPtr);
   initKeyboard(ctxPtr);
   initDisplay(ctxPtr);
   init6502(ctxPtr);
   initCIA(ctxPtr);
+  initmemory(ctxPtr);
 
   pinMode(uP_CLOCKCYCLE_PIN, OUTPUT);
   gpio_put(uP_CLOCKCYCLE_PIN, false);
@@ -46,6 +63,7 @@ void setup() {
   reset6502();
 
   sleep_ms(2000);
+  Serial.println("Starting programm");
 }
 
 void loop() {

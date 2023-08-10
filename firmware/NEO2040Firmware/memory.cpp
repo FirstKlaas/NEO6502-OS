@@ -21,8 +21,8 @@ void initmemory(TContextPtr ctx)
     ctx->memory = mem;
     mem[0xFFFC] = 0x00;
     mem[0xFFFD] = 0x08;
-    mem[0xFFFE] = 0x34;
-    mem[0xFFFF] = 0x09;
+    mem[0xFFFE] = 0x00;
+    mem[0xFFFF] = 0x08;
     load_kernel_to_memory(mem);
 }
 
