@@ -13,11 +13,25 @@
 #define ICR_NO_IRQ 0x00         //
 #define ICR_SOURCE_MASK 0x7f    // Bit 0-6: 01111111
 
+#define TIMER_A_INTERRUPT_FLAG  0x01
+#define TIMER_B_INTERRUPT_FLAG  0x02
+#define FRAME_INTERRUPT_FLAG    0x04
+#define KBD_INTERRUPT_FLAG      0x08
+
+#define CIA_IRQ_MASK            0x0f
+
 void setIRQB(bool irqb)
 {
 #ifdef USE_IRQB
   gpio_put(uP_IRQB, irqb);
 #endif
+}
+
+void requestFrameIinterrupt(TContextPtr ctx) {
+  // When there is an unacknowledged IRQ,
+  // ignore the request.
+  if (ctx->cia.irq_active) return;
+  ctx->cia.flags |= FRAME_INTERRUPT_FLAG;
 }
 
 inline __attribute__((always_inline)) void trigger6502IRQ(TContextPtr ctx)

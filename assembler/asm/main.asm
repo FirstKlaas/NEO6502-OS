@@ -49,7 +49,7 @@ start:          ldx #$ff    // Set the stackpointer to
                 sta $fffa 
                 lda #>main_isr
                 sta $fffb
-
+                
                 EnableCursorAutoAdjustment()
 
                 // Enable Frame IRQ
@@ -77,6 +77,7 @@ start:          ldx #$ff    // Set the stackpointer to
                 jsr init_sprites_
 !end:
                 jmp !end-
+            
 
 setup_timer:
                 // -----------------------------------------------------

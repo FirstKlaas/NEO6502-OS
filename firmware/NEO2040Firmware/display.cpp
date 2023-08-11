@@ -232,7 +232,8 @@ void getCursorY(TContextPtr ctx)
 
 void updateDisplay()
 {
-  if (screendata.needsRefresh)
+  // screendata.needsRefresh
+  if (true)
   {
     display.swap(true, false);
   };
@@ -364,8 +365,6 @@ void drawSprites(TContextPtr ctx)
 
   if (ctx->memory[DISCR] & 0x40)
   {
-    writeChar(ctx, ' ');
-    writeHexByte(ctx, screendata.sdb.count);
     for (uint8_t i = 0; i < screendata.sdb.count; i++)
     {
       if (screendata.sdb.flags[i] & 0x80)
@@ -376,16 +375,10 @@ void drawSprites(TContextPtr ctx)
             getSpriteDataPtr(ctx, i),
             getSpriteWidth(i),
             getSpriteHeight(i),
-            getSpriteColor(i));
+            29);
       };
     };
     screendata.needsRefresh++;
-  }
-  else
-  {
-    writeChar(ctx, 'N');
-    writeChar(ctx, ' ');
-    writeHexByte(ctx, screendata.sdb.xpos[0]);
   };
 }
 
@@ -436,6 +429,8 @@ boolean memWriteDisplayRegister(TContextPtr ctx)
 void animateAlien(TContextPtr ctx)
 {
   uint8_t color = screendata.sdb.color[0];
+  ctx->reg.DISCR |= 0x40;
+  screendata.sdb.flags[0] |= 0x80;
   screendata.sdb.color[0] = BLACK;
   drawSprites(ctx);
   screendata.sdb.color[0] = color;
