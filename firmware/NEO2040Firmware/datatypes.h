@@ -3,31 +3,19 @@
 
 #include <Arduino.h>
 
-typedef struct Register_ {
-  union {
-    struct {
-      uint8_t KBD;    // Keyboard register
-      uint8_t KBDCR;  // Keyboard control register
-    };
-    uint8_t keyboardRegister[2];
-  };
-  union {
-    struct {
-      uint8_t DIS;    // Display Register
-      uint8_t DISCR;  // Display control rgister
-      uint8_t DISCMD;
-      uint8_t DIS00;  // Display Data Register
-      uint8_t DIS01;  // Display Data Register
-      uint8_t DIS02;  // Display Data Register
-      uint8_t DIS03;  // Display Data Register
-      uint8_t DIS04;  // Display Data Register
-      uint8_t DIS05;  // Display Data Register
-      uint8_t DIS06;  // Display Data Register
-      uint8_t DIS07;  // Display Data Register
-    };
-    uint8_t displayRegister[11];
-  };
-} TRegister;
+#define KBD    0xd010    // Keyboard regster
+#define KBDCR  0xd011    // Keyboard control register
+#define DIS    0xd012    // Display register
+#define DISCR  0xd013    // Display control register
+#define DISCMD 0xd014    // Display command register
+#define DIS00  0xd015    // Data exchange register 
+#define DIS01  0xd016    // Data exchange register 
+#define DIS02  0xd017    // Data exchange register 
+#define DIS03  0xd018    // Data exchange register 
+#define DIS04  0xd019    // Data exchange register 
+#define DIS05  0xd01A    // Data exchange register 
+#define DIS06  0xd01B    // Data exchange register 
+#define DIS07  0xd01C    // Data exchange register 
 
 // CIA Stuff
 
@@ -44,11 +32,11 @@ typedef struct {
   uint16_t timer_b_start_value;
   uint16_t timer_a_counter;
   uint16_t timer_b_counter; 
-  uint8_t  flags;           // Source of the interrupt
-  uint8_t  mask;            // enabled interupts
+  uint8_t  raised_interrupts;     // Source of the interrupt
+  uint8_t  enabled_interrupts;    // enabled interupts
   boolean  timer_a_running;
   boolean  timer_b_running;   
-  boolean  irq_active;      // IRQ is pending => IRQB is low
+  boolean  irq_active;            // IRQ is pending => IRQB is low
 
 } CIA_t, *CIA_Ptr_t;
 
@@ -56,7 +44,7 @@ typedef struct HardwareType_ {
   uint16_t address;
   uint8_t data;
   uint8_t *memory;
-  TRegister reg;
+  //TRegister reg;
   CIA_t cia; 
   unsigned long clock_cycle;
 } TContext, *TContextPtr;

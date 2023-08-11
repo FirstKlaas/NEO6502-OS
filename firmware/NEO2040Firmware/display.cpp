@@ -192,7 +192,7 @@ void setCursor(TContextPtr ctx, uint8_t x, uint8_t y)
   screendata.currentXpos = x;
   screendata.currentYpos = y;
 
-  if (x >= LINECHARS && (ctx->reg.DISCR & AUTO_WRAP_FLAG))
+  if (x >= LINECHARS && (ctx->memory[DISCR] & AUTO_WRAP_FLAG))
   {
     screendata.currentXpos = (x % LINECHARS);
     screendata.currentYpos += (x / LINECHARS);
@@ -202,7 +202,7 @@ void setCursor(TContextPtr ctx, uint8_t x, uint8_t y)
   screendata.y = screendata.currentYpos * FONT_CHAR_HEIGHT + screendata.offset_y;
 
   display.setCursor(screendata.x, screendata.y);
-  if (ctx->reg.DISCR && SHOW_CURSOR_FLAG)
+  if (ctx->memory[DISCR] && SHOW_CURSOR_FLAG)
   {
     // If there is a change and we show the cursor,
     // we need to refresh the screen.
@@ -222,12 +222,12 @@ void setCursorY(TContextPtr ctx, uint8_t y)
 
 void getCursorX(TContextPtr ctx)
 {
-  ctx->reg.DIS00 = screendata.currentXpos;
+  ctx->memory[DIS00] = screendata.currentXpos;
 }
 
 void getCursorY(TContextPtr ctx)
 {
-  ctx->reg.DIS00 = screendata.currentYpos;
+  ctx->memory[DIS00] = screendata.currentYpos;
 }
 
 void updateDisplay()
@@ -249,7 +249,7 @@ void writeChar(TContextPtr ctx, uint8_t c)
   screendata.needsRefresh++;
   // Check, if we need to adjust the cursor
   // automatically
-  if (ctx->reg.DISCR && ADJUST_CURSOR_FLAG)
+  if (ctx->memory[DISCR] && ADJUST_CURSOR_FLAG)
   {
     setCursor(ctx, screendata.currentXpos + 1, screendata.currentYpos);
   }
@@ -257,28 +257,28 @@ void writeChar(TContextPtr ctx, uint8_t c)
 
 const TSpritePtr getSprite(const TContextPtr ctx)
 {
-  return screendata.sprites + (ctx->reg.DIS00 & 0x1f);
+  return screendata.sprites + (ctx->memory[DIS00] & 0x1f);
 }
 
 void executeCommand(TContextPtr ctx)
 {
 
-  switch (ctx->reg.DISCMD)
+  switch (ctx->memory[DISCMD])
   {
   case CMD_NOP:
     break;
   case CMD_SET_CURSOR_X:
-    setCursorX(ctx, ctx->reg.DIS00);
+    setCursorX(ctx, ctx->memory[DIS00]);
     break;
   case CMD_SET_CURSOR_Y:
-    setCursorY(ctx, ctx->reg.DIS00);
+    setCursorY(ctx, ctx->memory[DIS00]);
     break;
   case CMD_WRITE_CHAR:
-    writeChar(ctx, ctx->reg.DIS00);
+    writeChar(ctx, ctx->memory[DIS00]);
     screendata.needsRefresh++;
     break;
   case CMD_SET_FG_COLOR:
-    setColor(ctx->reg.DIS00);
+    setColor(ctx->memory[DIS00]);
     break;
   case CMD_GET_CURSOR_X:
     getCursorX(ctx);
@@ -289,8 +289,8 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_SET_SDB:
   {
-    screendata.sdb.address = ((ctx->reg.DIS01 << 8) | ctx->reg.DIS00);
-    screendata.sdb.count = ctx->reg.DIS02;
+    screendata.sdb.address = ((ctx->memory[DIS01] << 8) | ctx->memory[DIS00]);
+    screendata.sdb.count = ctx->memory[DIS02];
     screendata.sdb.flags = ctx->memory + screendata.sdb.address;
     screendata.sdb.xpos = screendata.sdb.flags + screendata.sdb.count;
     screendata.sdb.ypos = screendata.sdb.xpos + screendata.sdb.count;
@@ -311,7 +311,7 @@ void executeCommand(TContextPtr ctx)
   };
   break;
   }
-  ctx->reg.DISCR &= 0x7f; // Clear IRQ flag. Leave the rest
+  ctx->memory[DISCR] &= 0x7f; // Clear IRQ flag. Leave the rest
 }
 
 uint8_t HEXVALUES[] = "0123456789ABCDEF";
@@ -360,9 +360,9 @@ getSpriteColor(uint8_t index)
 void drawSprites(TContextPtr ctx)
 {
   setCursor(ctx, 1, 18);
-  writeHexByte(ctx, ctx->reg.DISCR);
+  writeHexByte(ctx, ctx->memory[DISCR]);
 
-  if (ctx->reg.DISCR & 0x40)
+  if (ctx->memory[DISCR] & 0x40)
   {
     writeChar(ctx, ' ');
     writeHexByte(ctx, screendata.sdb.count);
@@ -393,7 +393,7 @@ boolean memReadDisplayRegister(TContextPtr ctx)
 {
   if (ctx->address < REG_DIS_START || ctx->address > REG_DIS_END)
     return false;
-  ctx->data = ctx->reg.displayRegister[ctx->address - REG_DIS_START];
+  ctx->data = ctx->memory[ctx->address];
   return true;
 }
 
@@ -408,7 +408,7 @@ boolean memWriteDisplayRegister(TContextPtr ctx)
 
   // If the IRQ flag is set, we do not change anything, but
   // still the write request is handled.
-  if (ctx->reg.DISCR & 0x80)
+  if (ctx->memory[DISCR] & 0x80)
   {
 #ifdef DEBUG_DISPLAY
     Serial.println("IRQ Flag for display set. Register stay unchanged.");
@@ -416,17 +416,17 @@ boolean memWriteDisplayRegister(TContextPtr ctx)
     return true;
   }
 
-  ctx->reg.displayRegister[ctx->address - REG_DIS_START] = ctx->data;
+  ctx->memory[ctx->address] = ctx->data;
 
   // Check for IRQ Flag
-  if (ctx->reg.DISCR & 0x80)
+  if (ctx->memory[DISCR] & 0x80)
   {
 
 // If the IRQ flag is set, we know that it was set through this write
 // instruction. This means, we are requested to execute the
 // prepared command.
 #ifdef DEBUG_DISPLAY
-    Serial.printf("IRQ Flag for display set. Executing command. %02x\n", ctx->reg.DISCMD);
+    Serial.printf("IRQ Flag for display set. Executing command. %02x\n", ctx->memory[DISCMD]);
 #endif
     executeCommand(ctx); // Execute command and clear irq flag
   }

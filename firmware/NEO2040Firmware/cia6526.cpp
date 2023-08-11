@@ -27,9 +27,8 @@ inline __attribute__((always_inline)) void trigger6502IRQ(TContextPtr ctx)
   Serial.printf("CIA   : Setting IRQB LO. State is %d\n", ctx->cia.irq_active);
   if (ctx->cia.irq_active) return;
   ctx->cia.irq_active = true;
-  Serial.println("Setting IRQB to low.");
   setIRQB(IRQ_LOW); // IRQB is active low.
-  asm volatile("nop\nnop\nnop\nnop\nnop\n");
+  //asm volatile("nop\nnop\nnop\nnop\nnop\n");
   /**
   setIRQB(IRQ_HIGH); // IRQB is active low.  
   asm volatile("nop\nnop\nnop\nnop\nnop\n");
@@ -80,8 +79,8 @@ void setupCIAPins()
 void initCIA(TContextPtr ctx)
 {
   ctx->cia.irq_active = false;
-  ctx->cia.mask = 0;  // Which interrupts are allowed?
-  ctx->cia.flags = 0; // Which interrupts have been signaled?
+  ctx->cia.enabled_interrupts = 0;  // Which interrupts are allowed?
+  ctx->cia.raised_interrupts = 0; // Which interrupts have been signaled?
 
   ctx->cia.timer_a_counter = 0;
   ctx->cia.timer_b_counter = 0;
@@ -108,13 +107,13 @@ boolean memWriteCIA(TContextPtr ctx)
     {
       // Source bit (Bit7) equals 1: Every set bit (1) in data sets the corresponding
       // bit in irq mask
-      ctx->cia.mask |= (ctx->data & ICR_SOURCE_MASK);
+      ctx->cia.enabled_interrupts |= (ctx->data & ICR_SOURCE_MASK);
     }
     else
     {
       // Source bit is 0: Every set bit (1) clears the corresponding
       // bit in irq mask
-      ctx->cia.mask &= ((~ctx->data) & ICR_SOURCE_MASK);
+      ctx->cia.enabled_interrupts &= ((~ctx->data) & ICR_SOURCE_MASK);
     };
     break;
   case REG_CIA_TA_LO:
@@ -186,7 +185,7 @@ boolean memReadCIA(TContextPtr ctx)
   {
   // Set the IRQ signaling flag (mask & flags > 0)
   case REG_CIA_ICR:
-    if (ctx->cia.flags & ctx->cia.mask)
+    if (ctx->cia.raised_interrupts & ctx->cia.enabled_interrupts)
     {
       ctx->data = ICR_IRQ_FLAG;
     }
@@ -195,12 +194,12 @@ boolean memReadCIA(TContextPtr ctx)
       ctx->data = ICR_NO_IRQ;
     };
     // Set the source bits
-    ctx->data |= (ctx->cia.flags & CIA_IRQ_MASK);
+    ctx->data |= (ctx->cia.raised_interrupts & CIA_IRQ_MASK);
     // So the valid information is returned, but only
     // once.
     // Reading this register automatically clears the
     // interrupt flags and clears the IRQB interrupt.
-    ctx->cia.flags = 0;
+    ctx->cia.raised_interrupts = 0;
 
     // Reading also releases the IRQB line and
     // serves as an aknowledgement for the irq.
@@ -211,8 +210,9 @@ boolean memReadCIA(TContextPtr ctx)
   };
   return true;
 }
+
 /**
-* Checks the state of all the ergisters and hardware to
+* Checks the state of all the registers and hardware to
 * see, if an interrupt must be triggered or handled or
 * whatsoever. For the timers, the implementation followed
 * the documentation of the original CIA chip.
@@ -230,10 +230,9 @@ boolean memReadCIA(TContextPtr ctx)
 * TODO:
 * Clock stuff not implemented.
 */
-void checkCIA(TContextPtr ctx) {
-  if (ctx->cia.irq_active) return;
+void checkTimer(TContextPtr ctx) {
   if (ctx->cia.timer_a_running) {
-    //Serial.printf("CIA: Timer a is running: %04x [%03d]", ctx->cia.timer_a_counter, ctx->cia.mask);
+    //Serial.printf("CIA: Timer a is running: %04x [%03d]", ctx->cia.timer_a_counter, ctx->cia.enabled_interrupts);
     if (ctx->cia.timer_a_counter == 0) {
       Serial.printf("Time A is up. CIA_CRA: 0xdc0e = 0x%02x\n",ctx->memory[REG_CIA_CRA]);
       // Next decrement would generate an underflow (in a signed value)
@@ -249,16 +248,15 @@ void checkCIA(TContextPtr ctx) {
         Serial.println("Restarting timer A. Not actively stopping.");
         ctx->cia.timer_a_counter = ctx->cia.timer_a_start_value;
       };
-      Serial.printf("IRQ Mask: %02x\n", ctx->cia.mask);
-      if (ctx->cia.mask & TIMER_A_INTERRUPT_FLAG)
+      Serial.printf("IRQ Mask: %02x\n", ctx->cia.enabled_interrupts);
+      if (ctx->cia.enabled_interrupts & TIMER_A_INTERRUPT_FLAG)
       {
         // Timer A interrupts are enabled
         // Setting the source of the IRQ
-        ctx->cia.flags |= TIMER_A_INTERRUPT_FLAG;
+        ctx->cia.raised_interrupts |= TIMER_A_INTERRUPT_FLAG;
         // Now trigger the interrupt, by pulling IRQB low.
         // It will stay low, until the IRQ has been aknowledged
         Serial.println("BOOOOOOM. Timer A has underflow.");
-        trigger6502IRQ(ctx);
       }
       else
       {
@@ -272,9 +270,12 @@ void checkCIA(TContextPtr ctx) {
     }
   };
 
+  // -----------------------------------------------
+  // Timer B
+  // -----------------------------------------------
   if (ctx->cia.timer_b_running)
   {
-    // Serial.printf("CIA: Timer B is running: %04x [%03d]", ctx->cia.timer_B_counter, ctx->cia.mask);
+    // Serial.printf("CIA: Timer B is running: %04x [%03d]", ctx->cia.timer_B_counter, ctx->cia.enabled_interrupts);
     if (ctx->cia.timer_b_counter == 0)
     {
       Serial.printf("Time B is up. CIA_CRB: 0xdc0f = 0x%02x\n", ctx->memory[REG_CIA_CRB]);
@@ -291,19 +292,15 @@ void checkCIA(TContextPtr ctx) {
         Serial.println("Restarting timer B. Not actively stopping.");
         ctx->cia.timer_b_counter = ctx->cia.timer_b_start_value;
       };
-      Serial.printf("IRQ Mask: %02x\n", ctx->cia.mask);
-      if (ctx->cia.mask & TIMER_A_INTERRUPT_FLAG)
+      Serial.printf("IRQ Mask: %02x\n", ctx->cia.enabled_interrupts);
+      if (ctx->cia.enabled_interrupts & TIMER_A_INTERRUPT_FLAG)
       {
         // Timer A interrupts are enabled
         // Setting the source of the IRQ
-        ctx->cia.flags |= TIMER_B_INTERRUPT_FLAG;
+        ctx->cia.raised_interrupts |= TIMER_B_INTERRUPT_FLAG;
         // Now trigger the interrupt, by pulling IRQB low.
         // It will stay low, until the IRQ has been aknowledged
-        Serial.println("BOOOOOOM. Timer B has underflow.");
-        trigger6502IRQ(ctx);
-      }
-      else
-      {
+      } else {
         Serial.println("Timer B underflow, but IRQ not enabled.");
       }
     }
@@ -312,8 +309,24 @@ void checkCIA(TContextPtr ctx) {
       // At this point we know: counter > 0.
       ctx->cia.timer_b_counter--;
     }
-
-    // TODO: Check for serial (keyboard)
-    // TODO check for screenupdate (rasterinterrupt)
   };
+}
+
+void raiseFrameRequest(TContextPtr ctx) {
+  ctx->cia.raised_interrupts |= FRAME_INTERRUPT_FLAG;
+}
+
+void checkCIA(TContextPtr ctx) {
+  // When an interrupt is active (aka IRQB low)
+  // return whithout further checks.
+  // So interrups may not happen during interrupts. 
+  if (ctx->cia.irq_active) return;
+  if (!ctx->cia.enabled_interrupts) return;
+  checkTimer(ctx);
+
+  if (ctx->cia.enabled_interrupts & ctx->cia.raised_interrupts) {
+    trigger6502IRQ(ctx);
+  } else {
+    ctx->cia.raised_interrupts = 0;
+  }
 }

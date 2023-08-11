@@ -18,7 +18,17 @@
     jsr print_text_
 }
 
-                .const AMBER        = 178
+// Colors
+.const AMBER                    = 178
+
+// CIA Contants
+.const TIMER_A_INTERRUPT_FLAG   = $01
+.const TIMER_B_INTERRUPT_FLAG   = $02
+.const FRAME_INTERRUPT_FLAG     = $04
+.const KBD_INTERRUPT_FLAG       = $08
+
+.const CIA_SET_FLAGS            = $80
+
 
 /* ============================================================================
                 MAIN PROGRAM
@@ -28,13 +38,13 @@
 start:          ldx #$ff    // Set the stackpointer to
                 txs         // highest possible position.
 
-                // Installing main IRQ service routine
+                // Sett isr vector for IRQ
                 lda #<main_isr
                 sta $fffe 
                 lda #>main_isr
                 sta $ffff
 
-                // Setting vector for nmi 
+                // Setting isr vector for NMI 
                 lda #<main_isr
                 sta $fffa 
                 lda #>main_isr
@@ -42,8 +52,12 @@ start:          ldx #$ff    // Set the stackpointer to
 
                 EnableCursorAutoAdjustment()
 
-                jsr debug_register_
-                jsr setup_timer
+                // Enable Frame IRQ
+                lda #(CIA_SET_FLAGS | FRAME_INTERRUPT_FLAG)
+                sta $dc0d
+
+                // jsr debug_register_
+                // jsr setup_timer
                 SetCursorI(0,0)
                 SetForgroundColorI(208)
                 PrintText(border_top)
@@ -129,7 +143,7 @@ main_isr:
             lda $dc0d  // Clear/acknowledge the IRQ
             // To see, if it works, lets write something to TIMER B in the CIA, because
             // we will get a debug message in the rp2040 firmware.
-            lda #$ff
+            lda #$aa
             sta $dc06  // Timer B low value            
             pla
             tay 

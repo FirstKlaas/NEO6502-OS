@@ -15,8 +15,8 @@
  * 
  */
 void initKeyboard(TContextPtr ctx) {
-    ctx->reg.KBD = 0x00;
-    ctx->reg.KBDCR = 0x00;
+    ctx->memory[KBD] = 0x00;
+    ctx->memory[KBDCR] = 0x00;
     #ifdef DEBUG_KEYBOARD
     Serial.println("Keyboard initlialized.");
     #endif
@@ -30,10 +30,10 @@ void initKeyboard(TContextPtr ctx) {
 **/
 boolean readKeyboard(TContextPtr ctx) {
     if (ctx->address == REG_KBD_ADDR) {
-      ctx->data = ctx->reg.KBD;
+      ctx->data = ctx->memory[KBD];
       // Reading the register value also clears the
       // IRQ flag (if set) in the control register.
-      ctx->reg.KBDCR &= 0x7f;
+      ctx->memory[KBDCR] &= 0x7f;
       #ifdef DEBUG_KEYBOARD
       Serial.printf("readKeyboard: Key value read (0x%02X) and IRG flag cleared (0x%02X)", ctx->data, ctx->reg.KBDCR);
       #endif
@@ -41,7 +41,7 @@ boolean readKeyboard(TContextPtr ctx) {
     };
 
     if (ctx->address == REG_KBDCR_ADDR) {
-      ctx->data = ctx->reg.KBDCR;
+      ctx->data = ctx->memory[KBDCR];
       return true;
     };
 
@@ -52,7 +52,7 @@ boolean readKeyboard(TContextPtr ctx) {
 
 inline __attribute__((always_inline))
 bool irqSet(TContextPtr h) {
-  return (h->reg.KBDCR & REG_KBD_IRQ_FLAG);  
+  return (h->memory[KBDCR] & REG_KBD_IRQ_FLAG);  
 }
 
 inline __attribute__((always_inline))
@@ -71,7 +71,7 @@ boolean writeKeyboard(TContextPtr ctx) {
       // In any case we will return true, to indicate that the
       // write request has been handled.
       if (irqClear(ctx)) {
-        ctx->reg.KBD = ctx->data;
+        ctx->memory[KBD] = ctx->data;
       } else {
         #ifdef DEBUG_KEYBOARD
         Serial.println("writeKeyboard: Could not write to keyboard register, as the irg for existing key data is still unhandled.");
@@ -84,7 +84,7 @@ boolean writeKeyboard(TContextPtr ctx) {
     // Bit 7 (the IRQ bit) is read only. Therefore
     // it is left changed.
     if (ctx->address == REG_KBDCR_ADDR) {
-      ctx->reg.KBDCR = ((ctx->data & 0x7f) | (ctx->data & 0x80));
+      ctx->memory[KBDCR] = ((ctx->data & 0x7f) | (ctx->data & 0x80));
       return true;
     };
 
@@ -107,14 +107,14 @@ void checkForKeyPressed(TContextPtr ctx) {
         // Not yet implemented. Code fpr ^R is 0x12
 
         // Test, if the interrupt has been cleared? 
-        if ((ctx->reg.KBDCR & FLAG_UNCONSUMED_KEY) == ~FLAG_UNCONSUMED_KEY) {
+        if ((ctx->memory[KBDCR] & FLAG_UNCONSUMED_KEY) == ~FLAG_UNCONSUMED_KEY) {
             // There is no unconsumed character
             noInterrupts();
-            ctx->reg.KBD = Serial.read();
-            ctx->reg.KBDCR |= FLAG_UNCONSUMED_KEY;
+            ctx->memory[KBD] = Serial.read();
+            ctx->memory[KBDCR] |= FLAG_UNCONSUMED_KEY;
             interrupts();
             #ifdef DEBUG_KEYBOARD
-            Serial.printf("checkForKeyPressed: Key pressed. Code is [%d] (0x%02X)\n", ctx->reg.KBD, ctx->reg.KBD);
+            Serial.printf("checkForKeyPressed: Key pressed. Code is [%d] (0x%02X)\n", ctx->memory[KBD], ctx->memory[KBD]);
             #endif
         } else {
             #ifdef DEBUG_KEYBOARD

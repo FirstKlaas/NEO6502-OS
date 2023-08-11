@@ -41,9 +41,6 @@ void signalTest() {
 
 
 void setup() {
-  //signalTest();
-
-
   uint8_t cycle(0);
   Serial.begin(9600);
   while (!Serial && millis() < 10000UL);
@@ -70,11 +67,11 @@ void loop() {
   pinMode(uP_CLOCKCYCLE_PIN, OUTPUT);
   tick6502(ctxPtr);
   gpio_put(uP_CLOCKCYCLE_PIN, false);
-  checkCIA(ctxPtr);
   if ((millis() - lastClockTS) >= FRAMETIME) {
-    animateAlien(ctxPtr);
+    lastClockTS = millis();
+    raiseFrameRequest(ctxPtr);
     drawSprites(ctxPtr);
     updateDisplay();
-    lastClockTS = millis();
   }
+  checkCIA(ctxPtr);
 }
