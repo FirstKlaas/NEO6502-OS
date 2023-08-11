@@ -31,7 +31,7 @@ void requestFrameIinterrupt(TContextPtr ctx) {
   // When there is an unacknowledged IRQ,
   // ignore the request.
   if (ctx->cia.irq_active) return;
-  ctx->cia.flags |= FRAME_INTERRUPT_FLAG;
+  ctx->cia.raised_interrupts |= FRAME_INTERRUPT_FLAG;
 }
 
 inline __attribute__((always_inline)) void trigger6502IRQ(TContextPtr ctx)

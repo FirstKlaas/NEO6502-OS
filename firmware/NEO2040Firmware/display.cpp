@@ -425,15 +425,3 @@ boolean memWriteDisplayRegister(TContextPtr ctx)
   }
   return true;
 }
-
-void animateAlien(TContextPtr ctx)
-{
-  uint8_t color = screendata.sdb.color[0];
-  ctx->reg.DISCR |= 0x40;
-  screendata.sdb.flags[0] |= 0x80;
-  screendata.sdb.color[0] = BLACK;
-  drawSprites(ctx);
-  screendata.sdb.color[0] = color;
-  screendata.sdb.xpos[0]++;
-  screendata.needsRefresh++;
-}
