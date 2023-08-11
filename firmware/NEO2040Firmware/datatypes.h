@@ -40,6 +40,7 @@ typedef struct HardwareType_ {
   //TRegister reg;
   CIA_t cia; 
   unsigned long clock_cycle;
+  unsigned long frame_number;
 } TContext, *TContextPtr;
 
 #endif

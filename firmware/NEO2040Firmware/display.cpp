@@ -180,8 +180,6 @@ void initDisplay(TContextPtr ctx)
   display.setTextWrap(false);
   display.swap(false, true); // Duplicate same palette into front & back buffers
   screendata.needsRefresh = 1;
-  display.setCursor(1, 0);
-  setColor(255);
 };
 
 void setCursor(TContextPtr ctx, uint8_t x, uint8_t y)
@@ -230,11 +228,16 @@ void getCursorY(TContextPtr ctx)
   ctx->memory[DIS00] = screendata.currentYpos;
 }
 
+void clearDisplay() {
+  display.fillScreen(4);
+}
+
 void updateDisplay()
 {
   // screendata.needsRefresh
   if (true)
   {
+
     display.swap(true, false);
   };
   screendata.needsRefresh = 0;
@@ -301,13 +304,21 @@ void executeCommand(TContextPtr ctx)
     screendata.sdb.data_lo = screendata.sdb.height + screendata.sdb.count;
     screendata.sdb.data_hi = screendata.sdb.data_lo + screendata.sdb.count;
 
+
+    screendata.sdb.flags[0] = 0x80;
+    screendata.sdb.flags[1] = 0x80;
+    
+    //#ifdef DEBUG_DISPLAY
     Serial.printf(
-        "Sprite initalisation: Address %04x | Count %02d | width %02d | height %02d\n",
+        "Sprite initalisation: Address %04x | Count %02d | width %02d | height %02d | flags %02x | color %02x\n",
         screendata.sdb.address,
         screendata.sdb.count,
         screendata.sdb.width[0],
-        screendata.sdb.height[0]);
-
+        screendata.sdb.height[0],
+        screendata.sdb.flags[0],
+        screendata.sdb.color[0]
+        );
+    //#endif
     uint16_t offset = getSpriteOffset(ctx, 0);
   };
   break;
@@ -360,10 +371,7 @@ getSpriteColor(uint8_t index)
 
 void drawSprites(TContextPtr ctx)
 {
-  setCursor(ctx, 1, 18);
-  writeHexByte(ctx, ctx->memory[DISCR]);
-
-  if (ctx->memory[DISCR] & 0x40)
+  if (true) //ctx->memory[DISCR] & 0x40)
   {
     for (uint8_t i = 0; i < screendata.sdb.count; i++)
     {
@@ -375,8 +383,8 @@ void drawSprites(TContextPtr ctx)
             getSpriteDataPtr(ctx, i),
             getSpriteWidth(i),
             getSpriteHeight(i),
-            29);
-      };
+            getSpriteColor(i));
+      }
     };
     screendata.needsRefresh++;
   };

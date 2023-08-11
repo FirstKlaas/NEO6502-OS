@@ -105,7 +105,7 @@ def write_loader_function(out, segments):
 
 if __name__ == "__main__":
     p = Path("../../assembler/")
-    with open("../../firmware/NEO2040Firmware/kernel.cpp", "w") as out:
+    with open("kernel.cpp", "w") as out:
         gen_msg = "// THIS FILE IS AUTO GENERATED. DO NOT CHANGE\n//\n\n"
         out.write(gen_msg)
         out.write("#include <pico/stdlib.h>\n")

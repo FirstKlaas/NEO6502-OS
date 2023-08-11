@@ -5,7 +5,7 @@
 #include "datatypes.h"
 
 #define FRAMERATE 25  // frames per sec
-#define FRAMETIME 10  // msec
+#define FRAMETIME 50  // msec
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
 #define FONT_CHAR_WIDTH 6
@@ -88,6 +88,7 @@ void updateDisplay();
 void printWelcomeMsg(TContextPtr ctx);
 */
 void updateDisplay();
+void clearDisplay();
 void drawSprites(TContextPtr ctx);
 
 boolean memReadDisplayRegister(TContextPtr ctx);

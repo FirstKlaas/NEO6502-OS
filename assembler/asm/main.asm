@@ -19,7 +19,7 @@
 }
 
 // Colors
-.const AMBER                    = 178
+.const AMBER                    = 32
 
 // CIA Contants
 .const TIMER_A_INTERRUPT_FLAG   = $01
@@ -59,14 +59,14 @@ start:          ldx #$ff    // Set the stackpointer to
                 // jsr debug_register_
                 // jsr setup_timer
                 SetCursorI(0,0)
-                SetForgroundColorI(208)
+                SetForgroundColorI(AMBER)
                 PrintText(border_top)
                 SetCursorI(0,2)
-                SetForgroundColorI(208)
+                SetForgroundColorI(AMBER)
                 PrintText(border_bottom)
 
                 SetCursorI(1,1)
-                SetForgroundColorI(233)
+                SetForgroundColorI(AMBER)
                 PrintText(text_bar)
 
                 SetForgroundColorI(AMBER)
@@ -110,6 +110,7 @@ welcome:        .encoding "ascii"
                 .text "NE/OS v0.1 - Kernel Size 974 bytes"
                 .byte 0
 
+                * = $0A00 "ISR"
 /*  ====================================================================================
     MAIN ISR ROUTINE
 
@@ -135,21 +136,30 @@ welcome:        .encoding "ascii"
     ------------------------------------------------------------------------------------
 */
 main_isr:   
-            sei
             pha
             txa 
             pha 
             tya 
             pha 
-            lda $dc0d  // Clear/acknowledge the IRQ
-            // To see, if it works, lets write something to TIMER B in the CIA, because
-            // we will get a debug message in the rp2040 firmware.
-            lda #$aa
-            sta $dc06  // Timer B low value            
+            lda $dc0d  // Clear/acknowledge the IRQ 
+            ldx SPRITE_XPOS
+            inx
+            inx
+            stx SPRITE_XPOS
+            stx SPRITE_XPOS+1
+            stx SPRITE_XPOS+2
+            stx SPRITE_XPOS+3
+            stx SPRITE_XPOS+4
+            stx SPRITE_XPOS+5
+            stx SPRITE_XPOS+6
+            stx SPRITE_XPOS+7
+            stx SPRITE_XPOS+8
+            stx SPRITE_XPOS+9
+            stx SPRITE_XPOS+10
+            stx SPRITE_XPOS+11
             pla
             tay 
             pla 
             tax 
             pla
-            cli 
             rti

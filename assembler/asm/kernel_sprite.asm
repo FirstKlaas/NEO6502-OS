@@ -1,4 +1,4 @@
-.const SPRITE_ENABLE_FLAG = $40
+.const SPRITE_ENABLE_FLAG = $C0
 
 .macro SetSpriteAddress_IM(index, address) {
     ldx #index
@@ -44,9 +44,31 @@
 }
 
 init_sprites_:  SetSpriteAddress_IM(0, SPACE_ALIEN_A)
-                SetSpriteAddress_IM(1, SPACE_ALIEN_B)
+                SetSpriteAddress_IM(1, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(2, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(3, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(4, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(5, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(6, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(7, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(8, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(9, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(10, SPACE_ALIEN_A)
+                SetSpriteAddress_IM(11, SPACE_ALIEN_A)
+                
                 EnableSprite_I(0)
                 EnableSprite_I(1)
+                EnableSprite_I(2)
+                EnableSprite_I(3)
+                EnableSprite_I(4)
+                EnableSprite_I(5)
+                EnableSprite_I(6)
+                EnableSprite_I(7)
+                EnableSprite_I(8)
+                EnableSprite_I(9)
+                EnableSprite_I(10)
+                EnableSprite_I(11)
+
                 // Init the sprite definition block
                 lda #<SPRITE_DEFINITON_BLOCK
                 sta DIS_00
@@ -55,7 +77,7 @@ init_sprites_:  SetSpriteAddress_IM(0, SPACE_ALIEN_A)
                 lda #32                 // Set number of sprites
                 sta DIS_02
                 lda #CMD_SET_SDB        // Set command
-                sta DISCMD              // Write the command. Will raise the irq                                         
+                sta DISCMD              //                                          
                 lda DISCR
                 ora #$80
                 sta DISCR               // Raise the IRQ flag
@@ -73,6 +95,25 @@ SPACE_ALIEN_A:      .byte %00000010, %01000000
                     .byte %00000010, %01000000
                     .byte %00000110, %01100000
 
+SPACE_ALIEN_A2:     .byte %00000000, %00001100, %00110000, %00000000
+                    .byte %00000000, %00001100, %00110000, %00000000
+                    .byte %00000000, %00111111, %11111100, %00000000
+                    .byte %00000000, %00111111, %11111100, %00000000
+                    .byte %00000000, %11111111, %11111111, %00000000
+                    .byte %00000000, %11111111, %11111111, %00000000
+                    .byte %00000011, %11110011, %11001111, %11000000
+                    .byte %00000011, %11110011, %11001111, %11000000
+                    .byte %00000011, %00111111, %11111100, %11000000
+                    .byte %00000011, %00111111, %11111100, %11000000
+                    .byte %00000011, %00111111, %11111100, %11000000
+                    .byte %00000011, %00111111, %11111100, %11000000
+                    .byte %00000000, %00001100, %00110000, %00000000
+                    .byte %00000000, %00001100, %00110000, %00000000
+                    .byte %00000000, %00111100, %00111100, %00000000
+                    .byte %00000000, %00111100, %00111100, %00000000
+
+
+
 SPACE_ALIEN_B:      .byte %00000000, %00000000
                     .byte %00000100, %01000000
                     .byte %00000011, %10000000
@@ -83,33 +124,33 @@ SPACE_ALIEN_B:      .byte %00000000, %00000000
                     .byte %00001010, %10100000
 
 SPRITE_DEFINITON_BLOCK:
-SPRITE_FLAGS:       .byte $40, $40, $00, $00, $00, $00, $00, $00  // Sprite 00-07
-                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+SPRITE_FLAGS:       .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 00-07
+                    .byte $80, $80, $80, $00, $00, $00, $00, $00  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
-SPRITE_XPOS:        .byte $10, $10, $00, $00, $00, $00, $00, $00  // Sprite 00-07
-                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+SPRITE_XPOS:        .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 00-07
+                    .byte $10, $10, $10, $00, $00, $00, $00, $00  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
-SPRITE_YPOS:        .byte $40, $50, $00, $00, $00, $00, $00, $00  // Sprite 00-07
-                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+SPRITE_YPOS:        .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 00-07
+                    .byte $90, $a0, $00, $00, $00, $00, $00, $00  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
-SPRITE_COLOR:       .byte $0a, $0d, $00, $00, $00, $00, $00, $00  // Sprite 00-07
-                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+SPRITE_COLOR:       .byte $0a, $0b, $0c, $0d, $0e, $0f, $10, $11  // Sprite 00-07
+                    .byte $12, $13, $00, $00, $00, $00, $00, $00  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
-SPRITE_WIDTH:       .byte $10, $10, $00, $00, $00, $00, $00, $00  // Sprite 00-07
-                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+SPRITE_WIDTH:       .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 00-07
+                    .byte $10, $10, $00, $00, $00, $00, $00, $00  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
-SPRITE_HEIGHT:      .byte $08, $08, $00, $00, $00, $00, $00, $00  // Sprite 00-07
-                    .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+SPRITE_HEIGHT:      .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 00-07
+                    .byte $08, $08, $00, $00, $00, $00, $00, $00  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
 

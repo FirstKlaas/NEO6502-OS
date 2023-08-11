@@ -56,13 +56,6 @@ void readFromMemory(TContextPtr ctx)
     Serial.printf("[R] memory[%04X] -> %02X\n", ctx->address, ctx->memory[ctx->address]);
     #endif
     ctx->data = ctx->memory[ctx->address];
-    if (ctx->address > 0xff00) {
-      Serial.printf("[R] memory[%04X] -> %02X\n", ctx->address, ctx->memory[ctx->address]);
-      if (ctx->address == 0xfffc) Serial.println("Fetching program vector lowbyte.");
-      if (ctx->address == 0xfffd) Serial.println("Fetching program vector highbyte.");
-      if (ctx->address == 0xfffe) Serial.println("Fetching ISR vector lowbyte.");
-      if (ctx->address == 0xffff) Serial.println("Fetching ISR vector highbyte.");
-    };
 }
 
 /**
