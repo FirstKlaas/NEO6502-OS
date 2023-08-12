@@ -135,41 +135,52 @@ welcome:        .encoding "ascii"
     @last modified  : 08.08.2023 
     ------------------------------------------------------------------------------------
 */
-main_isr:   
+main_isr:  { 
             pha
             txa 
             pha 
             tya 
             pha
-            
+            lda SPRITE_XPOS     // Get the x position of the leftmost sprite
+            cmp #10             // 10 is the minimum x position
+            bpl check_right     // xpos - 10 >= 0 => check right border 
+left_underflow:                 
+            lda #1
+            sta operation+1
+            jmp go_down 
+check_right:
+            lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
+            cmp #$ef            // Max xpos = 239
+            bmi move            // if xpos - 239 < 0 => move
+right_overflow:
+            lda $ff 
+            sta operation+1
+go_down:    // Bring all enemies on pixel down
+            lda SPRITE_YPOS
+            clc
+            adc #1              // New y position
+            ldy #7
+yloop:                  
+            sta SPRITE_YPOS,y 
+            dey
+            bpl yloop
+move:               
             ldy #7              // Y is the sprite index. We have 8 sprites in a row 
-!move_right:
+loop:
             lda SPRITE_XPOS,y   // Load current x position of the sprite   
             clc
 operation:  adc #1              // Add the speed
-check_left: cmp #10             // 10 is the minimum value for the left side
-            bpl check_right     // There is still room
-            pha 
-            lda #$69            // ADC command
-            sta operation
-            pla 
-            jmp keep_op
-check_right:
-            cmp #125
-            bmi keep_op
-            pha 
-            lda #$e9            // SBC command
-            sta operation
-            pla 
 keep_op:    sta SPRITE_XPOS,y   // save the new xpos 
             sta SPRITE_XPOS+8,y // Also for the second row
+            sta SPRITE_XPOS+16,y // Also for the second row
             dey
+            bpl move
 
-            bpl !move_right-
-!exit:      lda $dc0d           // Acknowledge the IRQ            
+            lda $dc0d           // Acknowledge the IRQ            
             pla
             tay 
             pla 
             tax 
             pla
             rti
+}
