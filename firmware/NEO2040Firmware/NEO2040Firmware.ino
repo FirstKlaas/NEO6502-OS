@@ -50,15 +50,15 @@ void setup() {
 }
 
 void loop() {
-  pinMode(uP_CLOCKCYCLE_PIN, OUTPUT);
   tick6502(ctxPtr);
-  gpio_put(uP_CLOCKCYCLE_PIN, false);
   if ((millis() - lastClockTS) >= FRAMETIME) {
+    gpio_put(uP_CLOCKCYCLE_PIN, true);
     lastClockTS = millis();
     clearDisplay();
     raiseFrameRequest(ctxPtr);
     drawSprites(ctxPtr);
     updateDisplay();
+    gpio_put(uP_CLOCKCYCLE_PIN, false);
   }
   checkCIA(ctxPtr);
 }

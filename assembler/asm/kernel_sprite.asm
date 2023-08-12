@@ -43,31 +43,14 @@
     SetSpriteColor_IA(index)
 }
 
-init_sprites_:  SetSpriteAddress_IM(0, SPACE_ALIEN_A)
-                SetSpriteAddress_IM(1, SPACE_ALIEN_A)
-                SetSpriteAddress_IM(2, SPACE_ALIEN_A)
-                SetSpriteAddress_IM(3, SPACE_ALIEN_A)
-                SetSpriteAddress_IM(4, SPACE_ALIEN_A)
-                SetSpriteAddress_IM(5, SPACE_ALIEN_A)
-                SetSpriteAddress_IM(6, SPACE_ALIEN_A)
-                SetSpriteAddress_IM(7, SPACE_ALIEN_A)
-                SetSpriteAddress_IM(8, SPACE_ALIEN_B)
-                SetSpriteAddress_IM(9, SPACE_ALIEN_B)
-                SetSpriteAddress_IM(10, SPACE_ALIEN_B)
-                SetSpriteAddress_IM(11, SPACE_ALIEN_B)
+init_sprites_:  .for (var i=0; i<8; i++) {
+                    SetSpriteAddress_IM(i, SPACE_ALIEN_A)
+                    SetSpriteAddress_IM(i+8, SPACE_ALIEN_B)
+                }
                 
-                EnableSprite_I(0)
-                EnableSprite_I(1)
-                EnableSprite_I(2)
-                EnableSprite_I(3)
-                EnableSprite_I(4)
-                EnableSprite_I(5)
-                EnableSprite_I(6)
-                EnableSprite_I(7)
-                EnableSprite_I(8)
-                EnableSprite_I(9)
-                EnableSprite_I(10)
-                EnableSprite_I(11)
+                .for (var i=0;i<16;i++) { 
+                    EnableSprite_I(i)
+                }
 
                 // Init the sprite definition block
                 lda #<SPRITE_DEFINITON_BLOCK
@@ -125,12 +108,12 @@ SPACE_ALIEN_B:      .byte %00000000, %00000000
 
 SPRITE_DEFINITON_BLOCK:
 SPRITE_FLAGS:       .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 00-07
-                    .byte $80, $80, $80, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
 SPRITE_XPOS:        .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 00-07
-                    .byte $10, $20, $30, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
@@ -140,17 +123,17 @@ SPRITE_YPOS:        .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 00-0
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
 SPRITE_COLOR:       .byte $1f, $23, $2c, $31, $3d, $21, $39, $1f  // Sprite 00-07
-                    .byte $2c, $3d, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $2c, $3d, $31, $39, $23, $21, $2c, $31  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
 SPRITE_WIDTH:       .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 00-07
-                    .byte $10, $10, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
 SPRITE_HEIGHT:      .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 00-07
-                    .byte $08, $08, $00, $00, $00, $00, $00, $00  // Sprite 08-15
+                    .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 08-15
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
 

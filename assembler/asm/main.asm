@@ -140,16 +140,33 @@ main_isr:
             txa 
             pha 
             tya 
-            pha 
+            pha
             
-            lda $dc0d           // Acknowledge the IRQ
-            ldy #7              // Y is the sprite index 
-!loop:      lda SPRITE_XPOS,y   // Load current x position of the sprite   
-            adc #2              // Add the speed
-            sta SPRITE_XPOS,y   // save the 
-            stx SPRITE_XPOS+8,y // Also for the second row
-            bpl !loop-          // As long as the index is >0 repeat
+            ldy #7              // Y is the sprite index. We have 8 sprites in a row 
+!move_right:
+            lda SPRITE_XPOS,y   // Load current x position of the sprite   
+            clc
+operation:  adc #1              // Add the speed
+check_left: cmp #10             // 10 is the minimum value for the left side
+            bpl check_right     // There is still room
+            pha 
+            lda #$69            // ADC command
+            sta operation
+            pla 
+            jmp keep_op
+check_right:
+            cmp #125
+            bmi keep_op
+            pha 
+            lda #$e9            // SBC command
+            sta operation
+            pla 
+keep_op:    sta SPRITE_XPOS,y   // save the new xpos 
+            sta SPRITE_XPOS+8,y // Also for the second row
+            dey
 
+            bpl !move_right-
+!exit:      lda $dc0d           // Acknowledge the IRQ            
             pla
             tay 
             pla 
