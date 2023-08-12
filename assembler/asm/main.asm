@@ -141,22 +141,15 @@ main_isr:
             pha 
             tya 
             pha 
-            lda $dc0d  // Clear/acknowledge the IRQ 
-            ldx SPRITE_XPOS
-            inx
-            inx
-            stx SPRITE_XPOS
-            stx SPRITE_XPOS+1
-            stx SPRITE_XPOS+2
-            stx SPRITE_XPOS+3
-            stx SPRITE_XPOS+4
-            stx SPRITE_XPOS+5
-            stx SPRITE_XPOS+6
-            stx SPRITE_XPOS+7
-            stx SPRITE_XPOS+8
-            stx SPRITE_XPOS+9
-            stx SPRITE_XPOS+10
-            stx SPRITE_XPOS+11
+            
+            lda $dc0d           // Acknowledge the IRQ
+            ldy #7              // Y is the sprite index 
+!loop:      lda SPRITE_XPOS,y   // Load current x position of the sprite   
+            adc #2              // Add the speed
+            sta SPRITE_XPOS,y   // save the 
+            stx SPRITE_XPOS+8,y // Also for the second row
+            bpl !loop-          // As long as the index is >0 repeat
+
             pla
             tay 
             pla 
