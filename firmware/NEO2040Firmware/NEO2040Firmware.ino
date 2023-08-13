@@ -21,11 +21,20 @@
 #include "datatypes.h"
 #include "display.h"
 #include "cia6526.h"
+#include "hardware/timer.h"
+
+volatile uint8_t blip;
 
 static TContext ctx;
 static TContextPtr ctxPtr(&ctx);
+static repeating_timer_t clock_timer;
 
 unsigned long lastClockTS;
+
+bool clock_cycle_callback(struct repeating_timer *t) {
+  blip++;
+  return true;
+}
 
 void setup() {
   Serial.begin(9600);
@@ -42,29 +51,30 @@ void setup() {
   init6502(ctxPtr);
   initCIA(ctxPtr);
 
-  pinMode(uP_CLOCKCYCLE_PIN, OUTPUT);
+  /*
+  gpio_init(uP_CLOCKCYCLE_PIN);
+  gpio_set_dir(uP_CLOCKCYCLE_PIN, true);
+  // pinMode(uP_CLOCKCYCLE_PIN, OUTPUT);
   gpio_put(uP_CLOCKCYCLE_PIN, false);
   pinMode(uP_TICKCYCLE_PIN, OUTPUT);
   gpio_put(uP_TICKCYCLE_PIN, false);
-
+  */
   reset6502();
 
   sleep_ms(2000);
-  Serial.println("Starting programm");
+  Serial.println("Installing clock cycle timer");
+  add_repeating_timer_us(-1000, clock_cycle_callback, ctxPtr, &clock_timer);
 }
 
 void loop() {
-  gpio_put(uP_TICKCYCLE_PIN, true);
   tick6502(ctxPtr);
-  gpio_put(uP_TICKCYCLE_PIN, false);
   if ((millis() - lastClockTS) >= FRAMETIME) {
     lastClockTS = millis();
-    gpio_put(uP_CLOCKCYCLE_PIN, true);
     clearDisplay();
     drawSprites(ctxPtr);
     updateDisplay();
     raiseFrameRequest(ctxPtr);
-    gpio_put(uP_CLOCKCYCLE_PIN, false);
+    Serial.printf("Blip: %03d\n", blip);
   }
   checkCIA(ctxPtr);
   
