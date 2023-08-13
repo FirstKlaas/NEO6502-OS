@@ -164,7 +164,8 @@ yloop:
             sta SPRITE_YPOS,y 
             dey
             bpl yloop
-move:               
+move:       
+            jmp exit   
             ldy #7              // Y is the sprite index. We have 8 sprites in a row 
 loop:
             lda SPRITE_XPOS,y   // Load current x position of the sprite   
@@ -172,10 +173,10 @@ loop:
 operation:  adc #1              // Add the speed
 keep_op:    sta SPRITE_XPOS,y   // save the new xpos 
             sta SPRITE_XPOS+8,y // Also for the second row
-            sta SPRITE_XPOS+16,y // Also for the second row
+            //sta SPRITE_XPOS+16,y // Also for the second row
             dey
-            bpl move
-
+            bpl loop
+exit:
             lda $dc0d           // Acknowledge the IRQ            
             pla
             tay 
