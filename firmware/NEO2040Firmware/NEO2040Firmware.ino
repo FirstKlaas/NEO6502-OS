@@ -5,7 +5,9 @@
 //#include "pico/stdlib.h"
 #define DEBUG
 
-#define uP_CLOCKCYCLE_PIN 28
+#define uP_CLOCKCYCLE_PIN 23
+//#define uP_TICKCYCLE_PIN  22
+
 
 // Board Manager
 // https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
@@ -42,6 +44,8 @@ void setup() {
 
   pinMode(uP_CLOCKCYCLE_PIN, OUTPUT);
   gpio_put(uP_CLOCKCYCLE_PIN, false);
+  //pinMode(uP_TICKCYCLE_PIN, OUTPUT);
+  //gpio_put(uP_TICKCYCLE_PIN, false);
 
   reset6502();
 
@@ -52,13 +56,14 @@ void setup() {
 void loop() {
   tick6502(ctxPtr);
   if ((millis() - lastClockTS) >= FRAMETIME) {
-    gpio_put(uP_CLOCKCYCLE_PIN, true);
+    //gpio_put(uP_CLOCKCYCLE_PIN, true);
     lastClockTS = millis();
     clearDisplay();
-    raiseFrameRequest(ctxPtr);
     drawSprites(ctxPtr);
     updateDisplay();
-    gpio_put(uP_CLOCKCYCLE_PIN, false);
+    raiseFrameRequest(ctxPtr);
+    //gpio_put(uP_CLOCKCYCLE_PIN, false);
   }
   checkCIA(ctxPtr);
+  
 }

@@ -141,13 +141,12 @@ main_isr:  {
             pha 
             tya 
             pha
-            jmp move
-check_left:            
+check_left:           
             lda SPRITE_XPOS     // Get the x position of the leftmost sprite
             cmp #10             // 10 is the minimum x position
             bpl check_right     // xpos - 10 >= 0 => check right border 
 left_underflow:                 
-            lda #1
+            lda #$01
             sta operation+1
             jmp go_down 
 check_right:
@@ -155,15 +154,17 @@ check_right:
             cmp #$ef            // Max xpos = 239
             bmi move            // if xpos - 239 < 0 => move
 right_overflow:
-            lda $ff 
+            lda #$ff 
             sta operation+1
 go_down:    // Bring all enemies on pixel down
-            jmp move
             lda SPRITE_YPOS
             clc
-            adc #1              // New y position
-            ldy #7
+            adc #4              // New y position
+            ldy #24             // Calculate position fpr 24 sprites
 yloop:                  
+            lda SPRITE_YPOS,y 
+            clc
+            adc #4
             sta SPRITE_YPOS,y 
             dey
             bpl yloop
@@ -173,9 +174,9 @@ loop:
             lda SPRITE_XPOS,y   // Load current x position of the sprite   
             clc
 operation:  adc #1              // Add the speed
-keep_op:    sta SPRITE_XPOS,y   // save the new xpos 
+            sta SPRITE_XPOS,y   // save the new xpos 
             sta SPRITE_XPOS+8,y // Also for the second row
-            //sta SPRITE_XPOS+16,y // Also for the second row
+            sta SPRITE_XPOS+16,y // Also for the second row
             dey
             bpl loop
 exit:
