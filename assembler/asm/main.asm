@@ -141,6 +141,8 @@ main_isr:  {
             pha 
             tya 
             pha
+            jmp move
+check_left:            
             lda SPRITE_XPOS     // Get the x position of the leftmost sprite
             cmp #10             // 10 is the minimum x position
             bpl check_right     // xpos - 10 >= 0 => check right border 
@@ -156,6 +158,7 @@ right_overflow:
             lda $ff 
             sta operation+1
 go_down:    // Bring all enemies on pixel down
+            jmp move
             lda SPRITE_YPOS
             clc
             adc #1              // New y position
@@ -165,7 +168,6 @@ yloop:
             dey
             bpl yloop
 move:       
-            jmp exit   
             ldy #7              // Y is the sprite index. We have 8 sprites in a row 
 loop:
             lda SPRITE_XPOS,y   // Load current x position of the sprite   
