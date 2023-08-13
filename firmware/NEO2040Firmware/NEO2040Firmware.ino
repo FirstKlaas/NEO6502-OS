@@ -6,7 +6,7 @@
 #define DEBUG
 
 #define uP_CLOCKCYCLE_PIN 23
-//#define uP_TICKCYCLE_PIN  22
+#define uP_TICKCYCLE_PIN  29
 
 
 // Board Manager
@@ -44,8 +44,8 @@ void setup() {
 
   pinMode(uP_CLOCKCYCLE_PIN, OUTPUT);
   gpio_put(uP_CLOCKCYCLE_PIN, false);
-  //pinMode(uP_TICKCYCLE_PIN, OUTPUT);
-  //gpio_put(uP_TICKCYCLE_PIN, false);
+  pinMode(uP_TICKCYCLE_PIN, OUTPUT);
+  gpio_put(uP_TICKCYCLE_PIN, false);
 
   reset6502();
 
@@ -54,15 +54,17 @@ void setup() {
 }
 
 void loop() {
+  gpio_put(uP_TICKCYCLE_PIN, true);
   tick6502(ctxPtr);
+  gpio_put(uP_TICKCYCLE_PIN, false);
   if ((millis() - lastClockTS) >= FRAMETIME) {
-    //gpio_put(uP_CLOCKCYCLE_PIN, true);
     lastClockTS = millis();
+    gpio_put(uP_CLOCKCYCLE_PIN, true);
     clearDisplay();
     drawSprites(ctxPtr);
     updateDisplay();
     raiseFrameRequest(ctxPtr);
-    //gpio_put(uP_CLOCKCYCLE_PIN, false);
+    gpio_put(uP_CLOCKCYCLE_PIN, false);
   }
   checkCIA(ctxPtr);
   

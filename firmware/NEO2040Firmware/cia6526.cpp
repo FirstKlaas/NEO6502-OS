@@ -9,9 +9,9 @@
 #define IRQ_HIGH  true
 
 #define TIMER_RESTART_FLAG 0x08 // Bit 3  : 00001000
-#define ICR_IRQ_FLAG 0x80       // Bit 7  : 10000000
-#define ICR_NO_IRQ 0x00         //
-#define ICR_SOURCE_MASK 0x7f    // Bit 0-6: 01111111
+#define ICR_IRQ_FLAG       0x80 // Bit 7  : 10000000
+#define ICR_NO_IRQ         0x00 //
+#define ICR_SOURCE_MASK    0x7f // Bit 0-6: 01111111
 
 #define TIMER_A_INTERRUPT_FLAG  0x01
 #define TIMER_B_INTERRUPT_FLAG  0x02
