@@ -1,3 +1,5 @@
+.cpu _65c02
+
 .macro EnableCursorAutoAdjustment() {
     lda DISCR   // Set the auto adjust 
     ora #$0C    // and wrap flag
@@ -135,12 +137,11 @@ welcome:        .encoding "ascii"
     @last modified  : 08.08.2023 
     ------------------------------------------------------------------------------------
 */
-main_isr:  { 
-            pha
-            txa 
+main_isr:  {
             pha 
-            tya 
-            pha
+            phx 
+            phy 
+            lda $dc0d           // Acknowledge the IRQ            
 check_left:           
             lda SPRITE_XPOS     // Get the x position of the leftmost sprite
             cmp #10             // 10 is the minimum x position
@@ -180,11 +181,8 @@ operation:  adc #1              // Add the speed
             dey
             bpl loop
 exit:
-            lda $dc0d           // Acknowledge the IRQ            
-            pla
-            tay 
-            pla 
-            tax 
+            ply
+            plx
             pla
             rti
 }

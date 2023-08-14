@@ -88,48 +88,44 @@
 093f: 00        -         .byte 0
 
 [ISR]
-0a00: 48        - main_isr:pha
-0a01: 8a        -         txa 
-0a02: 48        -         pha 
-0a03: 98        -         tya 
-0a04: 48        -         pha
-0a05: ad 6d e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
-0a08: c9 0a     -         cmp #10             // 10 is the minimum x position
-0a0a: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
-0a0c: a9 01     - left_underflow:lda #$01
-0a0e: 8d 3b 0a  -         sta operation+1
-0a11: 4c 20 0a  -         jmp go_down 
-0a14: ad 74 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
-0a17: c9 ef     -         cmp #$ef            // Max xpos = 239
-0a19: 30 19     -         bmi move            // if xpos - 239 < 0 => move
-0a1b: a9 ff     - right_overflow:lda #$ff 
-0a1d: 8d 3b 0a  -         sta operation+1
-0a20: ad 8d e4  - go_down:lda SPRITE_YPOS
-0a23: 18        -         clc
-0a24: 69 04     -         adc #4              // New y position
-0a26: a0 18     -         ldy #24             // Calculate position fpr 24 sprites
-0a28: b9 8d e4  - yloop:  lda SPRITE_YPOS,y 
-0a2b: 18        -         clc
-0a2c: 69 04     -         adc #4
-0a2e: 99 8d e4  -         sta SPRITE_YPOS,y 
-0a31: 88        -         dey
-0a32: 10 f4     -         bpl yloop
-0a34: a0 07     - move:   ldy #7              // Y is the sprite index. We have 8 sprites in a row 
-0a36: b9 6d e4  - loop:   lda SPRITE_XPOS,y   // Load current x position of the sprite   
-0a39: 18        -         clc
-0a3a: 69 01     - operation:adc #1              // Add the speed
-0a3c: 99 6d e4  -         sta SPRITE_XPOS,y   // save the new xpos 
-0a3f: 99 75 e4  -         sta SPRITE_XPOS+8,y // Also for the second row
-0a42: 99 7d e4  -         sta SPRITE_XPOS+16,y // Also for the second row
-0a45: 88        -         dey
-0a46: 10 ee     -         bpl loop
-0a48: ad 0d dc  - exit:   lda $dc0d           // Acknowledge the IRQ            
+0a00: 48        - main_isr:pha 
+0a01: da        -         phx 
+0a02: 5a        -         phy 
+0a03: ad 0d dc  -         lda $dc0d           // Acknowledge the IRQ            
+0a06: ad 6d e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
+0a09: c9 0a     -         cmp #10             // 10 is the minimum x position
+0a0b: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
+0a0d: a9 01     - left_underflow:lda #$01
+0a0f: 8d 3c 0a  -         sta operation+1
+0a12: 4c 21 0a  -         jmp go_down 
+0a15: ad 74 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
+0a18: c9 ef     -         cmp #$ef            // Max xpos = 239
+0a1a: 30 19     -         bmi move            // if xpos - 239 < 0 => move
+0a1c: a9 ff     - right_overflow:lda #$ff 
+0a1e: 8d 3c 0a  -         sta operation+1
+0a21: ad 8d e4  - go_down:lda SPRITE_YPOS
+0a24: 18        -         clc
+0a25: 69 04     -         adc #4              // New y position
+0a27: a0 18     -         ldy #24             // Calculate position fpr 24 sprites
+0a29: b9 8d e4  - yloop:  lda SPRITE_YPOS,y 
+0a2c: 18        -         clc
+0a2d: 69 04     -         adc #4
+0a2f: 99 8d e4  -         sta SPRITE_YPOS,y 
+0a32: 88        -         dey
+0a33: 10 f4     -         bpl yloop
+0a35: a0 07     - move:   ldy #7              // Y is the sprite index. We have 8 sprites in a row 
+0a37: b9 6d e4  - loop:   lda SPRITE_XPOS,y   // Load current x position of the sprite   
+0a3a: 18        -         clc
+0a3b: 69 01     - operation:adc #1              // Add the speed
+0a3d: 99 6d e4  -         sta SPRITE_XPOS,y   // save the new xpos 
+0a40: 99 75 e4  -         sta SPRITE_XPOS+8,y // Also for the second row
+0a43: 99 7d e4  -         sta SPRITE_XPOS+16,y // Also for the second row
+0a46: 88        -         dey
+0a47: 10 ee     -         bpl loop
+0a49: 7a        - exit:   ply
+0a4a: fa        -         plx
 0a4b: 68        -         pla
-0a4c: a8        -         tay 
-0a4d: 68        -         pla 
-0a4e: aa        -         tax 
-0a4f: 68        -         pla
-0a50: 40        -         rti
+0a4c: 40        -         rti
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_

@@ -289,16 +289,13 @@ void checkTimer(TContextPtr ctx) {
   // -----------------------------------------------
   if (ctx->cia.timer_b_running)
   {
-    // Serial.printf("CIA: Timer B is running: %04x [%03d]", ctx->cia.timer_B_counter, ctx->cia.enabled_interrupts);
     if (ctx->cia.timer_b_counter == 0)
     {
-      //Serial.printf("Time B is up. CIA_CRB: 0xdc0f = 0x%02x\n", ctx->memory[REG_CIA_CRB]);
       // Next decrement would generate an underflow (in a signed value)
       // Trigger IRQ (if endabled)
       // Check, if we need to restart the timer.
       if (ctx->memory[REG_CIA_CRB] & TIMER_RESTART_FLAG)
       {
-        //Serial.println("Stopping timer B");
         ctx->cia.timer_b_running = false;
       }
       else
@@ -340,6 +337,7 @@ void checkCIA(TContextPtr ctx) {
   // So interrups may not happen during interrupts. 
   if (ctx->cia.irq_active) return;
   if (!ctx->cia.enabled_interrupts) return;
+
   checkTimer(ctx);
 
   if (ctx->cia.enabled_interrupts & ctx->cia.raised_interrupts) {
