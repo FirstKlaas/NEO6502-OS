@@ -269,8 +269,14 @@ const TSpritePtr getSprite(const TContextPtr ctx)
   return screendata.sprites + (ctx->memory[DIS00] & 0x1f);
 }
 
+inline __attribute__((always_inline))
+uint16_t word(uint8_t* p) {
+  return (p[0] | (p[1] << 8));
+}
+
 void executeCommand(TContextPtr ctx)
 {
+  static uint8_t* params = ctx->memory + DIS00; 
 
   switch (ctx->memory[DISCMD])
   {
@@ -301,7 +307,15 @@ void executeCommand(TContextPtr ctx)
   case CMD_GET_BG_COLOR:
     ctx->memory[DIS00] = screendata.currentBgColor;
     break;
-
+  case CMD_DRAW_HLINE:
+    display.drawFastHLine(
+      word(params),
+      params[2],
+      word(params+3),
+      params[4]
+    );
+    screendata.needsRefresh++;
+    break;
 
   case CMD_SET_SDB:
   {
