@@ -47,18 +47,21 @@ enum {
   CMD_GET_Y_OFFSET = 0x0A,
   CMD_SET_X_OFFSET = 0x0B,
   CMD_SET_Y_OFFSET = 0x0C,
-  CMD_WRITE_CHAR = 0x0D,
-  CMD_FILL_SCREEN = 0x0E,
+  CMD_WRITE_CHAR   = 0x0D,
+  CMD_FILL_SCREEN  = 0x0E,
   CMD_CLEAR_SCREEN = 0x0F,
-  CMD_SCROLL_UP = 0x10,
-  CMD_SCROLL_DOWN = 0x11,
-  CMD_SHOW_CURSOR = 0x12,
-  CMD_HIDE_CURSOR = 0x13,
+  CMD_SCROLL_UP    = 0x10,
+  CMD_SCROLL_DOWN  = 0x11,
+  CMD_SHOW_CURSOR  = 0x12,
+  CMD_HIDE_CURSOR  = 0x13,
   // Graphics Commands
-  CMD_DRAW_LINE = 0x14,
-  CMD_DRAW_HLINE = 0x15,
-  CMD_DRAW_VLINE = 0x16,
-  CMD_SET_SDB = 0x17,  // SET Sprite Definition Block Pointer
+  CMD_DRAW_LINE    = 0x14,
+  CMD_DRAW_HLINE   = 0x15,
+  CMD_DRAW_VLINE   = 0x16,
+  CMD_SET_SDB      = 0x17,  // SET Sprite Definition Block Pointer
+  CMD_GET_BGCOLOR  = 0x18,
+  CMD_SET_BGCOLOR  = 0x19,
+  
 
 
   // Sprite handling

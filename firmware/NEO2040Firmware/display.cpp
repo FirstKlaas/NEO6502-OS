@@ -54,11 +54,12 @@ struct
   uint8_t offset_x; // Left offset in pixel
 
   uint8_t textbuffer[LINES * LINECHARS];
-  uint8_t currentColor;
-  uint8_t currentXpos; // X position in character
-  uint8_t currentYpos; // Y position in character
+  uint8_t currentColor;   // Current foreground color
+  uint8_t currentBgColor; // Current background color
+  uint8_t currentXpos;    // X position in character
+  uint8_t currentYpos;    // Y position in character
 
-  uint32_t needsRefresh; // If > 0: Screen will be updated.
+  uint32_t needsRefresh;  // If > 0: Screen will be updated.
   TSprite sprites[32];
   TSpriteDataBlock sdb;
 } screendata;
@@ -233,7 +234,7 @@ void getCursorY(TContextPtr ctx)
 }
 
 void clearDisplay() {
-  display.fillScreen(4);
+  display.fillScreen(screendata.currentBgColor);
 }
 
 void updateDisplay()
@@ -294,6 +295,13 @@ void executeCommand(TContextPtr ctx)
   case CMD_GET_CURSOR_Y:
     getCursorY(ctx);
     break;
+  case CMD_SET_BG_COLOR:
+    screendata.currentBgColor = ctx->memory[DIS00];
+    break;
+  case CMD_GET_BG_COLOR:
+    ctx->memory[DIS00] = screendata.currentBgColor;
+    break;
+
 
   case CMD_SET_SDB:
   {
