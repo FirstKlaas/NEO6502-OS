@@ -23,8 +23,8 @@ usind the arduino ide 2. Later I want to move to PlatformIO.
 The kernel will be flashed as the "initial memory state" to the rp2040. Therefore the prg files have to be converted to c code. The little python tool 
 takes all the prg files in the folder and created a single c file with a loader function.
 
-# WARNING
-This code is heavily under development and will change permanently. Most of the time, the code will not work. I commit quite often, as I work on different
-computers. SO USE IT AT YOUR OWN RISK.
+> [!WARNING]
+> This code is heavily under development and will change permanently. Most of the time, the code will not work. I commit quite often, as I work on different
+> computers. SO USE IT AT YOUR OWN RISK.
 
 
