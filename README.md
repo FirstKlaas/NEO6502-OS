@@ -1,3 +1,7 @@
+> [!WARNING]
+> This code is heavily under development and will change permanently. Most of the time, the code will not work. I commit quite often, as I work on different
+> computers. SO USE IT AT YOUR OWN RISK.
+
 # NEO6502-OS
 
 This is my approach to write an "operating system" for the 65c02 processor living in the matrix of an rp2040. The code is based on the work of olimex.
@@ -22,9 +26,5 @@ usind the arduino ide 2. Later I want to move to PlatformIO.
 ### Firmware Converter
 The kernel will be flashed as the "initial memory state" to the rp2040. Therefore the prg files have to be converted to c code. The little python tool 
 takes all the prg files in the folder and created a single c file with a loader function.
-
-> [!WARNING]
-> This code is heavily under development and will change permanently. Most of the time, the code will not work. I commit quite often, as I work on different
-> computers. SO USE IT AT YOUR OWN RISK.
 
 
