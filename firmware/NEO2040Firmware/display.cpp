@@ -103,6 +103,10 @@ void initDisplay(TContextPtr ctx)
     for (;;)
       ;
   }
+  // Activate correct codepage
+  // Issue #14
+  display.cp437(true);
+
   screendata.offset_x = 1;
   screendata.offset_y = 1;
 
