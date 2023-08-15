@@ -151,9 +151,8 @@ print_char:     jmp print_char_
 
 .import source "asm/kernel_text_routines.asm"
 .import source "asm/kernel_graphic_primitives.asm"
-.import source "asm/math.asm"
 .import source "asm/kernel_sprite.asm"
-.import source "asm/debug_register.asm"
+.import source "asm/math.asm"
 
 
 /* ----------------------------------------------------------------------------

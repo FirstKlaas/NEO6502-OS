@@ -11,18 +11,14 @@ BCD_LOOKUP_TABLE:
 HTD_IN:     .byte $00, $00
 HTD_OUT:    .byte $00, $00, $00 
 
-bcd_convert_byte: {
-    rts
-}
-
 bcd_convert_word_: {
     sed 
     lda #0
     sta HTD_OUT
     sta HTD_OUT+1
     sta HTD_OUT+2
-    ldx $2d
-loop:
+    ldx #$2d
+!loop:
     asl HTD_IN 
     rol HTD_IN+1
     bcc htd1
@@ -40,7 +36,7 @@ htd1:
     dex
     dex 
     dex 
-    bpl loop 
+    bpl !loop- 
     cld 
     rts
 }

@@ -62,12 +62,17 @@ start:          ldx #$ff    // Set the stackpointer to
                 SetCursorI(2,1)
                 PrintText(welcome)
 
-                lda #123
-                sta DEBUG
+                lda #255
                 sta HTD_IN
-                lda #0
+                lda #255
                 sta HTD_IN+1
+                lda HTD_IN+1
+                sta DEBUG
+                lda HTD_IN
+                sta DEBUG
+                
                 jsr bcd_convert_word_
+                
                 lda HTD_OUT+2
                 sta DEBUG
                 lda HTD_OUT+1
@@ -75,9 +80,8 @@ start:          ldx #$ff    // Set the stackpointer to
                 lda HTD_OUT
                 sta DEBUG
                 
-
                 // Spritetest
-                jsr init_sprites_
+                //jsr init_sprites_
 !end:
                 jmp !end-
             
@@ -199,7 +203,7 @@ yloop:
             bpl yloop
 move:       
             ldy #7              // Y is the sprite index. We have 8 sprites in a row 
-loop:
+!loop:
             lda SPRITE_XPOS,y   // Load current x position of the sprite   
             clc
 operation:  adc #1              // Add the speed
@@ -207,7 +211,7 @@ operation:  adc #1              // Add the speed
             sta SPRITE_XPOS+8,y // Also for the second row
             sta SPRITE_XPOS+16,y // Also for the second row
             dey
-            bpl loop
+            bpl !loop-
 exit:
             lda $dc0d           // Acknowledge the IRQ            
             pla
