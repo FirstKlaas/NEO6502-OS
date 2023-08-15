@@ -72,6 +72,9 @@ void writeToMemory(TContextPtr ctx)
     if (writeKeyboard(ctx)) return;
     if (memWriteDisplayRegister(ctx)) return;
     if (memWriteCIA(ctx)) return;
+    if (ctx->address == 0xd0ff) {
+        Serial.printf("DEBUG REGISTER %02X\n", ctx->data);
+    }
     #ifdef DEBUG_MEMORY
     Serial.printf("[W] memory[%04X] <- %02X\n", ctx->address, ctx->data);
     #endif

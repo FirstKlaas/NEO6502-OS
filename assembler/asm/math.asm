@@ -3,15 +3,44 @@
 
 
 BCD_LOOKUP_TABLE:
-    .byte    0x00, 0x00, 0x01, 0x00, 0x00, 0x02, 0x00, 0x00, 0x04, 0x00, 0x00, 0x08
-    .byte    0x00, 0x00, 0x16, 0x00, 0x00, 0x32, 0x00, 0x00, 0x64, 0x00, 0x01, 0x28
-    .byte    0x00, 0x02, 0x56, 0x00, 0x05, 0x12, 0x00, 0x10, 0x24, 0x00, 0x20, 0x48
-    .byte    0x00, 0x40, 0x96, 0x00, 0x81, 0x92, 0x01, 0x63, 0x84, 0x03, 0x27, 0x68
+    .byte    $00, $00, $01, $00, $00, $02, $00, $00, $04, $00, $00, $08
+    .byte    $00, $00, $16, $00, $00, $32, $00, $00, $64, $00, $01, $28
+    .byte    $00, $02, $56, $00, $05, $12, $00, $10, $24, $00, $20, $48
+    .byte    $00, $40, $96, $00, $81, $92, $01, $63, $84, $03, $27, $68
+
+HTD_IN:     .byte $00, $00
+HTD_OUT:    .byte $00, $00, $00 
 
 bcd_convert_byte: {
     rts
 }
 
-bcd_convert_word: {
+bcd_convert_word_: {
+    sed 
+    lda #0
+    sta HTD_OUT
+    sta HTD_OUT+1
+    sta HTD_OUT+2
+    ldx $2d
+loop:
+    asl HTD_IN 
+    rol HTD_IN+1
+    bcc htd1
+    lda HTD_OUT
+    clc 
+    adc BCD_LOOKUP_TABLE+2,x
+    sta HTD_OUT
+    lda HTD_OUT+1
+    adc BCD_LOOKUP_TABLE+1,x
+    sta HTD_OUT+1
+    lda HTD_OUT+2
+    adc BCD_LOOKUP_TABLE,x
+    sta HTD_OUT+2
+htd1:
+    dex
+    dex 
+    dex 
+    bpl loop 
+    cld 
     rts
 }

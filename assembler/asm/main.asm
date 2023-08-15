@@ -62,6 +62,20 @@ start:          ldx #$ff    // Set the stackpointer to
                 SetCursorI(2,1)
                 PrintText(welcome)
 
+                lda #123
+                sta DEBUG
+                sta HTD_IN
+                lda #0
+                sta HTD_IN+1
+                jsr bcd_convert_word_
+                lda HTD_OUT+2
+                sta DEBUG
+                lda HTD_OUT+1
+                sta DEBUG
+                lda HTD_OUT
+                sta DEBUG
+                
+
                 // Spritetest
                 jsr init_sprites_
 !end:

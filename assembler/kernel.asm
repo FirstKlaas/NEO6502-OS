@@ -29,6 +29,7 @@
                 .const DIS05 = $d01A    // Data exchange register 
                 .const DIS06 = $d01B    // Data exchange register 
                 .const DIS07 = $d01C    // Data exchange register 
+                .const DEBUG = $d0ff    // Debug register
 
                 .const KBD_IRQ_FLAG = $80
                 .const DIS_IRQ_FLAG = $80
@@ -150,6 +151,7 @@ print_char:     jmp print_char_
 
 .import source "asm/kernel_text_routines.asm"
 .import source "asm/kernel_graphic_primitives.asm"
+.import source "asm/math.asm"
 .import source "asm/kernel_sprite.asm"
 .import source "asm/debug_register.asm"
 
