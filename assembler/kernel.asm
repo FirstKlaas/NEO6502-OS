@@ -11,6 +11,14 @@
                 .const KBDCR  = $d011    // Keyboard control register
                 .const DIS    = $d012    // Display register
                 .const DISCR  = $d013    // Display control register
+                                         // Bit 7 $80: Execute Command
+                                         // Bit 6 $40: undefined
+                                         // Bit 5 $20: undefined
+                                         // Bit 4 $10: Autoclean screen
+                                         // Bit 3 $08: Text and colorbuf
+                                         // Bit 2 $04: Autoadjust Cursor
+                                         // Bit 1 $02: Show Cursor
+                                         // Bit 0 $01: Sprite activation 
 
                 .const DISCMD = $d014    // Display command register
                 .const DIS_00 = $d015    // Data exchange register 
@@ -50,7 +58,11 @@
                 .const CMD_DRAW_LINE        = $14
                 .const CMD_DRAW_HLINE       = $15
                 .const CMD_DRAW_VLINE       = $16
-                .const CMD_SET_SDB          = $17                 
+                .const CMD_SET_SDB          = $17
+                .const CMD_GET_BGCOLOR      = $18
+                .const CMD_SET_BGCOLOR      = $19
+                .const CMD_DRAW_RECT        = $1A
+                .const CMD_FILL_RECT        = $1B
 
 .import source "asm/colors.asm"
 

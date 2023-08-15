@@ -61,7 +61,8 @@ enum {
   CMD_SET_SDB      = 0x17,  // SET Sprite Definition Block Pointer
   CMD_GET_BGCOLOR  = 0x18,
   CMD_SET_BGCOLOR  = 0x19,
-  
+  CMD_DRAW_RECT    = 0x1A,
+  CMD_FILL_RECT    = 0x1B,
 
 
   // Sprite handling

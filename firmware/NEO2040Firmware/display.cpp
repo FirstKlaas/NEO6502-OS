@@ -274,6 +274,11 @@ uint16_t word(uint8_t* p) {
   return (p[0] | (p[1] << 8));
 }
 
+inline __attribute__((always_inline))
+void markDirty() {
+  screendata.needsRefresh++;
+}
+
 void executeCommand(TContextPtr ctx)
 {
   static uint8_t* params = ctx->memory + DIS00; 
@@ -290,7 +295,7 @@ void executeCommand(TContextPtr ctx)
     break;
   case CMD_WRITE_CHAR:
     writeChar(ctx, ctx->memory[DIS00]);
-    screendata.needsRefresh++;
+    markDirty();
     break;
   case CMD_SET_FG_COLOR:
     setColor(ctx->memory[DIS00]);
@@ -309,12 +314,34 @@ void executeCommand(TContextPtr ctx)
     break;
   case CMD_DRAW_HLINE:
     display.drawFastHLine(
-      word(params),
-      params[2],
-      word(params+3),
-      params[4]
+      word(params),   // XPOS   DIS00 DIS01
+      params[2],      // YPOS   DIS02
+      word(params+3), // LENGTH DIS03 DIS04
+      params[5]       // COLRO  DIS05
     );
-    screendata.needsRefresh++;
+    markDirty();
+    break;
+
+  case CMD_DRAW_RECT:
+    display.drawRect(
+      word(params),   // XPOS   DIS00 DIS01
+      params[2],      // YPOS   DIS02
+      word(params+3), // WIDTH  DIS03 DIS04
+      params[5],      // HEIGHT DIS05
+      params[6]       // COLOR  DIS06
+    );
+    markDirty();
+    break;
+
+  case CMD_FILL_RECT:
+    display.fillRect(
+      word(params),   // XPOS   DIS00 DIS01
+      params[2],      // YPOS   DIS02
+      word(params+3), // WIDTH  DIS03 DIS04
+      params[5],      // HEIGHT DIS05
+      params[6]       // COLOR  DIS06
+    );
+    markDirty();
     break;
 
   case CMD_SET_SDB:
