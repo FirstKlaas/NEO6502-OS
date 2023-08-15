@@ -149,6 +149,7 @@ print_char:     jmp print_char_
                 * = $E100 "Kernel Routines"
 
 .import source "asm/kernel_text_routines.asm"
+.import source "asm/kernel_graphic_primitives.asm"
 .import source "asm/kernel_sprite.asm"
 .import source "asm/debug_register.asm"
 
