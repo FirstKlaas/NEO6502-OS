@@ -27,14 +27,14 @@ Address `$d000-$d0ff` should be used carefully as this is the space that is also
 | `$d012` | `DIS` | Display register (currently not used) |
 | `$d013` | `DISCR` | Display control register |
 | `$d014` | `DISCMD` | This register contains the display command that you want to perform.  For details, see the section commands |
-| `$d015` | `DIS_00` | Multipurpose exchange register used by certain commands |
-| `$d016` | `DIS_01` | Multipurpose exchange register used by certain commands |
-| `$d017` | `DIS_02` | Multipurpose exchange register used by certain commands |
-| `$d018` | `DIS_04` | Multipurpose exchange register used by certain commands |
-| `$d019` | `DIS_04` | Multipurpose exchange register used by certain commands |
-| `$d01a` | `DIS_05` | Multipurpose exchange register used by certain commands |
-| `$d01b` | `DIS_06` | Multipurpose exchange register used by certain commands |
-| `$d01c` | `DIS_07` | Multipurpose exchange register used by certain commands |
+| `$d015` | `DIS00` | Multipurpose exchange register used by certain commands |
+| `$d016` | `DIS01` | Multipurpose exchange register used by certain commands |
+| `$d017` | `DIS02` | Multipurpose exchange register used by certain commands |
+| `$d018` | `DIS04` | Multipurpose exchange register used by certain commands |
+| `$d019` | `DIS04` | Multipurpose exchange register used by certain commands |
+| `$d01a` | `DIS05` | Multipurpose exchange register used by certain commands |
+| `$d01b` | `DIS06` | Multipurpose exchange register used by certain commands |
+| `$d01c` | `DIS07` | Multipurpose exchange register used by certain commands |
 
 ### CIA register
 The firmware emulates something that is close to an CIA chip. It is not the intention ti really emulate the chip. Therefore the name might be irritating and needs to be changed in the future. But the register addresses and most of the logic is used for my implementation.

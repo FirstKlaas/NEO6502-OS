@@ -54,7 +54,7 @@ get_key_:       lda KBDCR               // Load the keyboard control register
    ----------------------------------------------------------------------------
 */
 set_cursor_x_:  pha                     // Save accu
-                sta DIS_00              // Save the xpos to the 
+                sta DIS00              // Save the xpos to the 
                                         // display register
                 lda #CMD_SET_CURSOR_X
                 sta DISCMD              // Write the command. Will raise the irq                                         
@@ -81,7 +81,7 @@ set_cursor_x_:  pha                     // Save accu
    ----------------------------------------------------------------------------
 */
 set_cursor_y_:  pha                     // Save accu
-                sta DIS_00              // Save the xpos to the 
+                sta DIS00              // Save the xpos to the 
                                         // display register
                 lda #CMD_SET_CURSOR_Y
                 sta DISCMD
@@ -95,7 +95,7 @@ set_cursor_y_:  pha                     // Save accu
                 rts                     // Return
 
 set_fg_color_:  pha                     // Save accu
-                sta DIS_00              // Save the color to the 
+                sta DIS00              // Save the color to the 
                                         // display register
                 lda #CMD_SET_FG_COLOR
                 sta DISCMD
@@ -109,7 +109,7 @@ set_fg_color_:  pha                     // Save accu
                 rts                     // Return
 
 set_bg_color_:  pha                     // Save accu
-                sta DIS_00              // Save the xpos to the 
+                sta DIS00              // Save the xpos to the 
                                         // display register
                 lda #CMD_SET_BG_COLOR
                 sta DISCMD
@@ -130,7 +130,7 @@ get_xpos_:      lda #CMD_GET_CURSOR_X
 !wait:
                 bit DISCR               // Check, if the irg flag is cleared
                 bmi !wait-              // No! Let's wait
-                lda DIS_00
+                lda DIS00
                 rts                     // Return
 
 get_ypos_:      lda #CMD_GET_CURSOR_Y
@@ -141,11 +141,11 @@ get_ypos_:      lda #CMD_GET_CURSOR_Y
 !wait:
                 bit DISCR               // Check, if the irg flag is cleared
                 bmi !wait-              // No! Let's wait
-                lda DIS_00
+                lda DIS00
                 rts                     // Return
 
 print_char_:    pha                     // Save accu
-                sta DIS_00              // Save the char to the 
+                sta DIS00              // Save the char to the 
                                         // display register
                 lda #CMD_WRITE_CHAR
                 sta DISCMD

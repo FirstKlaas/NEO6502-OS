@@ -4,16 +4,46 @@
     sta DIS00
     lda #xhi 
     sta DIS01
-    lda y 
+    lda #y 
     sta DIS02
-    lda lenlo 
+    lda #lenlo 
     sta DIS03
-    lda lenhi
+    lda #lenhi
     sta DIS04
-    lda col
+    lda #col
     sta DIS05
     jsr draw_horizonal_line_
     pla 
+}
+
+.macro FILL_RECT_I(xlo, xhi, y, width_lo, width_hi, height,col) {
+    pha
+    lda #xlo
+    sta DIS00
+    lda #xhi 
+    sta DIS01
+    lda #y 
+    sta DIS02
+    lda #width_lo 
+    sta DIS03
+    lda #width_hi
+    sta DIS04
+    lda #height
+    sta DIS05
+    lda #col 
+    sta DIS06
+    jsr fill_rect_
+    pla 
+}
+
+.macro EXECUTE_DISPLAY_COMMAND_A() {
+    sta DISCMD
+    lda DISCR
+    ora #$80
+    sta DISCR               // Raise the IRQ flag
+wait_for_ready:
+    bit DISCR               // Check, if the excecution/irg flag is cleared
+    bmi wait_for_ready      // No! Let's wait
 }
 
 /* ----------------------------------------------------------------------------
@@ -34,13 +64,28 @@
     Last modified : 15.08.2023
    ----------------------------------------------------------------------------
 */
-draw_horizonal_line_    : {
-                lda #CMD_DRAW_HLINE
-                sta DISCMD
-                lda DISCR
-                ora #$80
-                sta DISCR               // Raise the IRQ flag
-wait_for_ready:
-                bit DISCR               // Check, if the excecution/irg flag is cleared
-                bmi wait_for_ready      // No! Let's wait
+draw_horizonal_line_: {
+    lda #CMD_DRAW_HLINE
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
 }
+
+clear_screen_: {
+    lda #CMD_CLEAR_SCREEN
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+draw_rect_: {
+    lda #CMD_DRAW_RECT
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+fill_rect_: {
+    lda #CMD_FILL_RECT
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+

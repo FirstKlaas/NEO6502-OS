@@ -275,13 +275,13 @@ uint16_t word(uint8_t* p) {
 }
 
 inline __attribute__((always_inline))
-void markDirty() {
+void markScreenDirty() {
   screendata.needsRefresh++;
 }
 
 void executeCommand(TContextPtr ctx)
 {
-  static uint8_t* params = ctx->memory + DIS00; 
+  static uint8_t* params = (ctx->memory + DIS00); 
 
   switch (ctx->memory[DISCMD])
   {
@@ -295,7 +295,7 @@ void executeCommand(TContextPtr ctx)
     break;
   case CMD_WRITE_CHAR:
     writeChar(ctx, ctx->memory[DIS00]);
-    markDirty();
+    markScreenDirty();
     break;
   case CMD_SET_FG_COLOR:
     setColor(ctx->memory[DIS00]);
@@ -319,7 +319,7 @@ void executeCommand(TContextPtr ctx)
       word(params+3), // LENGTH DIS03 DIS04
       params[5]       // COLRO  DIS05
     );
-    markDirty();
+    markScreenDirty();
     break;
 
   case CMD_DRAW_RECT:
@@ -330,7 +330,7 @@ void executeCommand(TContextPtr ctx)
       params[5],      // HEIGHT DIS05
       params[6]       // COLOR  DIS06
     );
-    markDirty();
+    markScreenDirty();
     break;
 
   case CMD_FILL_RECT:
@@ -341,7 +341,7 @@ void executeCommand(TContextPtr ctx)
       params[5],      // HEIGHT DIS05
       params[6]       // COLOR  DIS06
     );
-    markDirty();
+    markScreenDirty();
     break;
 
   case CMD_SET_SDB:

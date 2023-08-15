@@ -4,6 +4,11 @@
     sta DISCR                
 }
 
+.macro EnableFrameIRQ() {
+    lda #(CIA_SET_FLAGS | FRAME_INTERRUPT_FLAG)
+    sta $dc0d
+}
+
 .macro DisableCursorAutoAdjustment() {
     lda DISCR   // Clear the auto adjust 
     and #$fd    // flag>
@@ -51,23 +56,7 @@ start:          ldx #$ff    // Set the stackpointer to
                 sta $fffb
                 
                 EnableCursorAutoAdjustment()
-
-                // Enable Frame IRQ
-                lda #(CIA_SET_FLAGS | FRAME_INTERRUPT_FLAG)
-                sta $dc0d
-
-                // jsr debug_register_
-                // jsr setup_timer
-                SetCursorI(0,0)
-                SetForgroundColorI(AMBER)
-                PrintText(border_top)
-                SetCursorI(0,2)
-                SetForgroundColorI(AMBER)
-                PrintText(border_bottom)
-
-                SetCursorI(1,1)
-                SetForgroundColorI(AMBER)
-                PrintText(text_bar)
+                EnableFrameIRQ()                
 
                 SetForgroundColorI(AMBER)
                 SetCursorI(2,1)
@@ -141,6 +130,8 @@ main_isr:  {
             pha 
             tya 
             pha
+            DRAW_HLINE_I(5,0,180,250,0,23)
+            FILL_RECT_I(5,0,20,250,0,160,55)
 check_left:           
             lda SPRITE_XPOS     // Get the x position of the leftmost sprite
             cmp #10             // 10 is the minimum x position
@@ -158,8 +149,32 @@ right_overflow:
             sta operation+1
 go_down:    // Bring all enemies on pixel down
             lda SPRITE_YPOS
-            clc
-            adc #4              // New y position
+            cmp #100
+            bmi decrease         // if SPRITE ypos < 100 decrease ypos
+reset_ypos:
+            // Row One
+            ldy #8
+            lda #$20              // Start Y position
+!loop:            
+            sta SPRITE_YPOS,y 
+            dey
+            bpl !loop-
+            // Row Two
+            ldy #8
+            lda #$30              // Start Y position
+!loop:            
+            sta SPRITE_YPOS+8,y 
+            dey
+            bpl !loop-
+            // Row Three
+            ldy #8
+            lda #$40              // Start Y position
+!loop:            
+            sta SPRITE_YPOS+16,y 
+            dey
+            bpl !loop-
+            jmp move    
+decrease:
             ldy #24             // Calculate position fpr 24 sprites
 yloop:                  
             lda SPRITE_YPOS,y 

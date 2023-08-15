@@ -60,7 +60,7 @@ void loop() {
   if ((millis() - lastClockTS) >= FRAMETIME) {
     lastClockTS = millis();
     gpio_put(uP_CLOCKCYCLE_PIN, true);
-    clearDisplay();
+    //clearDisplay();
     drawSprites(ctxPtr);
     updateDisplay();
     raiseFrameRequest(ctxPtr);

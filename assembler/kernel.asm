@@ -21,14 +21,14 @@
                                          // Bit 0 $01: Sprite activation 
 
                 .const DISCMD = $d014    // Display command register
-                .const DIS_00 = $d015    // Data exchange register 
-                .const DIS_01 = $d016    // Data exchange register 
-                .const DIS_02 = $d017    // Data exchange register 
-                .const DIS_03 = $d018    // Data exchange register 
-                .const DIS_04 = $d019    // Data exchange register 
-                .const DIS_05 = $d01A    // Data exchange register 
-                .const DIS_06 = $d01B    // Data exchange register 
-                .const DIS_07 = $d01C    // Data exchange register 
+                .const DIS00 = $d015    // Data exchange register 
+                .const DIS01 = $d016    // Data exchange register 
+                .const DIS02 = $d017    // Data exchange register 
+                .const DIS03 = $d018    // Data exchange register 
+                .const DIS04 = $d019    // Data exchange register 
+                .const DIS05 = $d01A    // Data exchange register 
+                .const DIS06 = $d01B    // Data exchange register 
+                .const DIS07 = $d01C    // Data exchange register 
 
                 .const KBD_IRQ_FLAG = $80
                 .const DIS_IRQ_FLAG = $80

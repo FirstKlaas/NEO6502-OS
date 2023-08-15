@@ -55,11 +55,11 @@ init_sprites_:  .for (var i=0; i<8; i++) {
 
                 // Init the sprite definition block
                 lda #<SPRITE_DEFINITON_BLOCK
-                sta DIS_00
+                sta DIS00
                 lda #>SPRITE_DEFINITON_BLOCK
-                sta DIS_01
+                sta DIS01
                 lda #32                 // Set number of sprites
-                sta DIS_02
+                sta DIS02
                 lda #CMD_SET_SDB        // Command "Set Sprite Definition Block"
                 sta DISCMD              //                                          
                 lda DISCR               // Load Display command register
@@ -109,9 +109,9 @@ SPRITE_XPOS:        .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 00-0
                     .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
-SPRITE_YPOS:        .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 00-07
-                    .byte $20, $20, $20, $20, $20, $20, $20, $20  // Sprite 08-15
-                    .byte $30, $30, $30, $30, $30, $30, $30, $30  // Sprite 16-23
+SPRITE_YPOS:        .byte $20, $20, $20, $20, $20, $20, $20, $20  // Sprite 00-07
+                    .byte $30, $30, $30, $30, $30, $30, $30, $30  // Sprite 08-15
+                    .byte $40, $40, $40, $40, $40, $40, $40, $40  // Sprite 16-23
                     .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
                     
 SPRITE_COLOR:       .byte $1f, $1f, $1f, $1f, $1f, $1f, $1f, $1f  // Sprite 00-07
