@@ -62,26 +62,9 @@ start:          ldx #$ff    // Set the stackpointer to
                 SetCursorI(2,1)
                 PrintText(welcome)
 
-                lda #255
-                sta HTD_IN
-                lda #255
-                sta HTD_IN+1
-                lda HTD_IN+1
-                sta DEBUG
-                lda HTD_IN
-                sta DEBUG
-                
-                jsr bcd_convert_word_
-                
-                lda HTD_OUT+2
-                sta DEBUG
-                lda HTD_OUT+1
-                sta DEBUG
-                lda HTD_OUT
-                sta DEBUG
                 
                 // Spritetest
-                //jsr init_sprites_
+                jsr init_sprites_
 !end:
                 jmp !end-
             
@@ -150,6 +133,21 @@ main_isr:  {
             pha
             DRAW_HLINE_I(5,0,180,250,0,23)
             FILL_RECT_I(5,0,20,250,0,160,55)
+            FILL_RECT_I(5,0,181,250,0,59,42)
+            SetForgroundColorI(43)
+            SetCursorI(2,23)
+            lda $d0fd
+            sta HTD_IN
+            lda $d0fe
+            sta HTD_IN+1
+            jsr bcd_convert_word_
+            lda HTD_OUT+2
+            jsr print_hex_
+            lda HTD_OUT+1
+            jsr print_hex_
+            lda HTD_OUT
+            jsr print_hex_
+
 check_left:           
             lda SPRITE_XPOS     // Get the x position of the leftmost sprite
             cmp #10             // 10 is the minimum x position
@@ -165,18 +163,25 @@ check_right:
 right_overflow:
             lda #$ff 
             sta operation+1
-go_down:    // Bring all enemies on pixel down
+go_down:    // Check, if we have reached the "bottom". If so,
+            // Reset the y position. Otherwise decrease the 
+            // y position for each sprite.
             lda SPRITE_YPOS
             cmp #100
             bmi decrease         // if SPRITE ypos < 100 decrease ypos
+
+            // -------------------------------------------------------
+            // Bring all sprites back up again
+            // -------------------------------------------------------
 reset_ypos:
-            // Row One
+            // Row One / Sprite 0-7
             ldy #8
             lda #$20              // Start Y position
 !loop:            
             sta SPRITE_YPOS,y 
             dey
             bpl !loop-
+
             // Row Two
             ldy #8
             lda #$30              // Start Y position
@@ -184,6 +189,7 @@ reset_ypos:
             sta SPRITE_YPOS+8,y 
             dey
             bpl !loop-
+            
             // Row Three
             ldy #8
             lda #$40              // Start Y position
@@ -192,28 +198,32 @@ reset_ypos:
             dey
             bpl !loop-
             jmp move    
+
 decrease:
             ldy #24             // Calculate position fpr 24 sprites
-yloop:                  
+!loop:                  
             lda SPRITE_YPOS,y 
             clc
             adc #4
             sta SPRITE_YPOS,y 
             dey
-            bpl yloop
+            bpl !loop-
+
+            // Moving sprites to the left or to the right
+            //
 move:       
-            ldy #7              // Y is the sprite index. We have 8 sprites in a row 
+            ldy #7               // Y is the sprite index. We have 8 sprites in a row 
 !loop:
-            lda SPRITE_XPOS,y   // Load current x position of the sprite   
+            lda SPRITE_XPOS,y    // Load current x position of the sprite   
             clc
-operation:  adc #1              // Add the speed
-            sta SPRITE_XPOS,y   // save the new xpos 
-            sta SPRITE_XPOS+8,y // Also for the second row
+operation:  adc #1               // Add the speed
+            sta SPRITE_XPOS,y    // save the new xpos 
+            sta SPRITE_XPOS+8,y  // Also for the second row
             sta SPRITE_XPOS+16,y // Also for the second row
             dey
             bpl !loop-
 exit:
-            lda $dc0d           // Acknowledge the IRQ            
+            lda $dc0d            // Acknowledge the IRQ            
             pla
             tay 
             pla 

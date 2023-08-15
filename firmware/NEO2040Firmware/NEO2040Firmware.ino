@@ -62,7 +62,7 @@ void loop() {
     gpio_put(uP_CLOCKCYCLE_PIN, true);
     //clearDisplay();
     drawSprites(ctxPtr);
-    updateDisplay();
+    updateDisplay(ctxPtr);
     raiseFrameRequest(ctxPtr);
     gpio_put(uP_CLOCKCYCLE_PIN, false);
   }

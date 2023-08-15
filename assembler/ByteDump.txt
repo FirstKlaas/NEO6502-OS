@@ -21,52 +21,38 @@
 082b: 20 0c e1  -         jsr set_cursor_x_
 082e: a9 01     -         lda #ypos
 0830: 20 24 e1  -         jsr set_cursor_y_    
-0833: a9 f7     -         lda #<addr
+0833: a9 cf     -         lda #<addr
 0835: 85 e0     -         sta zpRegE0
 0837: a9 08     -         lda #>addr
 0839: 85 e1     -         sta zpRegE1
 083b: 20 b0 e1  -         jsr print_text_
-083e: a9 ff     -         lda #255
-0840: 8d c9 e5  -         sta HTD_IN
-0843: a9 ff     -         lda #255
-0845: 8d ca e5  -         sta HTD_IN+1
-0848: ad ca e5  -         lda HTD_IN+1
-084b: 8d ff d0  -         sta DEBUG
-084e: ad c9 e5  -         lda HTD_IN
-0851: 8d ff d0  -         sta DEBUG
-0854: 20 ce e5  -         jsr bcd_convert_word_
-0857: ad cd e5  -         lda HTD_OUT+2
-085a: 8d ff d0  -         sta DEBUG
-085d: ad cc e5  -         lda HTD_OUT+1
-0860: 8d ff d0  -         sta DEBUG
-0863: ad cb e5  -         lda HTD_OUT
-0866: 8d ff d0  -         sta DEBUG
-0869: 4c 69 08  -         jmp !end-
-086c: a9 f0     - setup_timer:lda #$f0
-086e: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
-0871: a9 00     -         lda #$00
-0873: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
-0876: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
-0878: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
-087b: a9 11     -         lda #%00010001  // Bit 4: 1 = Load values from latch
-087d: 8d 0e dc  -         sta $dc0e       // Load values and start timer
-0880: 60        -         rts
-0881: c8 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_top:.byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
+083e: 20 37 e2  -         jsr init_sprites_
+0841: 4c 41 08  -         jmp !end-
+0844: a9 f0     - setup_timer:lda #$f0
+0846: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
+0849: a9 00     -         lda #$00
+084b: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
+084e: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
+0850: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
+0853: a9 11     -         lda #%00010001  // Bit 4: 1 = Load values from latch
+0855: 8d 0e dc  -         sta $dc0e       // Load values and start timer
+0858: 60        -         rts
+0859: c8 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_top:.byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
+0869: cc cc cc cc                                     
+086d: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
+087d: cc cc ba 00                                     
+0881: c7 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_bottom:.byte $c7,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
 0891: cc cc cc cc                                     
-0895: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
-08a5: cc cc ba 00                                     
-08a9: c7 cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  - border_bottom:.byte $c7,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
-08b9: cc cc cc cc                                     
-08bd: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$bb,$00
-08cd: cc cc bb 00                                     
-08d1: da da da da da da da da da da da da da da da da  - text_bar:.fill 37,$da 
-08e1: da da da da da da da da da da da da da da da da 
-08f1: da da da da da                                  
-08f6: 00        -         .byte 0
-08f7: 4e 45 2f 4f 53 20 76 30 2e 31 20 2d 20 4b 65 72  - welcome:.text "NE/OS v0.1 - Kernel Size 974 bytes"
-0907: 6e 65 6c 20 53 69 7a 65 20 39 37 34 20 62 79 74 
-0917: 65 73                                           
-0919: 00        -         .byte 0
+0895: cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc cc  -         .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$bb,$00
+08a5: cc cc bb 00                                     
+08a9: da da da da da da da da da da da da da da da da  - text_bar:.fill 37,$da 
+08b9: da da da da da da da da da da da da da da da da 
+08c9: da da da da da                                  
+08ce: 00        -         .byte 0
+08cf: 4e 45 2f 4f 53 20 76 30 2e 31 20 2d 20 4b 65 72  - welcome:.text "NE/OS v0.1 - Kernel Size 974 bytes"
+08df: 6e 65 6c 20 53 69 7a 65 20 39 37 34 20 62 79 74 
+08ef: 65 73                                           
+08f1: 00        -         .byte 0
 
 [ISR]
 0a00: 48        - main_isr:pha
@@ -106,59 +92,93 @@
 0a49: 8d 1b d0  -         sta DIS06
 0a4c: 20 24 e2  -         jsr fill_rect_
 0a4f: 68        -         pla 
-0a50: ad b9 e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
-0a53: c9 0a     -         cmp #10             // 10 is the minimum x position
-0a55: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
-0a57: a9 01     - left_underflow:lda #$01
-0a59: 8d a8 0a  -         sta operation+1
-0a5c: 4c 6b 0a  -         jmp go_down 
-0a5f: ad c0 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
-0a62: c9 ef     -         cmp #$ef            // Max xpos = 239
-0a64: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
-0a66: a9 ff     - right_overflow:lda #$ff 
-0a68: 8d a8 0a  -         sta operation+1
-0a6b: ad d9 e4  - go_down:lda SPRITE_YPOS
-0a6e: c9 64     -         cmp #100
-0a70: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
-0a72: a0 08     - reset_ypos:ldy #8
-0a74: a9 20     -         lda #$20              // Start Y position
-0a76: 99 d9 e4  -         sta SPRITE_YPOS,y 
-0a79: 88        -         dey
-0a7a: 10 fa     -         bpl !loop-
-0a7c: a0 08     -         ldy #8
-0a7e: a9 30     -         lda #$30              // Start Y position
-0a80: 99 e1 e4  -         sta SPRITE_YPOS+8,y 
-0a83: 88        -         dey
-0a84: 10 fa     -         bpl !loop-
-0a86: a0 08     -         ldy #8
-0a88: a9 40     -         lda #$40              // Start Y position
-0a8a: 99 e9 e4  -         sta SPRITE_YPOS+16,y 
-0a8d: 88        -         dey
-0a8e: 10 fa     -         bpl !loop-
-0a90: 4c a1 0a  -         jmp move    
-0a93: a0 18     - decrease:ldy #24             // Calculate position fpr 24 sprites
-0a95: b9 d9 e4  - yloop:  lda SPRITE_YPOS,y 
-0a98: 18        -         clc
-0a99: 69 04     -         adc #4
-0a9b: 99 d9 e4  -         sta SPRITE_YPOS,y 
-0a9e: 88        -         dey
-0a9f: 10 f4     -         bpl yloop
-0aa1: a0 07     - move:   ldy #7              // Y is the sprite index. We have 8 sprites in a row 
-0aa3: b9 b9 e4  -         lda SPRITE_XPOS,y   // Load current x position of the sprite   
-0aa6: 18        -         clc
-0aa7: 69 01     - operation:adc #1              // Add the speed
-0aa9: 99 b9 e4  -         sta SPRITE_XPOS,y   // save the new xpos 
-0aac: 99 c1 e4  -         sta SPRITE_XPOS+8,y // Also for the second row
-0aaf: 99 c9 e4  -         sta SPRITE_XPOS+16,y // Also for the second row
-0ab2: 88        -         dey
-0ab3: 10 ee     -         bpl !loop-
-0ab5: ad 0d dc  - exit:   lda $dc0d           // Acknowledge the IRQ            
-0ab8: 68        -         pla
-0ab9: a8        -         tay 
-0aba: 68        -         pla 
-0abb: aa        -         tax 
-0abc: 68        -         pla
-0abd: 40        -         rti
+0a50: 48        -         pha
+0a51: a9 05     -         lda #xlo
+0a53: 8d 15 d0  -         sta DIS00
+0a56: a9 00     -         lda #xhi 
+0a58: 8d 16 d0  -         sta DIS01
+0a5b: a9 b5     -         lda #y 
+0a5d: 8d 17 d0  -         sta DIS02
+0a60: a9 fa     -         lda #width_lo 
+0a62: 8d 18 d0  -         sta DIS03
+0a65: a9 00     -         lda #width_hi
+0a67: 8d 19 d0  -         sta DIS04
+0a6a: a9 3b     -         lda #height
+0a6c: 8d 1a d0  -         sta DIS05
+0a6f: a9 2a     -         lda #col 
+0a71: 8d 1b d0  -         sta DIS06
+0a74: 20 24 e2  -         jsr fill_rect_
+0a77: 68        -         pla 
+0a78: a9 2b     -         lda #color
+0a7a: 20 3c e1  -         jsr set_fg_color_
+0a7d: a9 02     -         lda #xpos
+0a7f: 20 0c e1  -         jsr set_cursor_x_
+0a82: a9 17     -         lda #ypos
+0a84: 20 24 e1  -         jsr set_cursor_y_    
+0a87: ad fd d0  -         lda $d0fd
+0a8a: 8d c9 e5  -         sta HTD_IN
+0a8d: ad fe d0  -         lda $d0fe
+0a90: 8d ca e5  -         sta HTD_IN+1
+0a93: 20 ce e5  -         jsr bcd_convert_word_
+0a96: ad cd e5  -         lda HTD_OUT+2
+0a99: 20 c8 e1  -         jsr print_hex_
+0a9c: ad cc e5  -         lda HTD_OUT+1
+0a9f: 20 c8 e1  -         jsr print_hex_
+0aa2: ad cb e5  -         lda HTD_OUT
+0aa5: 20 c8 e1  -         jsr print_hex_
+0aa8: ad b9 e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
+0aab: c9 0a     -         cmp #10             // 10 is the minimum x position
+0aad: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
+0aaf: a9 01     - left_underflow:lda #$01
+0ab1: 8d 00 0b  -         sta operation+1
+0ab4: 4c c3 0a  -         jmp go_down 
+0ab7: ad c0 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
+0aba: c9 ef     -         cmp #$ef            // Max xpos = 239
+0abc: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
+0abe: a9 ff     - right_overflow:lda #$ff 
+0ac0: 8d 00 0b  -         sta operation+1
+0ac3: ad d9 e4  - go_down:lda SPRITE_YPOS
+0ac6: c9 aa     -         cmp #170
+0ac8: 30 21     -         bmi decrease         // if SPRITE ypos < 170 decrease ypos
+0aca: a0 08     - reset_ypos:ldy #8
+0acc: a9 20     -         lda #$20              // Start Y position
+0ace: 99 d9 e4  -         sta SPRITE_YPOS,y 
+0ad1: 88        -         dey
+0ad2: 10 fa     -         bpl !loop-
+0ad4: a0 08     -         ldy #8
+0ad6: a9 30     -         lda #$30              // Start Y position
+0ad8: 99 e1 e4  -         sta SPRITE_YPOS+8,y 
+0adb: 88        -         dey
+0adc: 10 fa     -         bpl !loop-
+0ade: a0 08     -         ldy #8
+0ae0: a9 40     -         lda #$40              // Start Y position
+0ae2: 99 e9 e4  -         sta SPRITE_YPOS+16,y 
+0ae5: 88        -         dey
+0ae6: 10 fa     -         bpl !loop-
+0ae8: 4c f9 0a  -         jmp move    
+0aeb: a0 18     - decrease:ldy #24             // Calculate position fpr 24 sprites
+0aed: b9 d9 e4  -         lda SPRITE_YPOS,y 
+0af0: 18        -         clc
+0af1: 69 04     -         adc #4
+0af3: 99 d9 e4  -         sta SPRITE_YPOS,y 
+0af6: 88        -         dey
+0af7: 10 f4     -         bpl !loop-
+0af9: a0 07     - move:   ldy #7              // Y is the sprite index. We have 8 sprites in a row 
+0afb: b9 b9 e4  -         lda SPRITE_XPOS,y   // Load current x position of the sprite   
+0afe: 18        -         clc
+0aff: 69 01     - operation:adc #1              // Add the speed
+0b01: 99 b9 e4  -         sta SPRITE_XPOS,y   // save the new xpos 
+0b04: 99 c1 e4  -         sta SPRITE_XPOS+8,y // Also for the second row
+0b07: 99 c9 e4  -         sta SPRITE_XPOS+16,y // Also for the second row
+0b0a: 88        -         dey
+0b0b: 10 ee     -         bpl !loop-
+0b0d: ad 0d dc  - exit:   lda $dc0d           // Acknowledge the IRQ            
+0b10: 68        -         pla
+0b11: a8        -         tay 
+0b12: 68        -         pla 
+0b13: aa        -         tax 
+0b14: 68        -         pla
+0b15: 40        -         rti
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_

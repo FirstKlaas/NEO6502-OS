@@ -28,7 +28,9 @@
                 .const DIS04 = $d019    // Data exchange register 
                 .const DIS05 = $d01A    // Data exchange register 
                 .const DIS06 = $d01B    // Data exchange register 
-                .const DIS07 = $d01C    // Data exchange register 
+                .const DIS07 = $d01C    // Data exchange register
+                .const DISFL = $d0fd    // Frame number lo
+                .const DISFH = $d0fe    // Frame number hi
                 .const DEBUG = $d0ff    // Debug register
 
                 .const KBD_IRQ_FLAG = $80

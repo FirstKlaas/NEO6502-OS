@@ -4,7 +4,7 @@
 #include <pico/stdlib.h>
 #include "datatypes.h"
 
-#define FRAMERATE 20  // frames per sec
+#define FRAMERATE 25  // frames per sec
 #define FRAMETIME 1000/FRAMERATE  // msec
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
@@ -91,7 +91,7 @@ void writeChar(TContextPtr ctx, uint8_t c);
 void updateDisplay();
 void printWelcomeMsg(TContextPtr ctx);
 */
-void updateDisplay();
+void updateDisplay(TContextPtr ctx);
 void clearDisplay();
 void drawSprites(TContextPtr ctx);
 

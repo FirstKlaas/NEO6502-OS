@@ -237,7 +237,7 @@ void clearDisplay() {
   display.fillScreen(screendata.currentBgColor);
 }
 
-void updateDisplay()
+void updateDisplay(TContextPtr ctx)
 {
   // screendata.needsRefresh
   if (true)
@@ -246,6 +246,9 @@ void updateDisplay()
     display.swap(true, false);
   };
   screendata.needsRefresh = 0;
+  ctx->frame_number++;
+  ctx->memory[0xd0fd] = (ctx->frame_number & 0xff);
+  ctx->memory[0xd0fe] = ((ctx->frame_number >> 8) & 0xff);
 }
 
 void writeChar(TContextPtr ctx, uint8_t c)
@@ -317,7 +320,7 @@ void executeCommand(TContextPtr ctx)
       word(params),   // XPOS   DIS00 DIS01
       params[2],      // YPOS   DIS02
       word(params+3), // LENGTH DIS03 DIS04
-      params[5]       // COLRO  DIS05
+      params[5]       // COLOR  DIS05
     );
     markScreenDirty();
     break;
