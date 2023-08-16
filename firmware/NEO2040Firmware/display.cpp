@@ -344,6 +344,10 @@ void executeCommand(TContextPtr ctx)
     markScreenDirty();
     break;
 
+  case CMD_DRAW_SPRITES:
+    drawSprites(ctx);
+    break;
+
   case CMD_SET_SDB:
   {
     screendata.sdb.address = ((ctx->memory[DIS01] << 8) | ctx->memory[DIS00]);

@@ -131,9 +131,10 @@ main_isr:  {
             pha 
             tya 
             pha
-            DRAW_HLINE_I(5,0,180,250,0,23)
             FILL_RECT_I(5,0,20,250,0,160,55)
+            DRAW_SPRITES()
             FILL_RECT_I(5,0,181,250,0,59,42)
+            DRAW_HLINE_I(5,0,180,250,0,23)
             SetForgroundColorI(43)
             SetCursorI(2,23)
             lda $d0fd       // Framecounter LO Byte

@@ -66,6 +66,10 @@
                 .const CMD_SET_BGCOLOR      = $19
                 .const CMD_DRAW_RECT        = $1A
                 .const CMD_FILL_RECT        = $1B
+                .const CMD_DRAW_CIRCLE      = $1C
+                .const CMD_FILL_CIRCLE      = $1D
+                .const CMD_DRAW_SPRITES     = $1E
+
 
 .import source "asm/colors.asm"
 

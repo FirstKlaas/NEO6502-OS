@@ -63,6 +63,10 @@ enum {
   CMD_SET_BGCOLOR  = 0x19,
   CMD_DRAW_RECT    = 0x1A,
   CMD_FILL_RECT    = 0x1B,
+  CMD_DRAW_CIRCLE  = 0x1C,
+  CMD_FILL_CIRCLE  = 0x1D,
+  CMD_DRAW_SPRITES = 0x1E,
+  
 
 
   // Sprite handling

@@ -36,6 +36,10 @@
     pla 
 }
 
+.macro DRAW_SPRITES() {
+    jsr draw_sprites_
+}
+
 .macro EXECUTE_DISPLAY_COMMAND_A() {
     sta DISCMD
     lda DISCR
@@ -84,6 +88,12 @@ draw_rect_: {
 
 fill_rect_: {
     lda #CMD_FILL_RECT
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+draw_sprites_: {
+    lda #CMD_DRAW_SPRITES
     EXECUTE_DISPLAY_COMMAND_A()
     rts
 }
