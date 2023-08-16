@@ -166,9 +166,7 @@ right_overflow:
 go_down:    // Check, if we have reached the "bottom". If so,
             // Reset the y position. Otherwise decrease the 
             // y position for each sprite.
-            SetCursorI(15,23)
             lda SPRITE_YPOS
-            jsr print_hex_
             cmp #150
             bmi decrease         // if SPRITE ypos < 100 decrease ypos
 

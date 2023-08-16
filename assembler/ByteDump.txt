@@ -115,9 +115,9 @@
 0a7f: 20 0c e1  -         jsr set_cursor_x_
 0a82: a9 17     -         lda #ypos
 0a84: 20 24 e1  -         jsr set_cursor_y_    
-0a87: ad fd d0  -         lda $d0fd
+0a87: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
 0a8a: 8d c9 e5  -         sta HTD_IN
-0a8d: ad fe d0  -         lda $d0fe
+0a8d: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
 0a90: 8d ca e5  -         sta HTD_IN+1
 0a93: 20 ce e5  -         jsr bcd_convert_word_
 0a96: ad cd e5  -         lda HTD_OUT+2
@@ -135,11 +135,11 @@
 0ab7: ad c0 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
 0aba: c9 ef     -         cmp #$ef            // Max xpos = 239
 0abc: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
-0abe: a9 ff     - right_overflow:lda #$ff 
-0ac0: 8d 00 0b  -         sta operation+1
+0abe: a9 ff     - right_overflow:lda #$ff            // By adding -1, we move left.
+0ac0: 8d 00 0b  -         sta operation+1     // Write the new speed to the code (self modified)    
 0ac3: ad d9 e4  - go_down:lda SPRITE_YPOS
-0ac6: c9 aa     -         cmp #170
-0ac8: 30 21     -         bmi decrease         // if SPRITE ypos < 170 decrease ypos
+0ac6: c9 96     -         cmp #150
+0ac8: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
 0aca: a0 08     - reset_ypos:ldy #8
 0acc: a9 20     -         lda #$20              // Start Y position
 0ace: 99 d9 e4  -         sta SPRITE_YPOS,y 
@@ -163,16 +163,16 @@
 0af3: 99 d9 e4  -         sta SPRITE_YPOS,y 
 0af6: 88        -         dey
 0af7: 10 f4     -         bpl !loop-
-0af9: a0 07     - move:   ldy #7              // Y is the sprite index. We have 8 sprites in a row 
-0afb: b9 b9 e4  -         lda SPRITE_XPOS,y   // Load current x position of the sprite   
+0af9: a0 07     - move:   ldy #7               // Y is the sprite index. We have 8 sprites in a row 
+0afb: b9 b9 e4  -         lda SPRITE_XPOS,y    // Load current x position of the sprite   
 0afe: 18        -         clc
-0aff: 69 01     - operation:adc #1              // Add the speed
-0b01: 99 b9 e4  -         sta SPRITE_XPOS,y   // save the new xpos 
-0b04: 99 c1 e4  -         sta SPRITE_XPOS+8,y // Also for the second row
+0aff: 69 01     - operation:adc #1               // Add the speed
+0b01: 99 b9 e4  -         sta SPRITE_XPOS,y    // save the new xpos 
+0b04: 99 c1 e4  -         sta SPRITE_XPOS+8,y  // Also for the second row
 0b07: 99 c9 e4  -         sta SPRITE_XPOS+16,y // Also for the second row
 0b0a: 88        -         dey
 0b0b: 10 ee     -         bpl !loop-
-0b0d: ad 0d dc  - exit:   lda $dc0d           // Acknowledge the IRQ            
+0b0d: ad 0d dc  - exit:   lda $dc0d            // Acknowledge the IRQ            
 0b10: 68        -         pla
 0b11: a8        -         tay 
 0b12: 68        -         pla 
