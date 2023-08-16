@@ -136,9 +136,9 @@ main_isr:  {
             FILL_RECT_I(5,0,181,250,0,59,42)
             SetForgroundColorI(43)
             SetCursorI(2,23)
-            lda $d0fd
+            lda $d0fd       // Framecounter LO Byte
             sta HTD_IN
-            lda $d0fe
+            lda $d0fe       // Framecounter HI Byte
             sta HTD_IN+1
             jsr bcd_convert_word_
             lda HTD_OUT+2
@@ -161,13 +161,15 @@ check_right:
             cmp #$ef            // Max xpos = 239
             bmi move            // if xpos - 239 < 0 => move
 right_overflow:
-            lda #$ff 
-            sta operation+1
+            lda #$ff            // By adding -1, we move left.
+            sta operation+1     // Write the new speed to the code (self modified)    
 go_down:    // Check, if we have reached the "bottom". If so,
             // Reset the y position. Otherwise decrease the 
             // y position for each sprite.
+            SetCursorI(15,23)
             lda SPRITE_YPOS
-            cmp #100
+            jsr print_hex_
+            cmp #150
             bmi decrease         // if SPRITE ypos < 100 decrease ypos
 
             // -------------------------------------------------------
