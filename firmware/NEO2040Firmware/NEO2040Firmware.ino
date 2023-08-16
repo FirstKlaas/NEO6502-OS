@@ -31,7 +31,7 @@ unsigned long lastClockTS;
 bool frame_update_callback(struct repeating_timer *t) {
   //clearDisplay();
   //drawSprites((TContextPtr)t->user_data);
-  updateDisplay();
+  updateDisplay((TContextPtr)t->user_data);
   raiseFrameRequest((TContextPtr)t->user_data);
   return true;
 }
