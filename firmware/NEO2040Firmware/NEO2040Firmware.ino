@@ -28,16 +28,25 @@ static TContextPtr ctxPtr(&ctx);
 static repeating_timer_t frame_timer;
 
 unsigned long lastClockTS;
+volatile bool updating;
 
 bool frame_update_callback(struct repeating_timer *t) {
+  const TContextPtr ctx((TContextPtr)t->user_data);
+  
+  if (updating) {
+    Serial.printf("Frame drop %06d\n", ctx->frame_number);
+  }
+  updating = true;
   //clearDisplay();
   //drawSprites((TContextPtr)t->user_data);
-  updateDisplay((TContextPtr)t->user_data);
-  raiseFrameRequest((TContextPtr)t->user_data);
+  updateDisplay(ctx);
+  raiseFrameRequest(ctx);
+  updating = false;
   return true;
 }
 
 void setup() {
+  updating = false;
   Serial.begin(9600);
   while (!Serial && millis() < 10000UL);
   Serial.println("############ NEO6502 FirstKlaas OS v0.0.1 ############");
