@@ -13,6 +13,7 @@
 // https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 // Board: Raspberry Pi Pico
 
+#include "hardware/timer.h"
 #include <PicoDVI.h>
 
 #include "memory.h"
@@ -26,6 +27,14 @@ static TContext ctx;
 static TContextPtr ctxPtr(&ctx);
 
 unsigned long lastClockTS;
+
+bool frame_update_callback(struct repeating_timer *t) {
+  //clearDisplay();
+  //drawSprites((TContextPtr)t->user_data);
+  updateDisplay();
+  raiseFrameRequest((TContextPtr)t->user_data);
+  return true;
+}
 
 void setup() {
   Serial.begin(9600);
@@ -49,10 +58,23 @@ void setup() {
 
   reset6502();
 
-  sleep_ms(2000);
+  // Adding a repeating timer for the frame 
+  // updates. We use a negative value, so the time between
+  // calls is including the execution time
+  add_repeating_timer_us(-(FRAMETIME*1000), frame_update_callback, ctxPtr, &frame_timer);
+
+  //sleep_ms(2000);
   Serial.println("Starting programm");
+  while(true) {
+    tick6502(ctxPtr);
+    checkCIA(ctxPtr);    
+  }
 }
 
+
+/**
+ * Never gets called.
+ */
 void loop() {
   //gpio_put(uP_TICKCYCLE_PIN, true);
   tick6502(ctxPtr);
