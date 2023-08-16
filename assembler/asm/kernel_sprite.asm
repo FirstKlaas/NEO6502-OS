@@ -131,3 +131,56 @@ SPRITE_HEIGHT:      .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 00-0
 
 SPRITE_DATA_LO:     .fill 32, 0
 SPRITE_DATA_HI:     .fill 32, 0
+
+// ===============================================================================
+find_next_free_bullet: {
+    ldx ALIEN_BULLETS_COUNT
+    sec // Set carry flag (inicating we found a slot)
+!loop:
+    lda ALIEN_BULLETS_STAT,x 
+    bpl !end+ // We found a free slot. The index is in x register
+    dex
+    bpl !loop-
+    // We didn't found one
+    clc // Clear carry to indicate, we didn't found a free slot.
+!end:    
+    rts
+}
+
+// ===============================================================================
+draw_alien_bullets: {
+    ldx ALIEN_BULLETS_COUNT
+!loop:
+    lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
+    bpl !next+ // If bit 7 = 0 => bullet is not visible
+// Draw bullet
+draw_bullet:
+
+// Move bullet
+move_bullet:
+    lda ALIEN_BULLETS_y,x 
+    clc 
+    adc ALIEN_BULLETS_SPEED,x 
+    sta ALIEN_BULLETS_y,x 
+
+// Check ypos of bullet
+check_bullet:
+    cmp #100    // if ypos > 100 free bullet 
+    bmi !next+
+// Free bullet
+free_bullet:
+    lda ALIEN_BULLETS_STAT,x 
+    and #%01111111
+    sta ALIEN_BULLETS_STAT,x
+!next:
+    dex
+    bpl !loop-
+    rts
+}
+
+
+ALIEN_BULLETS_COUNT: .byte $05 
+ALIEN_BULLETS_STAT:  .fill $05, $04 // Bit 0..3 length
+ALIEN_BULLETS_X:     .fill $05, $00 // xpos. If xpos > 255; stat bit 6 = 1
+ALIEN_BULLETS_y:     .fill $05, $00 // ypos of the top
+ALIEN_BULLETS_SPEED: .fill $05, $02
