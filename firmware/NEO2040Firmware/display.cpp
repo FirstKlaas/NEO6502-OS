@@ -246,9 +246,6 @@ void updateDisplay(TContextPtr ctx)
     display.swap(true, false);
   };
   screendata.needsRefresh = 0;
-  ctx->frame_number++;
-  ctx->memory[0xd0fd] = (ctx->frame_number & 0xff);
-  ctx->memory[0xd0fe] = ((ctx->frame_number >> 8) & 0xff);
 }
 
 void writeChar(TContextPtr ctx, uint8_t c)

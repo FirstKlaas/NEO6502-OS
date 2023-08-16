@@ -25,6 +25,7 @@
 
 static TContext ctx;
 static TContextPtr ctxPtr(&ctx);
+static repeating_timer_t frame_timer;
 
 unsigned long lastClockTS;
 
@@ -89,5 +90,4 @@ void loop() {
     //gpio_put(uP_CLOCKCYCLE_PIN, false);
   }
   checkCIA(ctxPtr);
-  
 }

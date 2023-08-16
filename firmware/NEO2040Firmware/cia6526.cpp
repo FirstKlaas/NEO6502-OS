@@ -328,9 +328,10 @@ void checkTimer(TContextPtr ctx) {
 
 void raiseFrameRequest(TContextPtr ctx) {
   ctx->frame_number++;
-    
+  ctx->memory[0xd0fd] = (ctx->frame_number & 0xff);
+  ctx->memory[0xd0fe] = ((ctx->frame_number >> 8) & 0xff);
+
   if (ctx->cia.irq_active) return;
-  ctx->memory[DIS] = ctx->frame_number & 0xff;
   ctx->cia.raised_interrupts |= FRAME_INTERRUPT_FLAG;
 }
 
