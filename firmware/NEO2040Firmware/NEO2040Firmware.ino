@@ -54,17 +54,17 @@ void setup() {
 }
 
 void loop() {
-  gpio_put(uP_TICKCYCLE_PIN, true);
+  //gpio_put(uP_TICKCYCLE_PIN, true);
   tick6502(ctxPtr);
-  gpio_put(uP_TICKCYCLE_PIN, false);
+  //gpio_put(uP_TICKCYCLE_PIN, false);
   if ((millis() - lastClockTS) >= FRAMETIME) {
     lastClockTS = millis();
-    gpio_put(uP_CLOCKCYCLE_PIN, true);
+    //gpio_put(uP_CLOCKCYCLE_PIN, true);
     //clearDisplay();
     drawSprites(ctxPtr);
     updateDisplay(ctxPtr);
     raiseFrameRequest(ctxPtr);
-    gpio_put(uP_CLOCKCYCLE_PIN, false);
+    //gpio_put(uP_CLOCKCYCLE_PIN, false);
   }
   checkCIA(ctxPtr);
   
