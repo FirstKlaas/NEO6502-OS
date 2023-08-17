@@ -53,6 +53,8 @@
 08df: 6e 65 6c 20 53 69 7a 65 20 39 37 34 20 62 79 74 
 08ef: 65 73                                           
 08f1: 00        -         .byte 0
+08f2: 46 52 41 4d 45 3a                                - txt_frame:.text "FRAME:"
+08f8: 00        -         .byte 0
 
 [ISR]
 0a00: 48        - main_isr:pha
@@ -116,81 +118,89 @@
 0a82: 20 0c e1  -         jsr set_cursor_x_
 0a85: a9 17     -         lda #ypos
 0a87: 20 24 e1  -         jsr set_cursor_y_    
-0a8a: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
-0a8d: 8d 63 e6  -         sta HTD_IN
-0a90: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
-0a93: 8d 64 e6  -         sta HTD_IN+1
-0a96: 20 68 e6  -         jsr bcd_convert_word_
-0a99: ad 67 e6  -         lda HTD_OUT+2
-0a9c: 20 c8 e1  -         jsr print_hex_
-0a9f: ad 66 e6  -         lda HTD_OUT+1
-0aa2: 20 c8 e1  -         jsr print_hex_
-0aa5: ad 65 e6  -         lda HTD_OUT
-0aa8: 20 c8 e1  -         jsr print_hex_
-0aab: 20 bf e5  -         jsr find_next_invisible_bullet
-0aae: 90 14     -         bcc draw_bullet
-0ab0: a9 80     -         lda #$80
-0ab2: 9d 1f e6  -         sta ALIEN_BULLETS_STAT,x 
-0ab5: a9 64     -         lda #100
-0ab7: 8d 24 e6  -         sta ALIEN_BULLETS_X
-0aba: a9 14     -         lda #20
-0abc: 8d 29 e6  -         sta ALIEN_BULLETS_y
-0abf: a9 01     -         lda #1
-0ac1: 8d 2e e6  -         sta ALIEN_BULLETS_SPEED
-0ac4: 20 d3 e5  - draw_bullet:jsr update_alien_bullets
-0ac7: ad df e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
-0aca: c9 0a     -         cmp #10             // 10 is the minimum x position
-0acc: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
-0ace: a9 01     - left_underflow:lda #$01
-0ad0: 8d 1f 0b  -         sta operation+1
-0ad3: 4c e2 0a  -         jmp go_down 
-0ad6: ad e6 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
-0ad9: c9 ef     -         cmp #$ef            // Max xpos = 239
-0adb: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
-0add: a9 ff     - right_overflow:lda #$ff            // By adding -1, we move left.
-0adf: 8d 1f 0b  -         sta operation+1     // Write the new speed to the code (self modified)    
-0ae2: ad ff e4  - go_down:lda SPRITE_YPOS
-0ae5: c9 96     -         cmp #150
-0ae7: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
-0ae9: a0 08     - reset_ypos:ldy #8
-0aeb: a9 20     -         lda #$20              // Start Y position
-0aed: 99 ff e4  -         sta SPRITE_YPOS,y 
-0af0: 88        -         dey
-0af1: 10 fa     -         bpl !loop-
-0af3: a0 08     -         ldy #8
-0af5: a9 30     -         lda #$30              // Start Y position
-0af7: 99 07 e5  -         sta SPRITE_YPOS+8,y 
-0afa: 88        -         dey
-0afb: 10 fa     -         bpl !loop-
-0afd: a0 08     -         ldy #8
-0aff: a9 40     -         lda #$40              // Start Y position
-0b01: 99 0f e5  -         sta SPRITE_YPOS+16,y 
-0b04: 88        -         dey
-0b05: 10 fa     -         bpl !loop-
-0b07: 4c 18 0b  -         jmp move    
-0b0a: a0 18     - decrease:ldy #24             // Calculate position fpr 24 sprites
-0b0c: b9 ff e4  -         lda SPRITE_YPOS,y 
-0b0f: 18        -         clc
-0b10: 69 04     -         adc #4
-0b12: 99 ff e4  -         sta SPRITE_YPOS,y 
-0b15: 88        -         dey
-0b16: 10 f4     -         bpl !loop-
-0b18: a0 07     - move:   ldy #7               // Y is the sprite index. We have 8 sprites in a row 
-0b1a: b9 df e4  -         lda SPRITE_XPOS,y    // Load current x position of the sprite   
+0a8a: a9 f2     -         lda #<addr
+0a8c: 85 e0     -         sta zpRegE0
+0a8e: a9 08     -         lda #>addr
+0a90: 85 e1     -         sta zpRegE1
+0a92: 20 b0 e1  -         jsr print_text_
+0a95: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
+0a98: 8d 63 e6  -         sta HTD_IN
+0a9b: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
+0a9e: 8d 64 e6  -         sta HTD_IN+1
+0aa1: 20 68 e6  -         jsr bcd_convert_word_
+0aa4: ad 67 e6  -         lda HTD_OUT+2
+0aa7: 20 c8 e1  -         jsr print_hex_
+0aaa: ad 66 e6  -         lda HTD_OUT+1
+0aad: 20 c8 e1  -         jsr print_hex_
+0ab0: ad 65 e6  -         lda HTD_OUT
+0ab3: 20 c8 e1  -         jsr print_hex_
+0ab6: 20 bf e5  -         jsr find_next_invisible_bullet
+0ab9: 90 17     -         bcc draw_bullets
+0abb: 8a        -         txa
+0abc: 0a        -         asl
+0abd: 18        -         clc
+0abe: 69 80     -         adc #$80
+0ac0: 9d 1f e6  -         sta ALIEN_BULLETS_STAT,x 
+0ac3: a9 64     -         lda #100
+0ac5: 9d 24 e6  -         sta ALIEN_BULLETS_X,x
+0ac8: a9 00     -         lda #0
+0aca: 9d 29 e6  -         sta ALIEN_BULLETS_y,x
+0acd: a9 01     -         lda #1
+0acf: 9d 2e e6  -         sta ALIEN_BULLETS_SPEED,x
+0ad2: 20 d3 e5  - draw_bullets:jsr update_alien_bullets
+0ad5: ad df e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
+0ad8: c9 0a     -         cmp #10             // 10 is the minimum x position
+0ada: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
+0adc: a9 01     - left_underflow:lda #$01
+0ade: 8d 2d 0b  -         sta operation+1
+0ae1: 4c f0 0a  -         jmp go_down 
+0ae4: ad e6 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
+0ae7: c9 ef     -         cmp #$ef            // Max xpos = 239
+0ae9: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
+0aeb: a9 ff     - right_overflow:lda #$ff            // By adding -1, we move left.
+0aed: 8d 2d 0b  -         sta operation+1     // Write the new speed to the code (self modified)    
+0af0: ad ff e4  - go_down:lda SPRITE_YPOS
+0af3: c9 96     -         cmp #150
+0af5: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
+0af7: a0 08     - reset_ypos:ldy #8
+0af9: a9 20     -         lda #$20              // Start Y position
+0afb: 99 ff e4  -         sta SPRITE_YPOS,y 
+0afe: 88        -         dey
+0aff: 10 fa     -         bpl !loop-
+0b01: a0 08     -         ldy #8
+0b03: a9 30     -         lda #$30              // Start Y position
+0b05: 99 07 e5  -         sta SPRITE_YPOS+8,y 
+0b08: 88        -         dey
+0b09: 10 fa     -         bpl !loop-
+0b0b: a0 08     -         ldy #8
+0b0d: a9 40     -         lda #$40              // Start Y position
+0b0f: 99 0f e5  -         sta SPRITE_YPOS+16,y 
+0b12: 88        -         dey
+0b13: 10 fa     -         bpl !loop-
+0b15: 4c 26 0b  -         jmp move    
+0b18: a0 18     - decrease:ldy #24             // Calculate position fpr 24 sprites
+0b1a: b9 ff e4  -         lda SPRITE_YPOS,y 
 0b1d: 18        -         clc
-0b1e: 69 01     - operation:adc #1               // Add the speed
-0b20: 99 df e4  -         sta SPRITE_XPOS,y    // save the new xpos 
-0b23: 99 e7 e4  -         sta SPRITE_XPOS+8,y  // Also for the second row
-0b26: 99 ef e4  -         sta SPRITE_XPOS+16,y // Also for the second row
-0b29: 88        -         dey
-0b2a: 10 ee     -         bpl !loop-
-0b2c: ad 0d dc  - exit:   lda $dc0d            // Acknowledge the IRQ            
-0b2f: 68        -         pla
-0b30: a8        -         tay 
-0b31: 68        -         pla 
-0b32: aa        -         tax 
-0b33: 68        -         pla
-0b34: 40        -         rti
+0b1e: 69 04     -         adc #4
+0b20: 99 ff e4  -         sta SPRITE_YPOS,y 
+0b23: 88        -         dey
+0b24: 10 f4     -         bpl !loop-
+0b26: a0 07     - move:   ldy #7               // Y is the sprite index. We have 8 sprites in a row 
+0b28: b9 df e4  -         lda SPRITE_XPOS,y    // Load current x position of the sprite   
+0b2b: 18        -         clc
+0b2c: 69 01     - operation:adc #1               // Add the speed
+0b2e: 99 df e4  -         sta SPRITE_XPOS,y    // save the new xpos 
+0b31: 99 e7 e4  -         sta SPRITE_XPOS+8,y  // Also for the second row
+0b34: 99 ef e4  -         sta SPRITE_XPOS+16,y // Also for the second row
+0b37: 88        -         dey
+0b38: 10 ee     -         bpl !loop-
+0b3a: ad 0d dc  - exit:   lda $dc0d            // Acknowledge the IRQ            
+0b3d: 68        -         pla
+0b3e: a8        -         tay 
+0b3f: 68        -         pla 
+0b40: aa        -         tax 
+0b41: 68        -         pla
+0b42: 40        -         rti
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_
@@ -670,7 +680,7 @@ e5f2: a9 04     -         lda #4      // Length Low
 e5f4: 8d 18 d0  -         sta DIS03
 e5f7: a9 00     -         lda #0      // Length High
 e5f9: 8d 19 d0  -         sta DIS04   
-e5fc: a9 2c     -         lda #44     // Color
+e5fc: a9 17     -         lda #23     // Color
 e5fe: 8d 1a d0  -         sta DIS05
 e601: 20 eb e1  -         jsr draw_horizonal_line_
 e604: bd 29 e6  - move_bullet:lda ALIEN_BULLETS_y,x 

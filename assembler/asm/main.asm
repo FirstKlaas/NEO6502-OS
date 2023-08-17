@@ -100,6 +100,10 @@ welcome:        .encoding "ascii"
                 .text "NE/OS v0.1 - Kernel Size 974 bytes"
                 .byte 0
 
+txt_frame:      .encoding "ascii"
+                .text "FRAME:"
+                .byte 0
+
                 * = $0A00 "ISR"
 /*  ====================================================================================
     MAIN ISR ROUTINE
@@ -138,6 +142,7 @@ main_isr:  {
             SetForgroundColorI(43)
             // Printing the frame numer to the screen
             SetCursorI(2,23)
+            PrintText(txt_frame)
             lda $d0fd       // Framecounter LO Byte
             sta HTD_IN
             lda $d0fe       // Framecounter HI Byte
@@ -149,19 +154,36 @@ main_isr:  {
             jsr print_hex_
             lda HTD_OUT
             jsr print_hex_
+            SetCursorI(9,24)
+            lda ALIEN_BULLETS_y
+            jsr print_hex_
+            SetCursorI(12,24)
+            lda ALIEN_BULLETS_y+1
+            jsr print_hex_
+            SetCursorI(15,24)
+            lda ALIEN_BULLETS_y+2
+            jsr print_hex_
+            SetCursorI(18,24)
+            lda ALIEN_BULLETS_y+3
+            jsr print_hex_
+            
+            
 
             // Bullet test
             jsr find_next_invisible_bullet
-            bcc draw_bullet
-            lda #$80
+            bcc draw_bullets
+            txa
+            asl
+            clc
+            adc #$80
             sta ALIEN_BULLETS_STAT,x 
             lda #100
-            sta ALIEN_BULLETS_X
-            lda #20
-            sta ALIEN_BULLETS_y
+            sta ALIEN_BULLETS_X,x
+            lda #0
+            sta ALIEN_BULLETS_y,x
             lda #1
-            sta ALIEN_BULLETS_SPEED
-draw_bullet:            
+            sta ALIEN_BULLETS_SPEED,x
+draw_bullets:            
             jsr update_alien_bullets
 
 check_left:           

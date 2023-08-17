@@ -185,7 +185,7 @@ draw_bullet:
     sta DIS03
     lda #0      // Length High
     sta DIS04   
-    lda #44     // Color
+    lda #23     // Color
     sta DIS05
     jsr draw_horizonal_line_
 
