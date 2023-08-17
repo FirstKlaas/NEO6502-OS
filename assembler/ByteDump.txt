@@ -26,7 +26,7 @@
 0837: a9 08     -         lda #>addr
 0839: 85 e1     -         sta zpRegE1
 083b: 20 b0 e1  -         jsr print_text_
-083e: 20 4a e2  -         jsr init_sprites_
+083e: 20 5d e2  -         jsr init_sprites_
 0841: 4c 41 08  -         jmp !end-
 0844: a9 f0     - setup_timer:lda #$f0
 0846: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
@@ -75,9 +75,9 @@
 0a21: 8d 1a d0  -         sta DIS05
 0a24: a9 37     -         lda #col 
 0a26: 8d 1b d0  -         sta DIS06
-0a29: 20 24 e2  -         jsr fill_rect_
+0a29: 20 37 e2  -         jsr fill_rect_
 0a2c: 68        -         pla 
-0a2d: 20 37 e2  -         jsr draw_sprites_
+0a2d: 20 4a e2  -         jsr draw_sprites_
 0a30: 48        -         pha
 0a31: a9 05     -         lda #xlo
 0a33: 8d 15 d0  -         sta DIS00
@@ -93,7 +93,7 @@
 0a4c: 8d 1a d0  -         sta DIS05
 0a4f: a9 2a     -         lda #col 
 0a51: 8d 1b d0  -         sta DIS06
-0a54: 20 24 e2  -         jsr fill_rect_
+0a54: 20 37 e2  -         jsr fill_rect_
 0a57: 68        -         pla 
 0a58: 48        -         pha
 0a59: a9 05     -         lda #xlo
@@ -117,69 +117,80 @@
 0a85: a9 17     -         lda #ypos
 0a87: 20 24 e1  -         jsr set_cursor_y_    
 0a8a: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
-0a8d: 8d 21 e6  -         sta HTD_IN
+0a8d: 8d 63 e6  -         sta HTD_IN
 0a90: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
-0a93: 8d 22 e6  -         sta HTD_IN+1
-0a96: 20 26 e6  -         jsr bcd_convert_word_
-0a99: ad 25 e6  -         lda HTD_OUT+2
+0a93: 8d 64 e6  -         sta HTD_IN+1
+0a96: 20 68 e6  -         jsr bcd_convert_word_
+0a99: ad 67 e6  -         lda HTD_OUT+2
 0a9c: 20 c8 e1  -         jsr print_hex_
-0a9f: ad 24 e6  -         lda HTD_OUT+1
+0a9f: ad 66 e6  -         lda HTD_OUT+1
 0aa2: 20 c8 e1  -         jsr print_hex_
-0aa5: ad 23 e6  -         lda HTD_OUT
+0aa5: ad 65 e6  -         lda HTD_OUT
 0aa8: 20 c8 e1  -         jsr print_hex_
-0aab: ad cc e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
-0aae: c9 0a     -         cmp #10             // 10 is the minimum x position
-0ab0: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
-0ab2: a9 01     - left_underflow:lda #$01
-0ab4: 8d 03 0b  -         sta operation+1
-0ab7: 4c c6 0a  -         jmp go_down 
-0aba: ad d3 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
-0abd: c9 ef     -         cmp #$ef            // Max xpos = 239
-0abf: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
-0ac1: a9 ff     - right_overflow:lda #$ff            // By adding -1, we move left.
-0ac3: 8d 03 0b  -         sta operation+1     // Write the new speed to the code (self modified)    
-0ac6: ad ec e4  - go_down:lda SPRITE_YPOS
-0ac9: c9 96     -         cmp #150
-0acb: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
-0acd: a0 08     - reset_ypos:ldy #8
-0acf: a9 20     -         lda #$20              // Start Y position
-0ad1: 99 ec e4  -         sta SPRITE_YPOS,y 
-0ad4: 88        -         dey
-0ad5: 10 fa     -         bpl !loop-
-0ad7: a0 08     -         ldy #8
-0ad9: a9 30     -         lda #$30              // Start Y position
-0adb: 99 f4 e4  -         sta SPRITE_YPOS+8,y 
-0ade: 88        -         dey
-0adf: 10 fa     -         bpl !loop-
-0ae1: a0 08     -         ldy #8
-0ae3: a9 40     -         lda #$40              // Start Y position
-0ae5: 99 fc e4  -         sta SPRITE_YPOS+16,y 
-0ae8: 88        -         dey
-0ae9: 10 fa     -         bpl !loop-
-0aeb: 4c fc 0a  -         jmp move    
-0aee: a0 18     - decrease:ldy #24             // Calculate position fpr 24 sprites
-0af0: b9 ec e4  -         lda SPRITE_YPOS,y 
-0af3: 18        -         clc
-0af4: 69 04     -         adc #4
-0af6: 99 ec e4  -         sta SPRITE_YPOS,y 
-0af9: 88        -         dey
-0afa: 10 f4     -         bpl !loop-
-0afc: a0 07     - move:   ldy #7               // Y is the sprite index. We have 8 sprites in a row 
-0afe: b9 cc e4  -         lda SPRITE_XPOS,y    // Load current x position of the sprite   
-0b01: 18        -         clc
-0b02: 69 01     - operation:adc #1               // Add the speed
-0b04: 99 cc e4  -         sta SPRITE_XPOS,y    // save the new xpos 
-0b07: 99 d4 e4  -         sta SPRITE_XPOS+8,y  // Also for the second row
-0b0a: 99 dc e4  -         sta SPRITE_XPOS+16,y // Also for the second row
-0b0d: 88        -         dey
-0b0e: 10 ee     -         bpl !loop-
-0b10: ad 0d dc  - exit:   lda $dc0d            // Acknowledge the IRQ            
-0b13: 68        -         pla
-0b14: a8        -         tay 
-0b15: 68        -         pla 
-0b16: aa        -         tax 
-0b17: 68        -         pla
-0b18: 40        -         rti
+0aab: 20 bf e5  -         jsr find_next_invisible_bullet
+0aae: 90 14     -         bcc draw_bullet
+0ab0: a9 80     -         lda #$80
+0ab2: 9d 1f e6  -         sta ALIEN_BULLETS_STAT,x 
+0ab5: a9 64     -         lda #100
+0ab7: 8d 24 e6  -         sta ALIEN_BULLETS_X
+0aba: a9 14     -         lda #20
+0abc: 8d 29 e6  -         sta ALIEN_BULLETS_y
+0abf: a9 01     -         lda #1
+0ac1: 8d 2e e6  -         sta ALIEN_BULLETS_SPEED
+0ac4: 20 d3 e5  - draw_bullet:jsr update_alien_bullets
+0ac7: ad df e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
+0aca: c9 0a     -         cmp #10             // 10 is the minimum x position
+0acc: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
+0ace: a9 01     - left_underflow:lda #$01
+0ad0: 8d 1f 0b  -         sta operation+1
+0ad3: 4c e2 0a  -         jmp go_down 
+0ad6: ad e6 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
+0ad9: c9 ef     -         cmp #$ef            // Max xpos = 239
+0adb: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
+0add: a9 ff     - right_overflow:lda #$ff            // By adding -1, we move left.
+0adf: 8d 1f 0b  -         sta operation+1     // Write the new speed to the code (self modified)    
+0ae2: ad ff e4  - go_down:lda SPRITE_YPOS
+0ae5: c9 96     -         cmp #150
+0ae7: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
+0ae9: a0 08     - reset_ypos:ldy #8
+0aeb: a9 20     -         lda #$20              // Start Y position
+0aed: 99 ff e4  -         sta SPRITE_YPOS,y 
+0af0: 88        -         dey
+0af1: 10 fa     -         bpl !loop-
+0af3: a0 08     -         ldy #8
+0af5: a9 30     -         lda #$30              // Start Y position
+0af7: 99 07 e5  -         sta SPRITE_YPOS+8,y 
+0afa: 88        -         dey
+0afb: 10 fa     -         bpl !loop-
+0afd: a0 08     -         ldy #8
+0aff: a9 40     -         lda #$40              // Start Y position
+0b01: 99 0f e5  -         sta SPRITE_YPOS+16,y 
+0b04: 88        -         dey
+0b05: 10 fa     -         bpl !loop-
+0b07: 4c 18 0b  -         jmp move    
+0b0a: a0 18     - decrease:ldy #24             // Calculate position fpr 24 sprites
+0b0c: b9 ff e4  -         lda SPRITE_YPOS,y 
+0b0f: 18        -         clc
+0b10: 69 04     -         adc #4
+0b12: 99 ff e4  -         sta SPRITE_YPOS,y 
+0b15: 88        -         dey
+0b16: 10 f4     -         bpl !loop-
+0b18: a0 07     - move:   ldy #7               // Y is the sprite index. We have 8 sprites in a row 
+0b1a: b9 df e4  -         lda SPRITE_XPOS,y    // Load current x position of the sprite   
+0b1d: 18        -         clc
+0b1e: 69 01     - operation:adc #1               // Add the speed
+0b20: 99 df e4  -         sta SPRITE_XPOS,y    // save the new xpos 
+0b23: 99 e7 e4  -         sta SPRITE_XPOS+8,y  // Also for the second row
+0b26: 99 ef e4  -         sta SPRITE_XPOS+16,y // Also for the second row
+0b29: 88        -         dey
+0b2a: 10 ee     -         bpl !loop-
+0b2c: ad 0d dc  - exit:   lda $dc0d            // Acknowledge the IRQ            
+0b2f: 68        -         pla
+0b30: a8        -         tay 
+0b31: 68        -         pla 
+0b32: aa        -         tax 
+0b33: 68        -         pla
+0b34: 40        -         rti
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_
@@ -309,7 +320,7 @@ e1f5: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
 e1f8: 2c 13 d0  - wait_for_ready:bit DISCR               // Check, if the excecution/irg flag is cleared
 e1fb: 30 fb     -         bmi wait_for_ready      // No! Let's wait
 e1fd: 60        -         rts
-e1fe: a9 0f     - clear_screen_:lda #CMD_CLEAR_SCREEN
+e1fe: a9 16     - draw_vertical_line_:lda #CMD_DRAW_VLINE
 e200: 8d 14 d0  -         sta DISCMD
 e203: ad 13 d0  -         lda DISCR
 e206: 09 80     -         ora #$80
@@ -317,7 +328,7 @@ e208: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
 e20b: 2c 13 d0  - wait_for_ready:bit DISCR               // Check, if the excecution/irg flag is cleared
 e20e: 30 fb     -         bmi wait_for_ready      // No! Let's wait
 e210: 60        -         rts
-e211: a9 1a     - draw_rect_:lda #CMD_DRAW_RECT
+e211: a9 0f     - clear_screen_:lda #CMD_CLEAR_SCREEN
 e213: 8d 14 d0  -         sta DISCMD
 e216: ad 13 d0  -         lda DISCR
 e219: 09 80     -         ora #$80
@@ -325,7 +336,7 @@ e21b: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
 e21e: 2c 13 d0  - wait_for_ready:bit DISCR               // Check, if the excecution/irg flag is cleared
 e221: 30 fb     -         bmi wait_for_ready      // No! Let's wait
 e223: 60        -         rts
-e224: a9 1b     - fill_rect_:lda #CMD_FILL_RECT
+e224: a9 1a     - draw_rect_:lda #CMD_DRAW_RECT
 e226: 8d 14 d0  -         sta DISCMD
 e229: ad 13 d0  -         lda DISCR
 e22c: 09 80     -         ora #$80
@@ -333,7 +344,7 @@ e22e: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
 e231: 2c 13 d0  - wait_for_ready:bit DISCR               // Check, if the excecution/irg flag is cleared
 e234: 30 fb     -         bmi wait_for_ready      // No! Let's wait
 e236: 60        -         rts
-e237: a9 1e     - draw_sprites_:lda #CMD_DRAW_SPRITES
+e237: a9 1b     - fill_rect_:lda #CMD_FILL_RECT
 e239: 8d 14 d0  -         sta DISCMD
 e23c: ad 13 d0  -         lda DISCR
 e23f: 09 80     -         ora #$80
@@ -341,400 +352,428 @@ e241: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
 e244: 2c 13 d0  - wait_for_ready:bit DISCR               // Check, if the excecution/irg flag is cleared
 e247: 30 fb     -         bmi wait_for_ready      // No! Let's wait
 e249: 60        -         rts
-e24a: a2 00     - init_sprites_:ldx #index
-e24c: a9 7c     -         lda #<address
-e24e: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e251: a9 e4     -         lda #>address
-e253: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e256: a2 08     -         ldx #index
-e258: a9 8c     -         lda #<address
-e25a: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e25d: a9 e4     -         lda #>address
-e25f: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e262: a2 10     -         ldx #index
-e264: a9 9c     -         lda #<address
-e266: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e269: a9 e4     -         lda #>address
-e26b: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e26e: a2 01     -         ldx #index
-e270: a9 7c     -         lda #<address
-e272: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e275: a9 e4     -         lda #>address
-e277: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e27a: a2 09     -         ldx #index
-e27c: a9 8c     -         lda #<address
-e27e: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e281: a9 e4     -         lda #>address
-e283: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e286: a2 11     -         ldx #index
-e288: a9 9c     -         lda #<address
-e28a: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e28d: a9 e4     -         lda #>address
-e28f: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e292: a2 02     -         ldx #index
-e294: a9 7c     -         lda #<address
-e296: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e299: a9 e4     -         lda #>address
-e29b: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e29e: a2 0a     -         ldx #index
-e2a0: a9 8c     -         lda #<address
-e2a2: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e2a5: a9 e4     -         lda #>address
-e2a7: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e2aa: a2 12     -         ldx #index
-e2ac: a9 9c     -         lda #<address
-e2ae: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e2b1: a9 e4     -         lda #>address
-e2b3: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e2b6: a2 03     -         ldx #index
-e2b8: a9 7c     -         lda #<address
-e2ba: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e2bd: a9 e4     -         lda #>address
-e2bf: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e2c2: a2 0b     -         ldx #index
-e2c4: a9 8c     -         lda #<address
-e2c6: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e2c9: a9 e4     -         lda #>address
-e2cb: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e2ce: a2 13     -         ldx #index
-e2d0: a9 9c     -         lda #<address
-e2d2: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e2d5: a9 e4     -         lda #>address
-e2d7: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e2da: a2 04     -         ldx #index
-e2dc: a9 7c     -         lda #<address
-e2de: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e2e1: a9 e4     -         lda #>address
-e2e3: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e2e6: a2 0c     -         ldx #index
-e2e8: a9 8c     -         lda #<address
-e2ea: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e2ed: a9 e4     -         lda #>address
-e2ef: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e2f2: a2 14     -         ldx #index
-e2f4: a9 9c     -         lda #<address
-e2f6: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e2f9: a9 e4     -         lda #>address
-e2fb: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e2fe: a2 05     -         ldx #index
-e300: a9 7c     -         lda #<address
-e302: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e305: a9 e4     -         lda #>address
-e307: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e30a: a2 0d     -         ldx #index
-e30c: a9 8c     -         lda #<address
-e30e: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e311: a9 e4     -         lda #>address
-e313: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e316: a2 15     -         ldx #index
-e318: a9 9c     -         lda #<address
-e31a: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e31d: a9 e4     -         lda #>address
-e31f: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e322: a2 06     -         ldx #index
-e324: a9 7c     -         lda #<address
-e326: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e329: a9 e4     -         lda #>address
-e32b: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e32e: a2 0e     -         ldx #index
-e330: a9 8c     -         lda #<address
-e332: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e335: a9 e4     -         lda #>address
-e337: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e33a: a2 16     -         ldx #index
-e33c: a9 9c     -         lda #<address
-e33e: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e341: a9 e4     -         lda #>address
-e343: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e346: a2 07     -         ldx #index
-e348: a9 7c     -         lda #<address
-e34a: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e34d: a9 e4     -         lda #>address
-e34f: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e352: a2 0f     -         ldx #index
-e354: a9 8c     -         lda #<address
-e356: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e359: a9 e4     -         lda #>address
-e35b: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e35e: a2 17     -         ldx #index
-e360: a9 9c     -         lda #<address
-e362: 9d 6c e5  -         sta SPRITE_DATA_LO, x
-e365: a9 e4     -         lda #>address
-e367: 9d 8c e5  -         sta SPRITE_DATA_HI, x                
-e36a: a2 00     -         ldx #index
-e36c: bd ac e4  -         lda SPRITE_FLAGS, x
-e36f: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e371: 9d ac e4  -         sta SPRITE_FLAGS, x
-e374: a2 01     -         ldx #index
-e376: bd ac e4  -         lda SPRITE_FLAGS, x
-e379: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e37b: 9d ac e4  -         sta SPRITE_FLAGS, x
-e37e: a2 02     -         ldx #index
-e380: bd ac e4  -         lda SPRITE_FLAGS, x
-e383: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e385: 9d ac e4  -         sta SPRITE_FLAGS, x
-e388: a2 03     -         ldx #index
-e38a: bd ac e4  -         lda SPRITE_FLAGS, x
-e38d: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e38f: 9d ac e4  -         sta SPRITE_FLAGS, x
-e392: a2 04     -         ldx #index
-e394: bd ac e4  -         lda SPRITE_FLAGS, x
-e397: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e399: 9d ac e4  -         sta SPRITE_FLAGS, x
-e39c: a2 05     -         ldx #index
-e39e: bd ac e4  -         lda SPRITE_FLAGS, x
-e3a1: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3a3: 9d ac e4  -         sta SPRITE_FLAGS, x
-e3a6: a2 06     -         ldx #index
-e3a8: bd ac e4  -         lda SPRITE_FLAGS, x
-e3ab: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3ad: 9d ac e4  -         sta SPRITE_FLAGS, x
-e3b0: a2 07     -         ldx #index
-e3b2: bd ac e4  -         lda SPRITE_FLAGS, x
-e3b5: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3b7: 9d ac e4  -         sta SPRITE_FLAGS, x
-e3ba: a2 08     -         ldx #index
-e3bc: bd ac e4  -         lda SPRITE_FLAGS, x
-e3bf: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3c1: 9d ac e4  -         sta SPRITE_FLAGS, x
-e3c4: a2 09     -         ldx #index
-e3c6: bd ac e4  -         lda SPRITE_FLAGS, x
-e3c9: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3cb: 9d ac e4  -         sta SPRITE_FLAGS, x
-e3ce: a2 0a     -         ldx #index
-e3d0: bd ac e4  -         lda SPRITE_FLAGS, x
-e3d3: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3d5: 9d ac e4  -         sta SPRITE_FLAGS, x
-e3d8: a2 0b     -         ldx #index
-e3da: bd ac e4  -         lda SPRITE_FLAGS, x
-e3dd: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3df: 9d ac e4  -         sta SPRITE_FLAGS, x
-e3e2: a2 0c     -         ldx #index
-e3e4: bd ac e4  -         lda SPRITE_FLAGS, x
-e3e7: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3e9: 9d ac e4  -         sta SPRITE_FLAGS, x
-e3ec: a2 0d     -         ldx #index
-e3ee: bd ac e4  -         lda SPRITE_FLAGS, x
-e3f1: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3f3: 9d ac e4  -         sta SPRITE_FLAGS, x
-e3f6: a2 0e     -         ldx #index
-e3f8: bd ac e4  -         lda SPRITE_FLAGS, x
-e3fb: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e3fd: 9d ac e4  -         sta SPRITE_FLAGS, x
-e400: a2 0f     -         ldx #index
-e402: bd ac e4  -         lda SPRITE_FLAGS, x
-e405: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e407: 9d ac e4  -         sta SPRITE_FLAGS, x
-e40a: a2 10     -         ldx #index
-e40c: bd ac e4  -         lda SPRITE_FLAGS, x
-e40f: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e411: 9d ac e4  -         sta SPRITE_FLAGS, x
-e414: a2 11     -         ldx #index
-e416: bd ac e4  -         lda SPRITE_FLAGS, x
-e419: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e41b: 9d ac e4  -         sta SPRITE_FLAGS, x
-e41e: a2 12     -         ldx #index
-e420: bd ac e4  -         lda SPRITE_FLAGS, x
-e423: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e425: 9d ac e4  -         sta SPRITE_FLAGS, x
-e428: a2 13     -         ldx #index
-e42a: bd ac e4  -         lda SPRITE_FLAGS, x
-e42d: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e42f: 9d ac e4  -         sta SPRITE_FLAGS, x
-e432: a2 14     -         ldx #index
-e434: bd ac e4  -         lda SPRITE_FLAGS, x
-e437: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e439: 9d ac e4  -         sta SPRITE_FLAGS, x
-e43c: a2 15     -         ldx #index
-e43e: bd ac e4  -         lda SPRITE_FLAGS, x
-e441: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e443: 9d ac e4  -         sta SPRITE_FLAGS, x
-e446: a2 16     -         ldx #index
-e448: bd ac e4  -         lda SPRITE_FLAGS, x
-e44b: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e44d: 9d ac e4  -         sta SPRITE_FLAGS, x
-e450: a2 17     -         ldx #index
-e452: bd ac e4  -         lda SPRITE_FLAGS, x
-e455: 05 c0     -         ora SPRITE_ENABLE_FLAG
-e457: 9d ac e4  -         sta SPRITE_FLAGS, x
-e45a: a9 ac     -         lda #<SPRITE_DEFINITON_BLOCK
-e45c: 8d 15 d0  -         sta DIS00
-e45f: a9 e4     -         lda #>SPRITE_DEFINITON_BLOCK
-e461: 8d 16 d0  -         sta DIS01
-e464: a9 20     -         lda #32                 // Set number of sprites
-e466: 8d 17 d0  -         sta DIS02
-e469: a9 17     -         lda #CMD_SET_SDB        // Command "Set Sprite Definition Block"
-e46b: 8d 14 d0  -         sta DISCMD              //                                          
-e46e: ad 13 d0  -         lda DISCR               // Load Display command register
-e471: 09 80     -         ora #$80                // Set the "Command Exceution" Flag
-e473: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
-e476: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
-e479: 30 fb     -         bmi !wait-              // No! Let's wait
-e47b: 60        -         rts
-e47c: 02 40     - SPACE_ALIEN_A:.byte %00000010, %01000000
-e47e: 07 e0     -         .byte %00000111, %11100000
-e480: 0f f0     -         .byte %00001111, %11110000
-e482: 1d b8     -         .byte %00011101, %10111000
-e484: 17 e8     -         .byte %00010111, %11101000
-e486: 17 e8     -         .byte %00010111, %11101000
-e488: 02 40     -         .byte %00000010, %01000000
-e48a: 06 60     -         .byte %00000110, %01100000
-e48c: 00 00     - SPACE_ALIEN_B:.byte %00000000, %00000000
-e48e: 04 40     -         .byte %00000100, %01000000
-e490: 03 80     -         .byte %00000011, %10000000
-e492: 07 c0     -         .byte %00000111, %11000000
-e494: 05 40     -         .byte %00000101, %01000000
-e496: 07 c0     -         .byte %00000111, %11000000
-e498: 0a a0     -         .byte %00001010, %10100000
-e49a: 0a a0     -         .byte %00001010, %10100000
-e49c: 00 00     - SPACE_ALIEN_C:.byte %00000000, %00000000
-e49e: 04 40     -         .byte %00000100, %01000000
-e4a0: 0f e0     -         .byte %00001111, %11100000
-e4a2: 19 30     -         .byte %00011001, %00110000
-e4a4: 1f f0     -         .byte %00011111, %11110000
-e4a6: 1f f0     -         .byte %00011111, %11110000
-e4a8: 15 50     -         .byte %00010101, %01010000
-e4aa: 0a a0     -         .byte %00001010, %10100000
-e4ac: 80 80 80 80 80 80 80 80                          - SPRITE_DEFINITON_BLOCK,SPRITE_FLAGS:.byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 00-07
-e4b4: 80 80 80 80 80 80 80 80                          -         .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 08-15
-e4bc: 80 80 80 80 80 80 80 80                          -         .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 16-23
-e4c4: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-e4cc: 10 20 30 40 50 60 70 80                          - SPRITE_XPOS:.byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 00-07
-e4d4: 10 20 30 40 50 60 70 80                          -         .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 08-15
-e4dc: 10 20 30 40 50 60 70 80                          -         .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 16-23
-e4e4: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-e4ec: 20 20 20 20 20 20 20 20                          - SPRITE_YPOS:.byte $20, $20, $20, $20, $20, $20, $20, $20  // Sprite 00-07
-e4f4: 30 30 30 30 30 30 30 30                          -         .byte $30, $30, $30, $30, $30, $30, $30, $30  // Sprite 08-15
-e4fc: 40 40 40 40 40 40 40 40                          -         .byte $40, $40, $40, $40, $40, $40, $40, $40  // Sprite 16-23
-e504: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-e50c: 1f 1f 1f 1f 1f 1f 1f 1f                          - SPRITE_COLOR:.byte $1f, $1f, $1f, $1f, $1f, $1f, $1f, $1f  // Sprite 00-07
-e514: 23 23 23 23 23 23 23 23                          -         .byte $23, $23, $23, $23, $23, $23, $23, $23  // Sprite 08-15
-e51c: 2c 2c 2c 2c 2c 2c 2c 2c                          -         .byte $2c, $2c, $2c, $2c, $2c, $2c, $2c, $2c  // Sprite 16-23
-e524: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-e52c: 10 10 10 10 10 10 10 10                          - SPRITE_WIDTH:.byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 00-07
-e534: 10 10 10 10 10 10 10 10                          -         .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 08-15
-e53c: 10 10 10 10 10 10 10 10                          -         .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 16-23
-e544: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-e54c: 08 08 08 08 08 08 08 08                          - SPRITE_HEIGHT:.byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 00-07
-e554: 08 08 08 08 08 08 08 08                          -         .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 08-15
-e55c: 08 08 08 08 08 08 08 08                          -         .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 16-23
-e564: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-e56c: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_LO:.fill 32, 0
-e57c: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
-e58c: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_HI:.fill 32, 0
-e59c: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
-e5ac: ae dc e5  - find_next_free_bullet:ldx ALIEN_BULLETS_COUNT
-e5af: 38        -         sec // Set carry flag (inicating we found a slot)
-e5b0: bd dd e5  -         lda ALIEN_BULLETS_STAT,x 
-e5b3: 10 04     -         bpl !end+ // We found a free slot. The index is in x register
-e5b5: ca        -         dex
-e5b6: 10 f8     -         bpl !loop-
-e5b8: 18        -         clc // Clear carry to indicate, we didn't found a free slot.
-e5b9: 60        -         rts
-e5ba: ae dc e5  - draw_alien_bullets:ldx ALIEN_BULLETS_COUNT
-e5bd: bd dd e5  -         lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
-e5c0: 10 16     -         bpl !next+ // If bit 7 = 0 => bullet is not visible
-e5c2: bd e7 e5  - draw_bullet,move_bullet:lda ALIEN_BULLETS_y,x 
-e5c5: 18        -         clc 
-e5c6: 7d ec e5  -         adc ALIEN_BULLETS_SPEED,x 
-e5c9: 9d e7 e5  -         sta ALIEN_BULLETS_y,x 
-e5cc: c9 64     - check_bullet:cmp #100    // if ypos > 100 free bullet 
-e5ce: 30 08     -         bmi !next+
-e5d0: bd dd e5  - free_bullet:lda ALIEN_BULLETS_STAT,x 
-e5d3: 29 7f     -         and #%01111111
-e5d5: 9d dd e5  -         sta ALIEN_BULLETS_STAT,x
-e5d8: ca        -         dex
-e5d9: 10 e2     -         bpl !loop-
-e5db: 60        -         rts
-e5dc: 05        - ALIEN_BULLETS_COUNT:.byte $05 
-e5dd: 04 04 04 04 04                                   - ALIEN_BULLETS_STAT:.fill $05, $04 // Bit 0..3 length
-e5e2: 00 00 00 00 00                                   - ALIEN_BULLETS_X:.fill $05, $00 // xpos. If xpos > 255; stat bit 6 = 1
-e5e7: 00 00 00 00 00                                   - ALIEN_BULLETS_y:.fill $05, $00 // ypos of the top
-e5ec: 02 02 02 02 02                                   - ALIEN_BULLETS_SPEED:.fill $05, $02
-e5f1: 00 00 01 00 00 02 00 00 04 00 00 08              - BCD_LOOKUP_TABLE:.byte    $00, $00, $01, $00, $00, $02, $00, $00, $04, $00, $00, $08
-e5fd: 00 00 16 00 00 32 00 00 64 00 01 28              -         .byte    $00, $00, $16, $00, $00, $32, $00, $00, $64, $00, $01, $28
-e609: 00 02 56 00 05 12 00 10 24 00 20 48              -         .byte    $00, $02, $56, $00, $05, $12, $00, $10, $24, $00, $20, $48
-e615: 00 40 96 00 81 92 01 63 84 03 27 68              -         .byte    $00, $40, $96, $00, $81, $92, $01, $63, $84, $03, $27, $68
-e621: 00 00     - HTD_IN: .byte $00, $00
-e623: 00 00 00  - HTD_OUT:.byte $00, $00, $00 
-e626: f8        - bcd_convert_word_:sed 
-e627: a9 00     -         lda #0
-e629: 8d 23 e6  -         sta HTD_OUT
-e62c: 8d 24 e6  -         sta HTD_OUT+1
-e62f: 8d 25 e6  -         sta HTD_OUT+2
-e632: a2 2d     -         ldx #$2d
-e634: 0e 21 e6  -         asl HTD_IN 
-e637: 2e 22 e6  -         rol HTD_IN+1
-e63a: 90 1c     -         bcc htd1
-e63c: ad 23 e6  -         lda HTD_OUT
-e63f: 18        -         clc 
-e640: 7d f3 e5  -         adc BCD_LOOKUP_TABLE+2,x
-e643: 8d 23 e6  -         sta HTD_OUT
-e646: ad 24 e6  -         lda HTD_OUT+1
-e649: 7d f2 e5  -         adc BCD_LOOKUP_TABLE+1,x
-e64c: 8d 24 e6  -         sta HTD_OUT+1
-e64f: ad 25 e6  -         lda HTD_OUT+2
-e652: 7d f1 e5  -         adc BCD_LOOKUP_TABLE,x
-e655: 8d 25 e6  -         sta HTD_OUT+2
-e658: ca        - htd1:   dex
-e659: ca        -         dex 
-e65a: ca        -         dex 
-e65b: 10 d7     -         bpl !loop- 
-e65d: d8        -         cld 
-e65e: 60        -         rts
-e65f: a9 1f     - rand8,rand8b1-1:lda rand8b1:#31
-e661: 0a        -         asl
-e662: 49 35     - rand8a1-1:eor rand8a1:#53
-e664: 8d 60 e6  -         sta rand8b1
-e667: 6d 63 e6  -         adc rand8a1
-e66a: 8d 63 e6  -         sta rand8a1
-e66d: 60        -         rts
-e66e: 48        - set_seed:pha
-e66f: 29 d9     -         and #217
-e671: 18        -         clc
-e672: 69 0f     -         adc #<21263
-e674: 8d 63 e6  -         sta rand8a1
-e677: 68        -         pla
-e678: 29 26     -         and #255-217
-e67a: 69 53     -         adc #>21263
-e67c: 8d 60 e6  -         sta rand8b1
-e67f: 60        -         rts
-e680: 48        - byte_to_hex:pha                     // Save value to stack.
-e681: 29 0f     -         and #%00001111
-e683: 85 e0     -         sta zpRegE0             // store the lower nibble
-e685: 68        -         pla                     // Load the original value
-e686: 48        -         pha                     // and save it again
-e687: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
-e688: 4a        -         lsr
-e689: 4a        -         lsr
-e68a: 4a        -         lsr
-e68b: 85 e1     -         sta zpRegE1             // store the higher nibble
-e68d: 68        -         pla                     // restore the accu
-e68e: 60        -         rts
-e68f: a5 e0     - convert565:lda zpRegE0             // red value
-e691: 0a        -         asl                     // shift three to the left as we
-e692: 0a        -         asl                     // need to move the lower 5 bits of red
-e693: 0a        -         asl                     // to the bits 7-5
-e694: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
-e696: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
-e698: 4a        -         lsr                     // lower bits of the output highbyte
-e699: 4a        -         lsr
-e69a: 4a        -         lsr
-e69b: 29 07     -         and #%00000111          // Only the lower three bits.
-e69d: 05 e0     -         ora zpRegE0             // combine this with the compressed red
-e69f: 85 e0     -         sta zpRegE0             // Store the final high byte
-e6a1: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
-e6a3: 0a        -         asl                     // Shift everything 5 bits to the left and fill
-e6a4: 0a        -         asl                     // it with zeros
-e6a5: 0a        -         asl
-e6a6: 0a        -         asl
-e6a7: 0a        -         asl
-e6a8: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
-e6aa: a5 e2     -         lda zpRegE2             // Load blue
-e6ac: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
-e6ae: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
-e6b0: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
-e6b2: 60        -         rts
+e24a: a9 1e     - draw_sprites_:lda #CMD_DRAW_SPRITES
+e24c: 8d 14 d0  -         sta DISCMD
+e24f: ad 13 d0  -         lda DISCR
+e252: 09 80     -         ora #$80
+e254: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+e257: 2c 13 d0  - wait_for_ready:bit DISCR               // Check, if the excecution/irg flag is cleared
+e25a: 30 fb     -         bmi wait_for_ready      // No! Let's wait
+e25c: 60        -         rts
+e25d: a2 00     - init_sprites_:ldx #index
+e25f: a9 8f     -         lda #<address
+e261: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e264: a9 e4     -         lda #>address
+e266: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e269: a2 08     -         ldx #index
+e26b: a9 9f     -         lda #<address
+e26d: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e270: a9 e4     -         lda #>address
+e272: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e275: a2 10     -         ldx #index
+e277: a9 af     -         lda #<address
+e279: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e27c: a9 e4     -         lda #>address
+e27e: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e281: a2 01     -         ldx #index
+e283: a9 8f     -         lda #<address
+e285: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e288: a9 e4     -         lda #>address
+e28a: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e28d: a2 09     -         ldx #index
+e28f: a9 9f     -         lda #<address
+e291: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e294: a9 e4     -         lda #>address
+e296: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e299: a2 11     -         ldx #index
+e29b: a9 af     -         lda #<address
+e29d: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e2a0: a9 e4     -         lda #>address
+e2a2: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e2a5: a2 02     -         ldx #index
+e2a7: a9 8f     -         lda #<address
+e2a9: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e2ac: a9 e4     -         lda #>address
+e2ae: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e2b1: a2 0a     -         ldx #index
+e2b3: a9 9f     -         lda #<address
+e2b5: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e2b8: a9 e4     -         lda #>address
+e2ba: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e2bd: a2 12     -         ldx #index
+e2bf: a9 af     -         lda #<address
+e2c1: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e2c4: a9 e4     -         lda #>address
+e2c6: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e2c9: a2 03     -         ldx #index
+e2cb: a9 8f     -         lda #<address
+e2cd: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e2d0: a9 e4     -         lda #>address
+e2d2: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e2d5: a2 0b     -         ldx #index
+e2d7: a9 9f     -         lda #<address
+e2d9: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e2dc: a9 e4     -         lda #>address
+e2de: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e2e1: a2 13     -         ldx #index
+e2e3: a9 af     -         lda #<address
+e2e5: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e2e8: a9 e4     -         lda #>address
+e2ea: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e2ed: a2 04     -         ldx #index
+e2ef: a9 8f     -         lda #<address
+e2f1: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e2f4: a9 e4     -         lda #>address
+e2f6: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e2f9: a2 0c     -         ldx #index
+e2fb: a9 9f     -         lda #<address
+e2fd: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e300: a9 e4     -         lda #>address
+e302: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e305: a2 14     -         ldx #index
+e307: a9 af     -         lda #<address
+e309: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e30c: a9 e4     -         lda #>address
+e30e: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e311: a2 05     -         ldx #index
+e313: a9 8f     -         lda #<address
+e315: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e318: a9 e4     -         lda #>address
+e31a: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e31d: a2 0d     -         ldx #index
+e31f: a9 9f     -         lda #<address
+e321: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e324: a9 e4     -         lda #>address
+e326: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e329: a2 15     -         ldx #index
+e32b: a9 af     -         lda #<address
+e32d: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e330: a9 e4     -         lda #>address
+e332: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e335: a2 06     -         ldx #index
+e337: a9 8f     -         lda #<address
+e339: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e33c: a9 e4     -         lda #>address
+e33e: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e341: a2 0e     -         ldx #index
+e343: a9 9f     -         lda #<address
+e345: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e348: a9 e4     -         lda #>address
+e34a: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e34d: a2 16     -         ldx #index
+e34f: a9 af     -         lda #<address
+e351: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e354: a9 e4     -         lda #>address
+e356: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e359: a2 07     -         ldx #index
+e35b: a9 8f     -         lda #<address
+e35d: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e360: a9 e4     -         lda #>address
+e362: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e365: a2 0f     -         ldx #index
+e367: a9 9f     -         lda #<address
+e369: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e36c: a9 e4     -         lda #>address
+e36e: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e371: a2 17     -         ldx #index
+e373: a9 af     -         lda #<address
+e375: 9d 7f e5  -         sta SPRITE_DATA_LO, x
+e378: a9 e4     -         lda #>address
+e37a: 9d 9f e5  -         sta SPRITE_DATA_HI, x                
+e37d: a2 00     -         ldx #index
+e37f: bd bf e4  -         lda SPRITE_FLAGS, x
+e382: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e384: 9d bf e4  -         sta SPRITE_FLAGS, x
+e387: a2 01     -         ldx #index
+e389: bd bf e4  -         lda SPRITE_FLAGS, x
+e38c: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e38e: 9d bf e4  -         sta SPRITE_FLAGS, x
+e391: a2 02     -         ldx #index
+e393: bd bf e4  -         lda SPRITE_FLAGS, x
+e396: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e398: 9d bf e4  -         sta SPRITE_FLAGS, x
+e39b: a2 03     -         ldx #index
+e39d: bd bf e4  -         lda SPRITE_FLAGS, x
+e3a0: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3a2: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3a5: a2 04     -         ldx #index
+e3a7: bd bf e4  -         lda SPRITE_FLAGS, x
+e3aa: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3ac: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3af: a2 05     -         ldx #index
+e3b1: bd bf e4  -         lda SPRITE_FLAGS, x
+e3b4: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3b6: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3b9: a2 06     -         ldx #index
+e3bb: bd bf e4  -         lda SPRITE_FLAGS, x
+e3be: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3c0: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3c3: a2 07     -         ldx #index
+e3c5: bd bf e4  -         lda SPRITE_FLAGS, x
+e3c8: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3ca: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3cd: a2 08     -         ldx #index
+e3cf: bd bf e4  -         lda SPRITE_FLAGS, x
+e3d2: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3d4: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3d7: a2 09     -         ldx #index
+e3d9: bd bf e4  -         lda SPRITE_FLAGS, x
+e3dc: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3de: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3e1: a2 0a     -         ldx #index
+e3e3: bd bf e4  -         lda SPRITE_FLAGS, x
+e3e6: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3e8: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3eb: a2 0b     -         ldx #index
+e3ed: bd bf e4  -         lda SPRITE_FLAGS, x
+e3f0: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3f2: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3f5: a2 0c     -         ldx #index
+e3f7: bd bf e4  -         lda SPRITE_FLAGS, x
+e3fa: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e3fc: 9d bf e4  -         sta SPRITE_FLAGS, x
+e3ff: a2 0d     -         ldx #index
+e401: bd bf e4  -         lda SPRITE_FLAGS, x
+e404: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e406: 9d bf e4  -         sta SPRITE_FLAGS, x
+e409: a2 0e     -         ldx #index
+e40b: bd bf e4  -         lda SPRITE_FLAGS, x
+e40e: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e410: 9d bf e4  -         sta SPRITE_FLAGS, x
+e413: a2 0f     -         ldx #index
+e415: bd bf e4  -         lda SPRITE_FLAGS, x
+e418: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e41a: 9d bf e4  -         sta SPRITE_FLAGS, x
+e41d: a2 10     -         ldx #index
+e41f: bd bf e4  -         lda SPRITE_FLAGS, x
+e422: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e424: 9d bf e4  -         sta SPRITE_FLAGS, x
+e427: a2 11     -         ldx #index
+e429: bd bf e4  -         lda SPRITE_FLAGS, x
+e42c: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e42e: 9d bf e4  -         sta SPRITE_FLAGS, x
+e431: a2 12     -         ldx #index
+e433: bd bf e4  -         lda SPRITE_FLAGS, x
+e436: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e438: 9d bf e4  -         sta SPRITE_FLAGS, x
+e43b: a2 13     -         ldx #index
+e43d: bd bf e4  -         lda SPRITE_FLAGS, x
+e440: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e442: 9d bf e4  -         sta SPRITE_FLAGS, x
+e445: a2 14     -         ldx #index
+e447: bd bf e4  -         lda SPRITE_FLAGS, x
+e44a: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e44c: 9d bf e4  -         sta SPRITE_FLAGS, x
+e44f: a2 15     -         ldx #index
+e451: bd bf e4  -         lda SPRITE_FLAGS, x
+e454: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e456: 9d bf e4  -         sta SPRITE_FLAGS, x
+e459: a2 16     -         ldx #index
+e45b: bd bf e4  -         lda SPRITE_FLAGS, x
+e45e: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e460: 9d bf e4  -         sta SPRITE_FLAGS, x
+e463: a2 17     -         ldx #index
+e465: bd bf e4  -         lda SPRITE_FLAGS, x
+e468: 05 c0     -         ora SPRITE_ENABLE_FLAG
+e46a: 9d bf e4  -         sta SPRITE_FLAGS, x
+e46d: a9 bf     -         lda #<SPRITE_DEFINITON_BLOCK
+e46f: 8d 15 d0  -         sta DIS00
+e472: a9 e4     -         lda #>SPRITE_DEFINITON_BLOCK
+e474: 8d 16 d0  -         sta DIS01
+e477: a9 20     -         lda #32                 // Set number of sprites
+e479: 8d 17 d0  -         sta DIS02
+e47c: a9 17     -         lda #CMD_SET_SDB        // Command "Set Sprite Definition Block"
+e47e: 8d 14 d0  -         sta DISCMD              //                                          
+e481: ad 13 d0  -         lda DISCR               // Load Display command register
+e484: 09 80     -         ora #$80                // Set the "Command Exceution" Flag
+e486: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+e489: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
+e48c: 30 fb     -         bmi !wait-              // No! Let's wait
+e48e: 60        -         rts
+e48f: 02 40     - SPACE_ALIEN_A:.byte %00000010, %01000000
+e491: 07 e0     -         .byte %00000111, %11100000
+e493: 0f f0     -         .byte %00001111, %11110000
+e495: 1d b8     -         .byte %00011101, %10111000
+e497: 17 e8     -         .byte %00010111, %11101000
+e499: 17 e8     -         .byte %00010111, %11101000
+e49b: 02 40     -         .byte %00000010, %01000000
+e49d: 06 60     -         .byte %00000110, %01100000
+e49f: 00 00     - SPACE_ALIEN_B:.byte %00000000, %00000000
+e4a1: 04 40     -         .byte %00000100, %01000000
+e4a3: 03 80     -         .byte %00000011, %10000000
+e4a5: 07 c0     -         .byte %00000111, %11000000
+e4a7: 05 40     -         .byte %00000101, %01000000
+e4a9: 07 c0     -         .byte %00000111, %11000000
+e4ab: 0a a0     -         .byte %00001010, %10100000
+e4ad: 0a a0     -         .byte %00001010, %10100000
+e4af: 00 00     - SPACE_ALIEN_C:.byte %00000000, %00000000
+e4b1: 04 40     -         .byte %00000100, %01000000
+e4b3: 0f e0     -         .byte %00001111, %11100000
+e4b5: 19 30     -         .byte %00011001, %00110000
+e4b7: 1f f0     -         .byte %00011111, %11110000
+e4b9: 1f f0     -         .byte %00011111, %11110000
+e4bb: 15 50     -         .byte %00010101, %01010000
+e4bd: 0a a0     -         .byte %00001010, %10100000
+e4bf: 80 80 80 80 80 80 80 80                          - SPRITE_DEFINITON_BLOCK,SPRITE_FLAGS:.byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 00-07
+e4c7: 80 80 80 80 80 80 80 80                          -         .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 08-15
+e4cf: 80 80 80 80 80 80 80 80                          -         .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 16-23
+e4d7: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+e4df: 10 20 30 40 50 60 70 80                          - SPRITE_XPOS:.byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 00-07
+e4e7: 10 20 30 40 50 60 70 80                          -         .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 08-15
+e4ef: 10 20 30 40 50 60 70 80                          -         .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 16-23
+e4f7: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+e4ff: 20 20 20 20 20 20 20 20                          - SPRITE_YPOS:.byte $20, $20, $20, $20, $20, $20, $20, $20  // Sprite 00-07
+e507: 30 30 30 30 30 30 30 30                          -         .byte $30, $30, $30, $30, $30, $30, $30, $30  // Sprite 08-15
+e50f: 40 40 40 40 40 40 40 40                          -         .byte $40, $40, $40, $40, $40, $40, $40, $40  // Sprite 16-23
+e517: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+e51f: 1f 1f 1f 1f 1f 1f 1f 1f                          - SPRITE_COLOR:.byte $1f, $1f, $1f, $1f, $1f, $1f, $1f, $1f  // Sprite 00-07
+e527: 23 23 23 23 23 23 23 23                          -         .byte $23, $23, $23, $23, $23, $23, $23, $23  // Sprite 08-15
+e52f: 2c 2c 2c 2c 2c 2c 2c 2c                          -         .byte $2c, $2c, $2c, $2c, $2c, $2c, $2c, $2c  // Sprite 16-23
+e537: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+e53f: 10 10 10 10 10 10 10 10                          - SPRITE_WIDTH:.byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 00-07
+e547: 10 10 10 10 10 10 10 10                          -         .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 08-15
+e54f: 10 10 10 10 10 10 10 10                          -         .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 16-23
+e557: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+e55f: 08 08 08 08 08 08 08 08                          - SPRITE_HEIGHT:.byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 00-07
+e567: 08 08 08 08 08 08 08 08                          -         .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 08-15
+e56f: 08 08 08 08 08 08 08 08                          -         .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 16-23
+e577: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+e57f: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_LO:.fill 32, 0
+e58f: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+e59f: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_HI:.fill 32, 0
+e5af: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+e5bf: ae 1e e6  - find_next_invisible_bullet:ldx ALIEN_BULLETS_COUNT
+e5c2: bd 1f e6  -         lda ALIEN_BULLETS_STAT,x 
+e5c5: 30 07     -         bmi !next+ // Invisible. Next.
+e5c7: 09 80     -         ora #$80
+e5c9: 9d 1f e6  -         sta ALIEN_BULLETS_STAT, x
+e5cc: 38        -         sec // Set carry flag (inicating we found a slot)
+e5cd: 60        -         rts // So we avoid a jump. But good practice?
+e5ce: ca        -         dex
+e5cf: 10 f1     -         bpl !loop-
+e5d1: 18        -         clc // Clear carry to indicate, we didn't found a free slot.
+e5d2: 60        -         rts
+e5d3: ae 1e e6  - update_alien_bullets:ldx ALIEN_BULLETS_COUNT
+e5d6: bd 1f e6  -         lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
+e5d9: 10 3f     -         bpl !next+ // If bit 7 = 0 => bullet is not visible
+e5db: bd 24 e6  - draw_bullet:lda ALIEN_BULLETS_X,x    // X-Pos low
+e5de: 8d 15 d0  -         sta DIS00
+e5e1: bd 1f e6  -         lda ALIEN_BULLETS_STAT,x // Status byte
+e5e4: 2a        -         rol 
+e5e5: 2a        -         rol                      // Bring bit 6 to pos 0
+e5e6: 2a        -         rol 
+e5e7: 29 01     -         and #1 
+e5e9: 8d 16 d0  -         sta DIS01   // xpos high
+e5ec: bd 29 e6  -         lda ALIEN_BULLETS_y,x 
+e5ef: 8d 17 d0  -         sta DIS02   // ypos 
+e5f2: a9 04     -         lda #4      // Length Low
+e5f4: 8d 18 d0  -         sta DIS03
+e5f7: a9 00     -         lda #0      // Length High
+e5f9: 8d 19 d0  -         sta DIS04   
+e5fc: a9 2c     -         lda #44     // Color
+e5fe: 8d 1a d0  -         sta DIS05
+e601: 20 eb e1  -         jsr draw_horizonal_line_
+e604: bd 29 e6  - move_bullet:lda ALIEN_BULLETS_y,x 
+e607: 18        -         clc 
+e608: 7d 2e e6  -         adc ALIEN_BULLETS_SPEED,x 
+e60b: 9d 29 e6  -         sta ALIEN_BULLETS_y,x 
+e60e: c9 64     - check_bullet:cmp #100    // if ypos > 100 hide bullet 
+e610: 30 08     -         bmi !next+
+e612: bd 1f e6  - hide_bullet:lda ALIEN_BULLETS_STAT,x 
+e615: 29 7f     -         and #%01111111
+e617: 9d 1f e6  -         sta ALIEN_BULLETS_STAT,x
+e61a: ca        -         dex
+e61b: 10 b9     -         bpl !loop-
+e61d: 60        -         rts
+e61e: 05        - ALIEN_BULLETS_COUNT:.byte $05 
+e61f: 04 04 04 04 04                                   - ALIEN_BULLETS_STAT:.fill $05, $04 // Bit 0..3 length
+e624: 00 00 00 00 00                                   - ALIEN_BULLETS_X:.fill $05, $00 // xpos. If xpos > 255; stat bit 6 = 1
+e629: 00 00 00 00 00                                   - ALIEN_BULLETS_y:.fill $05, $00 // ypos of the top
+e62e: 02 02 02 02 02                                   - ALIEN_BULLETS_SPEED:.fill $05, $02
+e633: 00 00 01 00 00 02 00 00 04 00 00 08              - BCD_LOOKUP_TABLE:.byte    $00, $00, $01, $00, $00, $02, $00, $00, $04, $00, $00, $08
+e63f: 00 00 16 00 00 32 00 00 64 00 01 28              -         .byte    $00, $00, $16, $00, $00, $32, $00, $00, $64, $00, $01, $28
+e64b: 00 02 56 00 05 12 00 10 24 00 20 48              -         .byte    $00, $02, $56, $00, $05, $12, $00, $10, $24, $00, $20, $48
+e657: 00 40 96 00 81 92 01 63 84 03 27 68              -         .byte    $00, $40, $96, $00, $81, $92, $01, $63, $84, $03, $27, $68
+e663: 00 00     - HTD_IN: .byte $00, $00
+e665: 00 00 00  - HTD_OUT:.byte $00, $00, $00 
+e668: f8        - bcd_convert_word_:sed 
+e669: a9 00     -         lda #0
+e66b: 8d 65 e6  -         sta HTD_OUT
+e66e: 8d 66 e6  -         sta HTD_OUT+1
+e671: 8d 67 e6  -         sta HTD_OUT+2
+e674: a2 2d     -         ldx #$2d
+e676: 0e 63 e6  -         asl HTD_IN 
+e679: 2e 64 e6  -         rol HTD_IN+1
+e67c: 90 1c     -         bcc htd1
+e67e: ad 65 e6  -         lda HTD_OUT
+e681: 18        -         clc 
+e682: 7d 35 e6  -         adc BCD_LOOKUP_TABLE+2,x
+e685: 8d 65 e6  -         sta HTD_OUT
+e688: ad 66 e6  -         lda HTD_OUT+1
+e68b: 7d 34 e6  -         adc BCD_LOOKUP_TABLE+1,x
+e68e: 8d 66 e6  -         sta HTD_OUT+1
+e691: ad 67 e6  -         lda HTD_OUT+2
+e694: 7d 33 e6  -         adc BCD_LOOKUP_TABLE,x
+e697: 8d 67 e6  -         sta HTD_OUT+2
+e69a: ca        - htd1:   dex
+e69b: ca        -         dex 
+e69c: ca        -         dex 
+e69d: 10 d7     -         bpl !loop- 
+e69f: d8        -         cld 
+e6a0: 60        -         rts
+e6a1: a9 1f     - rand8,rand8b1-1:lda rand8b1:#31
+e6a3: 0a        -         asl
+e6a4: 49 35     - rand8a1-1:eor rand8a1:#53
+e6a6: 8d a2 e6  -         sta rand8b1
+e6a9: 6d a5 e6  -         adc rand8a1
+e6ac: 8d a5 e6  -         sta rand8a1
+e6af: 60        -         rts
+e6b0: 48        - set_seed:pha
+e6b1: 29 d9     -         and #217
+e6b3: 18        -         clc
+e6b4: 69 0f     -         adc #<21263
+e6b6: 8d a5 e6  -         sta rand8a1
+e6b9: 68        -         pla
+e6ba: 29 26     -         and #255-217
+e6bc: 69 53     -         adc #>21263
+e6be: 8d a2 e6  -         sta rand8b1
+e6c1: 60        -         rts
+e6c2: 48        - byte_to_hex:pha                     // Save value to stack.
+e6c3: 29 0f     -         and #%00001111
+e6c5: 85 e0     -         sta zpRegE0             // store the lower nibble
+e6c7: 68        -         pla                     // Load the original value
+e6c8: 48        -         pha                     // and save it again
+e6c9: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
+e6ca: 4a        -         lsr
+e6cb: 4a        -         lsr
+e6cc: 4a        -         lsr
+e6cd: 85 e1     -         sta zpRegE1             // store the higher nibble
+e6cf: 68        -         pla                     // restore the accu
+e6d0: 60        -         rts
+e6d1: a5 e0     - convert565:lda zpRegE0             // red value
+e6d3: 0a        -         asl                     // shift three to the left as we
+e6d4: 0a        -         asl                     // need to move the lower 5 bits of red
+e6d5: 0a        -         asl                     // to the bits 7-5
+e6d6: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
+e6d8: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
+e6da: 4a        -         lsr                     // lower bits of the output highbyte
+e6db: 4a        -         lsr
+e6dc: 4a        -         lsr
+e6dd: 29 07     -         and #%00000111          // Only the lower three bits.
+e6df: 05 e0     -         ora zpRegE0             // combine this with the compressed red
+e6e1: 85 e0     -         sta zpRegE0             // Store the final high byte
+e6e3: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
+e6e5: 0a        -         asl                     // Shift everything 5 bits to the left and fill
+e6e6: 0a        -         asl                     // it with zeros
+e6e7: 0a        -         asl
+e6e8: 0a        -         asl
+e6e9: 0a        -         asl
+e6ea: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
+e6ec: a5 e2     -         lda zpRegE2             // Load blue
+e6ee: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
+e6f0: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
+e6f2: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
+e6f4: 60        -         rts
 
 [Kernel Data]
 f000: 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46  - hex_chars:.text "0123456789ABCDEF"

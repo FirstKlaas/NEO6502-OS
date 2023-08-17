@@ -136,6 +136,7 @@ main_isr:  {
             FILL_RECT_I(5,0,181,250,0,59,42)
             DRAW_HLINE_I(5,0,180,250,0,23)
             SetForgroundColorI(43)
+            // Printing the frame numer to the screen
             SetCursorI(2,23)
             lda $d0fd       // Framecounter LO Byte
             sta HTD_IN
@@ -148,6 +149,20 @@ main_isr:  {
             jsr print_hex_
             lda HTD_OUT
             jsr print_hex_
+
+            // Bullet test
+            jsr find_next_invisible_bullet
+            bcc draw_bullet
+            lda #$80
+            sta ALIEN_BULLETS_STAT,x 
+            lda #100
+            sta ALIEN_BULLETS_X
+            lda #20
+            sta ALIEN_BULLETS_y
+            lda #1
+            sta ALIEN_BULLETS_SPEED
+draw_bullet:            
+            jsr update_alien_bullets
 
 check_left:           
             lda SPRITE_XPOS     // Get the x position of the leftmost sprite

@@ -6,7 +6,7 @@
         {
             "label": "compile kernel routines",
             "type": "shell",
-            "command": "java -jar ./KickAss.jar ./kernel.asm -bytedump -mbfiles –symbolfile -o kernel.prg",
+            "command": "java -jar ./KickAss.jar ./kernel.asm -bytedump -mbfiles -o kernel.prg",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

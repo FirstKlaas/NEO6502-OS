@@ -74,6 +74,30 @@ draw_horizonal_line_: {
     rts
 }
 
+/* ----------------------------------------------------------------------------
+    Draw a horizontal line.
+  
+    Params In:
+        DIS00 XPOS_LO    
+        DIS01 XPOS_HI   
+        DIS02 YPOS      
+        DIS03 LENGTH_LO  
+        DIS04 LENGTH_HI 
+        DIS05 COLOR     
+
+    Params Out:
+        None
+
+    Since         : 15.08.2023
+    Last modified : 15.08.2023
+   ----------------------------------------------------------------------------
+*/
+draw_vertical_line_: {
+    lda #CMD_DRAW_VLINE
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
 clear_screen_: {
     lda #CMD_CLEAR_SCREEN
     EXECUTE_DISPLAY_COMMAND_A()

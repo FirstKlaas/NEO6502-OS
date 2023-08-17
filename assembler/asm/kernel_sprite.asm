@@ -132,13 +132,25 @@ SPRITE_HEIGHT:      .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 00-0
 SPRITE_DATA_LO:     .fill 32, 0
 SPRITE_DATA_HI:     .fill 32, 0
 
-// ===============================================================================
-find_next_free_bullet: {
+/* ===============================================================================
+    Look for the next "invisible" bullet in the table. A invisible bullet is 
+    marked with the bit 7 set to zero in the stat byte. The carry bit is used 
+    to signal success or failure.
+
+    If successful, the correct index is available in the x register and the carry
+    bit is set. Not no free slot is availabe, the carry bit is cleared.
+*/
+find_next_invisible_bullet: {
     ldx ALIEN_BULLETS_COUNT
-    sec // Set carry flag (inicating we found a slot)
 !loop:
     lda ALIEN_BULLETS_STAT,x 
-    bpl !end+ // We found a free slot. The index is in x register
+    bmi !next+ // Invisible. Next.
+    // Make this bullet visible
+    ora #$80
+    sta ALIEN_BULLETS_STAT, x
+    sec // Set carry flag (inicating we found a slot)
+    rts // So we avoid a jump. But good practice?
+!next:
     dex
     bpl !loop-
     // We didn't found one
@@ -147,28 +159,50 @@ find_next_free_bullet: {
     rts
 }
 
-// ===============================================================================
-draw_alien_bullets: {
+/* ===============================================================================
+    Update all "visible" bullets. A visible bullet is marked with the bit 7=1 in
+    tha stat(us) byte.
+*/
+update_alien_bullets: {
     ldx ALIEN_BULLETS_COUNT
 !loop:
     lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
     bpl !next+ // If bit 7 = 0 => bullet is not visible
-// Draw bullet
+    
+    // Draw bullet using a line
 draw_bullet:
+    lda ALIEN_BULLETS_X,x    // X-Pos low
+    sta DIS00
+    lda ALIEN_BULLETS_STAT,x // Status byte
+    rol 
+    rol                      // Bring bit 6 to pos 0
+    rol 
+    and #1 
+    sta DIS01   // xpos high
+    lda ALIEN_BULLETS_y,x 
+    sta DIS02   // ypos 
+    lda #4      // Length Low
+    sta DIS03
+    lda #0      // Length High
+    sta DIS04   
+    lda #44     // Color
+    sta DIS05
+    jsr draw_horizonal_line_
 
-// Move bullet
+    // Move the bullet. It adds the speed to the current y position
 move_bullet:
     lda ALIEN_BULLETS_y,x 
     clc 
     adc ALIEN_BULLETS_SPEED,x 
     sta ALIEN_BULLETS_y,x 
 
-// Check ypos of bullet
+    // Check ypos of bullet
 check_bullet:
-    cmp #100    // if ypos > 100 free bullet 
+    cmp #100    // if ypos > 100 hide bullet 
     bmi !next+
-// Free bullet
-free_bullet:
+
+    // hide bullet
+hide_bullet:
     lda ALIEN_BULLETS_STAT,x 
     and #%01111111
     sta ALIEN_BULLETS_STAT,x
@@ -181,6 +215,8 @@ free_bullet:
 
 ALIEN_BULLETS_COUNT: .byte $05 
 ALIEN_BULLETS_STAT:  .fill $05, $04 // Bit 0..3 length
+                                    // Bit 7: Visibility. 1 = Visible
+                                    // Bit 6: High Bit Xpos: 1 = Xpos > 255
 ALIEN_BULLETS_X:     .fill $05, $00 // xpos. If xpos > 255; stat bit 6 = 1
 ALIEN_BULLETS_y:     .fill $05, $00 // ypos of the top
 ALIEN_BULLETS_SPEED: .fill $05, $02
