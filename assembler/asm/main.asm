@@ -143,6 +143,7 @@ main_isr:  {
             // Printing the frame numer to the screen
             SetCursorI(2,23)
             PrintText(txt_frame)
+            SetCursorI(9,23)
             lda $d0fd       // Framecounter LO Byte
             sta HTD_IN
             lda $d0fe       // Framecounter HI Byte
@@ -154,24 +155,30 @@ main_isr:  {
             jsr print_hex_
             lda HTD_OUT
             jsr print_hex_
-            SetCursorI(9,24)
-            lda ALIEN_BULLETS_y
-            jsr print_hex_
-            SetCursorI(12,24)
-            lda ALIEN_BULLETS_y+1
-            jsr print_hex_
-            SetCursorI(15,24)
-            lda ALIEN_BULLETS_y+2
-            jsr print_hex_
-            SetCursorI(18,24)
-            lda ALIEN_BULLETS_y+3
-            jsr print_hex_
             
             
+            .for (var i=0; i<5; i++) {
+                SetCursorI(18+(i*3),23)
+                lda ALIEN_BULLETS_X+i
+                jsr print_hex_
+            }
+            .for (var i=0; i<5; i++) {
+                SetCursorI(18+(i*3),24)
+                lda ALIEN_BULLETS_y+i
+                jsr print_hex_
+            }
+            .for (var i=0; i<5; i++) {
+                SetCursorI(18+(i*3),25)
+                lda ALIEN_BULLETS_STAT+i
+                jsr print_hex_
+            }
 
             // Bullet test
+            
             jsr find_next_invisible_bullet
             bcc draw_bullets
+            
+            /*
             txa
             asl
             clc
@@ -179,10 +186,11 @@ main_isr:  {
             sta ALIEN_BULLETS_STAT,x 
             lda #100
             sta ALIEN_BULLETS_X,x
-            lda #0
+            lda #20
             sta ALIEN_BULLETS_y,x
-            lda #1
+            lda #3
             sta ALIEN_BULLETS_SPEED,x
+            */
 draw_bullets:            
             jsr update_alien_bullets
 

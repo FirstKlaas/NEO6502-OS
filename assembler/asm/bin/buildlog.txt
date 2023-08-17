@@ -1,3 +1,0 @@
-Warning. Already have an inputfile. Won't use 'c:\development\NEO6502-OS\assembler\asm\kernel_sprite.asm'
-Error: Inputfile 'kernel.asm' doesn't exist.
-

@@ -1,3 +1,4 @@
+.cpu _65c02
 .const SPRITE_ENABLE_FLAG = $C0
 
 .macro SetSpriteAddress_IM(index, address) {
@@ -144,7 +145,7 @@ find_next_invisible_bullet: {
     ldx ALIEN_BULLETS_COUNT
 !loop:
     lda ALIEN_BULLETS_STAT,x 
-    bmi !next+ // Invisible. Next.
+    bmi !next+ // Visible. Next.
     // Make this bullet visible
     ora #$80
     sta ALIEN_BULLETS_STAT, x
@@ -167,7 +168,7 @@ update_alien_bullets: {
     ldx ALIEN_BULLETS_COUNT
 !loop:
     lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
-    bpl !next+ // If bit 7 = 0 => bullet is not visible
+    bpl !next+               // If bit 7 = 0 => bullet is not visible
     
     // Draw bullet using a line
 draw_bullet:
@@ -187,22 +188,26 @@ draw_bullet:
     sta DIS04   
     lda #23     // Color
     sta DIS05
-    jsr draw_horizonal_line_
-
+    phx
+    jsr draw_vertical_line_
+    plx
     // Move the bullet. It adds the speed to the current y position
 move_bullet:
     lda ALIEN_BULLETS_y,x 
     clc 
-    adc ALIEN_BULLETS_SPEED,x 
-    sta ALIEN_BULLETS_y,x 
+    //adc ALIEN_BULLETS_SPEED,x
+    adc #2 
+    sta ALIEN_BULLETS_y,x
 
     // Check ypos of bullet
 check_bullet:
-    cmp #100    // if ypos > 100 hide bullet 
+    cmp #190    // if ypos > 190 hide bullet 
     bmi !next+
 
     // hide bullet
 hide_bullet:
+    lda #0
+    sta ALIEN_BULLETS_y,x       // Reset Y Position to zero
     lda ALIEN_BULLETS_STAT,x 
     and #%01111111
     sta ALIEN_BULLETS_STAT,x
@@ -212,11 +217,11 @@ hide_bullet:
     rts
 }
 
-
-ALIEN_BULLETS_COUNT: .byte $05 
-ALIEN_BULLETS_STAT:  .fill $05, $04 // Bit 0..3 length
-                                    // Bit 7: Visibility. 1 = Visible
-                                    // Bit 6: High Bit Xpos: 1 = Xpos > 255
-ALIEN_BULLETS_X:     .fill $05, $00 // xpos. If xpos > 255; stat bit 6 = 1
-ALIEN_BULLETS_y:     .fill $05, $00 // ypos of the top
-ALIEN_BULLETS_SPEED: .fill $05, $02
+                        .const BULLET_COUNT = 5
+ALIEN_BULLETS_COUNT:    .byte BULLET_COUNT 
+ALIEN_BULLETS_STAT:     .fill BULLET_COUNT, $04  // Bit 0..3 length
+                                                 // Bit 7: Visibility. 1 = Visible
+                                                 // Bit 6: High Bit Xpos: 1 = Xpos > 255
+ALIEN_BULLETS_X:        .byte $30, $40, $50, $60, $70  // xpos. If xpos > 255; stat bit 6 = 1
+ALIEN_BULLETS_y:        .fill BULLET_COUNT, $20  // ypos of the top
+ALIEN_BULLETS_SPEED:    .fill BULLET_COUNT, $02

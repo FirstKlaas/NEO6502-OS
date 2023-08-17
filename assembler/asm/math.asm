@@ -1,3 +1,4 @@
+.cpu _65c02
 // http://www.6502.org/source/integers/hex2dec.htm
 // Converting byte and word to BCD code.
 
@@ -12,7 +13,9 @@ HTD_IN:     .byte $00, $00
 HTD_OUT:    .byte $00, $00, $00 
 
 bcd_convert_word_: {
-    sed 
+    sed
+    phx
+    pha
     lda #0
     sta HTD_OUT
     sta HTD_OUT+1
@@ -37,7 +40,9 @@ htd1:
     dex 
     dex 
     bpl !loop- 
-    cld 
+    cld
+    pla
+    plx 
     rts
 }
 

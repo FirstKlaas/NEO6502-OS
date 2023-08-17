@@ -322,6 +322,16 @@ void executeCommand(TContextPtr ctx)
     markScreenDirty();
     break;
 
+  case CMD_DRAW_VLINE:
+    display.drawFastVLine(
+      word(params),   // XPOS   DIS00 DIS01
+      params[2],      // YPOS   DIS02
+      word(params+3), // LENGTH DIS03 DIS04
+      params[5]       // COLOR  DIS05
+    );
+    markScreenDirty();
+    break;
+
   case CMD_DRAW_RECT:
     display.drawRect(
       word(params),   // XPOS   DIS00 DIS01
