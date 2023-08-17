@@ -117,15 +117,15 @@
 0a85: a9 17     -         lda #ypos
 0a87: 20 24 e1  -         jsr set_cursor_y_    
 0a8a: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
-0a8d: 8d 13 e6  -         sta HTD_IN
+0a8d: 8d 21 e6  -         sta HTD_IN
 0a90: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
-0a93: 8d 14 e6  -         sta HTD_IN+1
-0a96: 20 18 e6  -         jsr bcd_convert_word_
-0a99: ad 17 e6  -         lda HTD_OUT+2
+0a93: 8d 22 e6  -         sta HTD_IN+1
+0a96: 20 26 e6  -         jsr bcd_convert_word_
+0a99: ad 25 e6  -         lda HTD_OUT+2
 0a9c: 20 c8 e1  -         jsr print_hex_
-0a9f: ad 16 e6  -         lda HTD_OUT+1
+0a9f: ad 24 e6  -         lda HTD_OUT+1
 0aa2: 20 c8 e1  -         jsr print_hex_
-0aa5: ad 15 e6  -         lda HTD_OUT
+0aa5: ad 23 e6  -         lda HTD_OUT
 0aa8: 20 c8 e1  -         jsr print_hex_
 0aab: ad cc e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
 0aae: c9 0a     -         cmp #10             // 10 is the minimum x position
@@ -623,93 +623,118 @@ e56c: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_LO:.fill 32
 e57c: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
 e58c: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_HI:.fill 32, 0
 e59c: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
-e5ac: ae ce e5  - draw_alien_bullets:ldx ALIEN_BULLETS_COUNT
-e5af: bd cf e5  -         lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
-e5b2: 10 16     -         bpl !next+ // If bit 7 = 0 => bullet is not visible
-e5b4: bd d9 e5  - draw_bullet,move_bullet:lda ALIEN_BULLETS_y,x 
-e5b7: 18        -         clc 
-e5b8: 7d de e5  -         adc ALIEN_BULLETS_SPEED,x 
-e5bb: 9d d9 e5  -         sta ALIEN_BULLETS_y,x 
-e5be: c9 64     - check_bullet:cmp #100
-e5c0: 30 08     -         bmi !next+
-e5c2: bd cf e5  - free_bullet:lda ALIEN_BULLETS_STAT,x 
-e5c5: 29 7f     -         and #%01111111
-e5c7: 9d cf e5  -         sta ALIEN_BULLETS_STAT,x
-e5ca: ca        -         dex
-e5cb: 10 e2     -         bpl !loop-
-e5cd: 60        -         rts
-e5ce: 05        - ALIEN_BULLETS_COUNT:.byte $05 
-e5cf: 04 04 04 04 04                                   - ALIEN_BULLETS_STAT:.fill $05, $04 // Bit 0..3 length
-e5d4: 00 00 00 00 00                                   - ALIEN_BULLETS_X:.fill $05, $00 // xpos. If xpos > 255; stat bit 6 = 1
-e5d9: 00 00 00 00 00                                   - ALIEN_BULLETS_y:.fill $05, $00 // ypos of the top
-e5de: 02 02 02 02 02                                   - ALIEN_BULLETS_SPEED:.fill $05, $02
-e5e3: 00 00 01 00 00 02 00 00 04 00 00 08              - BCD_LOOKUP_TABLE:.byte    $00, $00, $01, $00, $00, $02, $00, $00, $04, $00, $00, $08
-e5ef: 00 00 16 00 00 32 00 00 64 00 01 28              -         .byte    $00, $00, $16, $00, $00, $32, $00, $00, $64, $00, $01, $28
-e5fb: 00 02 56 00 05 12 00 10 24 00 20 48              -         .byte    $00, $02, $56, $00, $05, $12, $00, $10, $24, $00, $20, $48
-e607: 00 40 96 00 81 92 01 63 84 03 27 68              -         .byte    $00, $40, $96, $00, $81, $92, $01, $63, $84, $03, $27, $68
-e613: 00 00     - HTD_IN: .byte $00, $00
-e615: 00 00 00  - HTD_OUT:.byte $00, $00, $00 
-e618: f8        - bcd_convert_word_:sed 
-e619: a9 00     -         lda #0
-e61b: 8d 15 e6  -         sta HTD_OUT
-e61e: 8d 16 e6  -         sta HTD_OUT+1
-e621: 8d 17 e6  -         sta HTD_OUT+2
-e624: a2 2d     -         ldx #$2d
-e626: 0e 13 e6  -         asl HTD_IN 
-e629: 2e 14 e6  -         rol HTD_IN+1
-e62c: 90 1c     -         bcc htd1
-e62e: ad 15 e6  -         lda HTD_OUT
-e631: 18        -         clc 
-e632: 7d e5 e5  -         adc BCD_LOOKUP_TABLE+2,x
-e635: 8d 15 e6  -         sta HTD_OUT
-e638: ad 16 e6  -         lda HTD_OUT+1
-e63b: 7d e4 e5  -         adc BCD_LOOKUP_TABLE+1,x
-e63e: 8d 16 e6  -         sta HTD_OUT+1
-e641: ad 17 e6  -         lda HTD_OUT+2
-e644: 7d e3 e5  -         adc BCD_LOOKUP_TABLE,x
-e647: 8d 17 e6  -         sta HTD_OUT+2
-e64a: ca        - htd1:   dex
-e64b: ca        -         dex 
-e64c: ca        -         dex 
-e64d: 10 d7     -         bpl !loop- 
-e64f: d8        -         cld 
-e650: 60        -         rts
-e651: 48        - byte_to_hex:pha                     // Save value to stack.
-e652: 29 0f     -         and #%00001111
-e654: 85 e0     -         sta zpRegE0             // store the lower nibble
-e656: 68        -         pla                     // Load the original value
-e657: 48        -         pha                     // and save it again
-e658: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
-e659: 4a        -         lsr
-e65a: 4a        -         lsr
-e65b: 4a        -         lsr
-e65c: 85 e1     -         sta zpRegE1             // store the higher nibble
-e65e: 68        -         pla                     // restore the accu
-e65f: 60        -         rts
-e660: a5 e0     - convert565:lda zpRegE0             // red value
-e662: 0a        -         asl                     // shift three to the left as we
-e663: 0a        -         asl                     // need to move the lower 5 bits of red
-e664: 0a        -         asl                     // to the bits 7-5
-e665: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
-e667: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
-e669: 4a        -         lsr                     // lower bits of the output highbyte
-e66a: 4a        -         lsr
-e66b: 4a        -         lsr
-e66c: 29 07     -         and #%00000111          // Only the lower three bits.
-e66e: 05 e0     -         ora zpRegE0             // combine this with the compressed red
-e670: 85 e0     -         sta zpRegE0             // Store the final high byte
-e672: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
-e674: 0a        -         asl                     // Shift everything 5 bits to the left and fill
-e675: 0a        -         asl                     // it with zeros
-e676: 0a        -         asl
-e677: 0a        -         asl
-e678: 0a        -         asl
-e679: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
-e67b: a5 e2     -         lda zpRegE2             // Load blue
-e67d: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
-e67f: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
-e681: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
-e683: 60        -         rts
+e5ac: ae dc e5  - find_next_free_bullet:ldx ALIEN_BULLETS_COUNT
+e5af: 38        -         sec // Set carry flag (inicating we found a slot)
+e5b0: bd dd e5  -         lda ALIEN_BULLETS_STAT,x 
+e5b3: 10 04     -         bpl !end+ // We found a free slot. The index is in x register
+e5b5: ca        -         dex
+e5b6: 10 f8     -         bpl !loop-
+e5b8: 18        -         clc // Clear carry to indicate, we didn't found a free slot.
+e5b9: 60        -         rts
+e5ba: ae dc e5  - draw_alien_bullets:ldx ALIEN_BULLETS_COUNT
+e5bd: bd dd e5  -         lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
+e5c0: 10 16     -         bpl !next+ // If bit 7 = 0 => bullet is not visible
+e5c2: bd e7 e5  - draw_bullet,move_bullet:lda ALIEN_BULLETS_y,x 
+e5c5: 18        -         clc 
+e5c6: 7d ec e5  -         adc ALIEN_BULLETS_SPEED,x 
+e5c9: 9d e7 e5  -         sta ALIEN_BULLETS_y,x 
+e5cc: c9 64     - check_bullet:cmp #100    // if ypos > 100 free bullet 
+e5ce: 30 08     -         bmi !next+
+e5d0: bd dd e5  - free_bullet:lda ALIEN_BULLETS_STAT,x 
+e5d3: 29 7f     -         and #%01111111
+e5d5: 9d dd e5  -         sta ALIEN_BULLETS_STAT,x
+e5d8: ca        -         dex
+e5d9: 10 e2     -         bpl !loop-
+e5db: 60        -         rts
+e5dc: 05        - ALIEN_BULLETS_COUNT:.byte $05 
+e5dd: 04 04 04 04 04                                   - ALIEN_BULLETS_STAT:.fill $05, $04 // Bit 0..3 length
+e5e2: 00 00 00 00 00                                   - ALIEN_BULLETS_X:.fill $05, $00 // xpos. If xpos > 255; stat bit 6 = 1
+e5e7: 00 00 00 00 00                                   - ALIEN_BULLETS_y:.fill $05, $00 // ypos of the top
+e5ec: 02 02 02 02 02                                   - ALIEN_BULLETS_SPEED:.fill $05, $02
+e5f1: 00 00 01 00 00 02 00 00 04 00 00 08              - BCD_LOOKUP_TABLE:.byte    $00, $00, $01, $00, $00, $02, $00, $00, $04, $00, $00, $08
+e5fd: 00 00 16 00 00 32 00 00 64 00 01 28              -         .byte    $00, $00, $16, $00, $00, $32, $00, $00, $64, $00, $01, $28
+e609: 00 02 56 00 05 12 00 10 24 00 20 48              -         .byte    $00, $02, $56, $00, $05, $12, $00, $10, $24, $00, $20, $48
+e615: 00 40 96 00 81 92 01 63 84 03 27 68              -         .byte    $00, $40, $96, $00, $81, $92, $01, $63, $84, $03, $27, $68
+e621: 00 00     - HTD_IN: .byte $00, $00
+e623: 00 00 00  - HTD_OUT:.byte $00, $00, $00 
+e626: f8        - bcd_convert_word_:sed 
+e627: a9 00     -         lda #0
+e629: 8d 23 e6  -         sta HTD_OUT
+e62c: 8d 24 e6  -         sta HTD_OUT+1
+e62f: 8d 25 e6  -         sta HTD_OUT+2
+e632: a2 2d     -         ldx #$2d
+e634: 0e 21 e6  -         asl HTD_IN 
+e637: 2e 22 e6  -         rol HTD_IN+1
+e63a: 90 1c     -         bcc htd1
+e63c: ad 23 e6  -         lda HTD_OUT
+e63f: 18        -         clc 
+e640: 7d f3 e5  -         adc BCD_LOOKUP_TABLE+2,x
+e643: 8d 23 e6  -         sta HTD_OUT
+e646: ad 24 e6  -         lda HTD_OUT+1
+e649: 7d f2 e5  -         adc BCD_LOOKUP_TABLE+1,x
+e64c: 8d 24 e6  -         sta HTD_OUT+1
+e64f: ad 25 e6  -         lda HTD_OUT+2
+e652: 7d f1 e5  -         adc BCD_LOOKUP_TABLE,x
+e655: 8d 25 e6  -         sta HTD_OUT+2
+e658: ca        - htd1:   dex
+e659: ca        -         dex 
+e65a: ca        -         dex 
+e65b: 10 d7     -         bpl !loop- 
+e65d: d8        -         cld 
+e65e: 60        -         rts
+e65f: a9 1f     - rand8,rand8b1-1:lda rand8b1:#31
+e661: 0a        -         asl
+e662: 49 35     - rand8a1-1:eor rand8a1:#53
+e664: 8d 60 e6  -         sta rand8b1
+e667: 6d 63 e6  -         adc rand8a1
+e66a: 8d 63 e6  -         sta rand8a1
+e66d: 60        -         rts
+e66e: 48        - set_seed:pha
+e66f: 29 d9     -         and #217
+e671: 18        -         clc
+e672: 69 0f     -         adc #<21263
+e674: 8d 63 e6  -         sta rand8a1
+e677: 68        -         pla
+e678: 29 26     -         and #255-217
+e67a: 69 53     -         adc #>21263
+e67c: 8d 60 e6  -         sta rand8b1
+e67f: 60        -         rts
+e680: 48        - byte_to_hex:pha                     // Save value to stack.
+e681: 29 0f     -         and #%00001111
+e683: 85 e0     -         sta zpRegE0             // store the lower nibble
+e685: 68        -         pla                     // Load the original value
+e686: 48        -         pha                     // and save it again
+e687: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
+e688: 4a        -         lsr
+e689: 4a        -         lsr
+e68a: 4a        -         lsr
+e68b: 85 e1     -         sta zpRegE1             // store the higher nibble
+e68d: 68        -         pla                     // restore the accu
+e68e: 60        -         rts
+e68f: a5 e0     - convert565:lda zpRegE0             // red value
+e691: 0a        -         asl                     // shift three to the left as we
+e692: 0a        -         asl                     // need to move the lower 5 bits of red
+e693: 0a        -         asl                     // to the bits 7-5
+e694: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
+e696: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
+e698: 4a        -         lsr                     // lower bits of the output highbyte
+e699: 4a        -         lsr
+e69a: 4a        -         lsr
+e69b: 29 07     -         and #%00000111          // Only the lower three bits.
+e69d: 05 e0     -         ora zpRegE0             // combine this with the compressed red
+e69f: 85 e0     -         sta zpRegE0             // Store the final high byte
+e6a1: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
+e6a3: 0a        -         asl                     // Shift everything 5 bits to the left and fill
+e6a4: 0a        -         asl                     // it with zeros
+e6a5: 0a        -         asl
+e6a6: 0a        -         asl
+e6a7: 0a        -         asl
+e6a8: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
+e6aa: a5 e2     -         lda zpRegE2             // Load blue
+e6ac: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
+e6ae: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
+e6b0: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
+e6b2: 60        -         rts
 
 [Kernel Data]
 f000: 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46  - hex_chars:.text "0123456789ABCDEF"
