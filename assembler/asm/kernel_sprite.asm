@@ -196,15 +196,14 @@ move_bullet:
 
     // Check ypos of bullet
 check_bullet:
-    jmp !next+
+    // jmp !next+
+    lda ALIEN_BULLETS_y,x
     cmp #190    // if ypos > 190 hide bullet 
     bmi !next+
     // hide bullet
 hide_bullet:
-    lda #0
-    sta ALIEN_BULLETS_y,x       // Reset Y Position to zero
     lda ALIEN_BULLETS_STAT,x 
-    and #%01111111
+    and #$7f
     sta ALIEN_BULLETS_STAT,x
 !next:
     dex
