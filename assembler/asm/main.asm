@@ -176,7 +176,7 @@ main_isr:  {
             // Bullet test
             
             jsr find_next_invisible_bullet
-            bcc draw_bullets
+            //bcc draw_bullets
             
             /*
             txa
@@ -193,6 +193,7 @@ main_isr:  {
             */
 draw_bullets:            
             jsr update_alien_bullets
+            //jsr pure_draw_bullet
 
 check_left:           
             lda SPRITE_XPOS     // Get the x position of the leftmost sprite
@@ -221,7 +222,7 @@ go_down:    // Check, if we have reached the "bottom". If so,
             // -------------------------------------------------------
 reset_ypos:
             // Row One / Sprite 0-7
-            ldy #8
+            ldy #7
             lda #$20              // Start Y position
 !loop:            
             sta SPRITE_YPOS,y 
@@ -229,7 +230,7 @@ reset_ypos:
             bpl !loop-
 
             // Row Two
-            ldy #8
+            ldy #7
             lda #$30              // Start Y position
 !loop:            
             sta SPRITE_YPOS+8,y 
@@ -237,7 +238,7 @@ reset_ypos:
             bpl !loop-
             
             // Row Three
-            ldy #8
+            ldy #7
             lda #$40              // Start Y position
 !loop:            
             sta SPRITE_YPOS+16,y 
@@ -246,7 +247,7 @@ reset_ypos:
             jmp move    
 
 decrease:
-            ldy #24             // Calculate position fpr 24 sprites
+            ldy #23             // Calculate position fpr 24 sprites
 !loop:                  
             lda SPRITE_YPOS,y 
             clc

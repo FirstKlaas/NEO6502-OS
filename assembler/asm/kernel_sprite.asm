@@ -1,5 +1,6 @@
 .cpu _65c02
 .const SPRITE_ENABLE_FLAG = $C0
+.const BULLET_COUNT = 5
 
 .macro SetSpriteAddress_IM(index, address) {
     ldx #index
@@ -142,7 +143,7 @@ SPRITE_DATA_HI:     .fill 32, 0
     bit is set. Not no free slot is availabe, the carry bit is cleared.
 */
 find_next_invisible_bullet: {
-    ldx ALIEN_BULLETS_COUNT
+    ldx #4
 !loop:
     lda ALIEN_BULLETS_STAT,x 
     bmi !next+ // Visible. Next.
@@ -165,7 +166,7 @@ find_next_invisible_bullet: {
     tha stat(us) byte.
 */
 update_alien_bullets: {
-    ldx ALIEN_BULLETS_COUNT
+    ldx #4
 !loop:
     lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
     bpl !next+               // If bit 7 = 0 => bullet is not visible
@@ -174,11 +175,7 @@ update_alien_bullets: {
 draw_bullet:
     lda ALIEN_BULLETS_X,x    // X-Pos low
     sta DIS00
-    lda ALIEN_BULLETS_STAT,x // Status byte
-    rol 
-    rol                      // Bring bit 6 to pos 0
-    rol 
-    and #1 
+    lda #0
     sta DIS01   // xpos high
     lda ALIEN_BULLETS_y,x 
     sta DIS02   // ypos 
@@ -188,9 +185,7 @@ draw_bullet:
     sta DIS04   
     lda #23     // Color
     sta DIS05
-    phx
     jsr draw_vertical_line_
-    plx
     // Move the bullet. It adds the speed to the current y position
 move_bullet:
     lda ALIEN_BULLETS_y,x 
@@ -201,9 +196,9 @@ move_bullet:
 
     // Check ypos of bullet
 check_bullet:
+    jmp !next+
     cmp #190    // if ypos > 190 hide bullet 
     bmi !next+
-
     // hide bullet
 hide_bullet:
     lda #0
@@ -217,8 +212,29 @@ hide_bullet:
     rts
 }
 
-                        .const BULLET_COUNT = 5
-ALIEN_BULLETS_COUNT:    .byte BULLET_COUNT 
+pure_draw_bullet: {
+
+    ldx #4
+!loop:
+    lda ALIEN_BULLETS_X,x    // X-Pos low
+    sta DIS00
+    lda #0
+    sta DIS01   // xpos high
+    lda ALIEN_BULLETS_y,x 
+    sta DIS02   // ypos 
+    lda #4      // Length Low
+    sta DIS03
+    lda #0      // Length High
+    sta DIS04   
+    lda #23     // Color
+    sta DIS05
+    jsr draw_vertical_line_
+    dex 
+    bpl !loop-
+    rts
+}
+
+
 ALIEN_BULLETS_STAT:     .fill BULLET_COUNT, $04  // Bit 0..3 length
                                                  // Bit 7: Visibility. 1 = Visible
                                                  // Bit 6: High Bit Xpos: 1 = Xpos > 255
