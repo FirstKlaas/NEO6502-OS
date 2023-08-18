@@ -58,7 +58,7 @@ htd1:
 // Period 59748
 // Source: https://codebase64.org/doku.php?id=base:ax_tinyrand8
 
-rand8:	
+rand8: 
 	lda rand8b1:#31
 	asl
 	eor rand8a1:#53
@@ -67,10 +67,11 @@ rand8:
 	sta rand8a1
 	rts
 
+
 // sets the seed based on the value in A
 // always sets a1 and b1 so that a cycle with maximum period is chosen
 // constants 217 and 21263 have been derived by simulation
-set_seed:
+set_seed: 
 	pha
 	and #217
 	clc

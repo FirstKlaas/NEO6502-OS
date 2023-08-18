@@ -97,7 +97,7 @@ text_bar:       .fill 37,$da
                 .byte 0
 
 welcome:        .encoding "ascii"
-                .text "NE/OS v0.1 - Kernel Size 974 bytes"
+                .text "NE/OS v0.1 - FirstKlaas Experience"
                 .byte 0
 
 txt_frame:      .encoding "ascii"
@@ -129,6 +129,9 @@ txt_frame:      .encoding "ascii"
     @last modified  : 08.08.2023 
     ------------------------------------------------------------------------------------
 */
+
+shot_delay: .byte 1
+
 main_isr:  { 
             pha
             txa 
@@ -173,17 +176,32 @@ main_isr:  {
                 jsr print_hex_
             }
 
-            // Bullet test
-            
+            // Delay triggered shot
+            dec shot_delay      // Shot delay
+            bne draw_bullets    // Still positive. No Shot
+            jsr rand8           // New delay in frames ( 0..255)
+            and #15
+            adc #7              // Just in case the lower bits are all 0
+            sta shot_delay      // Store new delay
             jsr find_next_invisible_bullet
             bcc draw_bullets
 
             // X contains the free bullet index
             // Now lets find a random alien monster
             // that shoots.
-            
-            lda #$30
+            jsr rand8  // Random value to accu
+            and #7     // One of the first eight aliens
+            tay        // Using y as alien index
+            lda SPRITE_XPOS,y
+            clc
+            adc #8
+            sta ALIEN_BULLETS_X,x
+            lda SPRITE_YPOS,y
+            clc
+            adc #4
             sta ALIEN_BULLETS_Y,x
+            
+
             /*
             lda #$80
             sta ALIEN_BULLETS_STAT,x 

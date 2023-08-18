@@ -4,7 +4,7 @@
 #include <pico/stdlib.h>
 #include "datatypes.h"
 
-#define FRAMERATE 25  // frames per sec
+#define FRAMERATE 20  // frames per sec
 #define FRAMETIME 1000/FRAMERATE  // msec
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
