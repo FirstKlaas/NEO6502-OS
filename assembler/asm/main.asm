@@ -164,7 +164,7 @@ main_isr:  {
             }
             .for (var i=0; i<5; i++) {
                 SetCursorI(18+(i*3),24)
-                lda ALIEN_BULLETS_y+i
+                lda ALIEN_BULLETS_Y+i
                 jsr print_hex_
             }
             .for (var i=0; i<5; i++) {
@@ -176,9 +176,17 @@ main_isr:  {
             // Bullet test
             
             jsr find_next_invisible_bullet
-            //bcc draw_bullets
+            bcc draw_bullets
+
+            // X contains the free bullet index
+            // Now lets find a random alien monster
+            // that shoots.
             
+            lda #$30
+            sta ALIEN_BULLETS_Y,x
             /*
+            lda #$80
+            sta ALIEN_BULLETS_STAT,x 
             txa
             asl
             clc
@@ -187,7 +195,7 @@ main_isr:  {
             lda #100
             sta ALIEN_BULLETS_X,x
             lda #20
-            sta ALIEN_BULLETS_y,x
+            sta ALIEN_BULLETS_Y,x
             lda #3
             sta ALIEN_BULLETS_SPEED,x
             */

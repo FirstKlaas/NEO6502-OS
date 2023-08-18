@@ -122,6 +122,10 @@
                 zpRegFF: .byte 0
 }
 
+.macro HALT() {
+    // Any write to $ffee will halt the cpu  
+    sta $ffee
+}
 
 .import source "asm/main.asm"
 

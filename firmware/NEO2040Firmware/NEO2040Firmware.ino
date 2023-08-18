@@ -32,7 +32,7 @@ volatile bool updating;
 
 bool frame_update_callback(struct repeating_timer *t) {
   const TContextPtr ctx((TContextPtr)t->user_data);
-  
+  if (!(ctx->cpu_running)) return true;
   if (updating) {
     Serial.printf("Frame drop %06d\n", ctx->frame_number);
   }
@@ -53,7 +53,8 @@ void setup() {
 
   ctx.clock_cycle = 0L;
   ctx.frame_number = 0L;
-
+  ctx.cpu_running = true;
+  
   initmemory(ctxPtr);
   setupCIAPins();
   initKeyboard(ctxPtr);
@@ -76,8 +77,10 @@ void setup() {
   //sleep_ms(2000);
   Serial.println("Starting programm");
   while(true) {
-    tick6502(ctxPtr);
-    checkCIA(ctxPtr);    
+    if (ctx.cpu_running) {
+      tick6502(ctxPtr);
+      checkCIA(ctxPtr);    
+    }
   }
 }
 

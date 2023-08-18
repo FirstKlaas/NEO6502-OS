@@ -80,6 +80,10 @@ void writeToMemory(TContextPtr ctx)
     #endif
     ctx->memory[ctx->address] = ctx->data;
 
+    if (ctx->address == 0xffee) {
+      Serial.printf("Halt CPU: %02x\n", ctx->data);
+      delay(5000); // (ctx->cpu_running = false;
+    }
     if (ctx->address == 0xfffe) Serial.printf("Setting ISR vector lowbyte. %02x\n", ctx->data);
     if (ctx->address == 0xffff) Serial.printf("Setting ISR vector highbyte. %02x\n", ctx->data);
 }

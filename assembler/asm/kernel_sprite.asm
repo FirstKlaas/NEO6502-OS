@@ -149,9 +149,9 @@ find_next_invisible_bullet: {
     bmi !next+ // Visible. Next.
     // Make this bullet visible
     ora #$80
-    sta ALIEN_BULLETS_STAT, x
+    sta ALIEN_BULLETS_STAT,x
     sec // Set carry flag (inicating we found a slot)
-    rts // So we avoid a jump. But good practice?
+    jmp !end+
 !next:
     dex
     bpl !loop-
@@ -166,39 +166,35 @@ find_next_invisible_bullet: {
     tha stat(us) byte.
 */
 update_alien_bullets: {
+    jsr move_bullets
+    jsr check_bullets
+    jsr draw_bullets
+    rts
+}
+
+move_bullets: {
     ldx #4
 !loop:
-    lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
-    bpl !next+               // If bit 7 = 0 => bullet is not visible
-    
-    // Draw bullet using a line
-draw_bullet:
-    lda ALIEN_BULLETS_X,x    // X-Pos low
-    sta DIS00
-    lda #0
-    sta DIS01   // xpos high
-    lda ALIEN_BULLETS_y,x 
-    sta DIS02   // ypos 
-    lda #4      // Length Low
-    sta DIS03
-    lda #0      // Length High
-    sta DIS04   
-    lda #23     // Color
-    sta DIS05
-    jsr draw_vertical_line_
-    // Move the bullet. It adds the speed to the current y position
-move_bullet:
-    lda ALIEN_BULLETS_y,x 
+    lda ALIEN_BULLETS_STAT,x
+    bpl !next+
+    lda ALIEN_BULLETS_Y,x 
     clc 
     //adc ALIEN_BULLETS_SPEED,x
     adc #2 
-    sta ALIEN_BULLETS_y,x
+    sta ALIEN_BULLETS_Y,x
+!next:
+    dex
+    bpl !loop- 
+    rts
+}
 
-    // Check ypos of bullet
-check_bullet:
-    // jmp !next+
-    lda ALIEN_BULLETS_y,x
-    cmp #190    // if ypos > 190 hide bullet 
+check_bullets: {
+    ldx #4
+!loop:
+    lda ALIEN_BULLETS_STAT,x
+    bpl !next+
+    lda ALIEN_BULLETS_Y,x
+    cmp #170    // if ypos > 190 hide bullet 
     bmi !next+
     // hide bullet
 hide_bullet:
@@ -211,23 +207,26 @@ hide_bullet:
     rts
 }
 
-pure_draw_bullet: {
+draw_bullets: {
 
-    ldx #4
-!loop:
-    lda ALIEN_BULLETS_X,x    // X-Pos low
-    sta DIS00
     lda #0
     sta DIS01   // xpos high
-    lda ALIEN_BULLETS_y,x 
-    sta DIS02   // ypos 
     lda #4      // Length Low
     sta DIS03
     lda #0      // Length High
     sta DIS04   
     lda #23     // Color
     sta DIS05
+    ldx #4
+!loop:
+    lda ALIEN_BULLETS_STAT,x 
+    bpl !next+
+    lda ALIEN_BULLETS_X,x       // X-Pos low
+    sta DIS00
+    lda ALIEN_BULLETS_Y,x 
+    sta DIS02                   // ypos 
     jsr draw_vertical_line_
+!next:
     dex 
     bpl !loop-
     rts
@@ -238,5 +237,5 @@ ALIEN_BULLETS_STAT:     .fill BULLET_COUNT, $04  // Bit 0..3 length
                                                  // Bit 7: Visibility. 1 = Visible
                                                  // Bit 6: High Bit Xpos: 1 = Xpos > 255
 ALIEN_BULLETS_X:        .byte $30, $40, $50, $60, $70  // xpos. If xpos > 255; stat bit 6 = 1
-ALIEN_BULLETS_y:        .fill BULLET_COUNT, $20  // ypos of the top
+ALIEN_BULLETS_Y:        .fill BULLET_COUNT, $20  // ypos of the top
 ALIEN_BULLETS_SPEED:    .fill BULLET_COUNT, $02

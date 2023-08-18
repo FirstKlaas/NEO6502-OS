@@ -128,161 +128,164 @@
 0a9a: a9 17     -         lda #ypos
 0a9c: 20 24 e1  -         jsr set_cursor_y_    
 0a9f: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
-0aa2: 8d 8a e6  -         sta HTD_IN
+0aa2: 8d 7e e6  -         sta HTD_IN
 0aa5: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
-0aa8: 8d 8b e6  -         sta HTD_IN+1
-0aab: 20 8f e6  -         jsr bcd_convert_word_
-0aae: ad 8e e6  -         lda HTD_OUT+2
+0aa8: 8d 7f e6  -         sta HTD_IN+1
+0aab: 20 83 e6  -         jsr bcd_convert_word_
+0aae: ad 82 e6  -         lda HTD_OUT+2
 0ab1: 20 c8 e1  -         jsr print_hex_
-0ab4: ad 8d e6  -         lda HTD_OUT+1
+0ab4: ad 81 e6  -         lda HTD_OUT+1
 0ab7: 20 c8 e1  -         jsr print_hex_
-0aba: ad 8c e6  -         lda HTD_OUT
+0aba: ad 80 e6  -         lda HTD_OUT
 0abd: 20 c8 e1  -         jsr print_hex_
 0ac0: a9 12     -         lda #xpos
 0ac2: 20 0c e1  -         jsr set_cursor_x_
 0ac5: a9 17     -         lda #ypos
 0ac7: 20 24 e1  -         jsr set_cursor_y_    
-0aca: ad 4b e6  -         lda ALIEN_BULLETS_X+i
+0aca: ad 3f e6  -         lda ALIEN_BULLETS_X+i
 0acd: 20 c8 e1  -         jsr print_hex_
 0ad0: a9 15     -         lda #xpos
 0ad2: 20 0c e1  -         jsr set_cursor_x_
 0ad5: a9 17     -         lda #ypos
 0ad7: 20 24 e1  -         jsr set_cursor_y_    
-0ada: ad 4c e6  -         lda ALIEN_BULLETS_X+i
+0ada: ad 40 e6  -         lda ALIEN_BULLETS_X+i
 0add: 20 c8 e1  -         jsr print_hex_
 0ae0: a9 18     -         lda #xpos
 0ae2: 20 0c e1  -         jsr set_cursor_x_
 0ae5: a9 17     -         lda #ypos
 0ae7: 20 24 e1  -         jsr set_cursor_y_    
-0aea: ad 4d e6  -         lda ALIEN_BULLETS_X+i
+0aea: ad 41 e6  -         lda ALIEN_BULLETS_X+i
 0aed: 20 c8 e1  -         jsr print_hex_
 0af0: a9 1b     -         lda #xpos
 0af2: 20 0c e1  -         jsr set_cursor_x_
 0af5: a9 17     -         lda #ypos
 0af7: 20 24 e1  -         jsr set_cursor_y_    
-0afa: ad 4e e6  -         lda ALIEN_BULLETS_X+i
+0afa: ad 42 e6  -         lda ALIEN_BULLETS_X+i
 0afd: 20 c8 e1  -         jsr print_hex_
 0b00: a9 1e     -         lda #xpos
 0b02: 20 0c e1  -         jsr set_cursor_x_
 0b05: a9 17     -         lda #ypos
 0b07: 20 24 e1  -         jsr set_cursor_y_    
-0b0a: ad 4f e6  -         lda ALIEN_BULLETS_X+i
+0b0a: ad 43 e6  -         lda ALIEN_BULLETS_X+i
 0b0d: 20 c8 e1  -         jsr print_hex_
 0b10: a9 12     -         lda #xpos
 0b12: 20 0c e1  -         jsr set_cursor_x_
 0b15: a9 18     -         lda #ypos
 0b17: 20 24 e1  -         jsr set_cursor_y_    
-0b1a: ad 50 e6  -         lda ALIEN_BULLETS_y+i
+0b1a: ad 44 e6  -         lda ALIEN_BULLETS_Y+i
 0b1d: 20 c8 e1  -         jsr print_hex_
 0b20: a9 15     -         lda #xpos
 0b22: 20 0c e1  -         jsr set_cursor_x_
 0b25: a9 18     -         lda #ypos
 0b27: 20 24 e1  -         jsr set_cursor_y_    
-0b2a: ad 51 e6  -         lda ALIEN_BULLETS_y+i
+0b2a: ad 45 e6  -         lda ALIEN_BULLETS_Y+i
 0b2d: 20 c8 e1  -         jsr print_hex_
 0b30: a9 18     -         lda #xpos
 0b32: 20 0c e1  -         jsr set_cursor_x_
 0b35: a9 18     -         lda #ypos
 0b37: 20 24 e1  -         jsr set_cursor_y_    
-0b3a: ad 52 e6  -         lda ALIEN_BULLETS_y+i
+0b3a: ad 46 e6  -         lda ALIEN_BULLETS_Y+i
 0b3d: 20 c8 e1  -         jsr print_hex_
 0b40: a9 1b     -         lda #xpos
 0b42: 20 0c e1  -         jsr set_cursor_x_
 0b45: a9 18     -         lda #ypos
 0b47: 20 24 e1  -         jsr set_cursor_y_    
-0b4a: ad 53 e6  -         lda ALIEN_BULLETS_y+i
+0b4a: ad 47 e6  -         lda ALIEN_BULLETS_Y+i
 0b4d: 20 c8 e1  -         jsr print_hex_
 0b50: a9 1e     -         lda #xpos
 0b52: 20 0c e1  -         jsr set_cursor_x_
 0b55: a9 18     -         lda #ypos
 0b57: 20 24 e1  -         jsr set_cursor_y_    
-0b5a: ad 54 e6  -         lda ALIEN_BULLETS_y+i
+0b5a: ad 48 e6  -         lda ALIEN_BULLETS_Y+i
 0b5d: 20 c8 e1  -         jsr print_hex_
 0b60: a9 12     -         lda #xpos
 0b62: 20 0c e1  -         jsr set_cursor_x_
 0b65: a9 19     -         lda #ypos
 0b67: 20 24 e1  -         jsr set_cursor_y_    
-0b6a: ad 46 e6  -         lda ALIEN_BULLETS_STAT+i
+0b6a: ad 3a e6  -         lda ALIEN_BULLETS_STAT+i
 0b6d: 20 c8 e1  -         jsr print_hex_
 0b70: a9 15     -         lda #xpos
 0b72: 20 0c e1  -         jsr set_cursor_x_
 0b75: a9 19     -         lda #ypos
 0b77: 20 24 e1  -         jsr set_cursor_y_    
-0b7a: ad 47 e6  -         lda ALIEN_BULLETS_STAT+i
+0b7a: ad 3b e6  -         lda ALIEN_BULLETS_STAT+i
 0b7d: 20 c8 e1  -         jsr print_hex_
 0b80: a9 18     -         lda #xpos
 0b82: 20 0c e1  -         jsr set_cursor_x_
 0b85: a9 19     -         lda #ypos
 0b87: 20 24 e1  -         jsr set_cursor_y_    
-0b8a: ad 48 e6  -         lda ALIEN_BULLETS_STAT+i
+0b8a: ad 3c e6  -         lda ALIEN_BULLETS_STAT+i
 0b8d: 20 c8 e1  -         jsr print_hex_
 0b90: a9 1b     -         lda #xpos
 0b92: 20 0c e1  -         jsr set_cursor_x_
 0b95: a9 19     -         lda #ypos
 0b97: 20 24 e1  -         jsr set_cursor_y_    
-0b9a: ad 49 e6  -         lda ALIEN_BULLETS_STAT+i
+0b9a: ad 3d e6  -         lda ALIEN_BULLETS_STAT+i
 0b9d: 20 c8 e1  -         jsr print_hex_
 0ba0: a9 1e     -         lda #xpos
 0ba2: 20 0c e1  -         jsr set_cursor_x_
 0ba5: a9 19     -         lda #ypos
 0ba7: 20 24 e1  -         jsr set_cursor_y_    
-0baa: ad 4a e6  -         lda ALIEN_BULLETS_STAT+i
+0baa: ad 3e e6  -         lda ALIEN_BULLETS_STAT+i
 0bad: 20 c8 e1  -         jsr print_hex_
 0bb0: 20 bf e5  -         jsr find_next_invisible_bullet
-0bb3: 20 d2 e5  - draw_bullets:jsr update_alien_bullets
-0bb6: ad df e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
-0bb9: c9 0a     -         cmp #10             // 10 is the minimum x position
-0bbb: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
-0bbd: a9 01     - left_underflow:lda #$01
-0bbf: 8d 0e 0c  -         sta operation+1
-0bc2: 4c d1 0b  -         jmp go_down 
-0bc5: ad e6 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
-0bc8: c9 ef     -         cmp #$ef            // Max xpos = 239
-0bca: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
-0bcc: a9 ff     - right_overflow:lda #$ff            // By adding -1, we move left.
-0bce: 8d 0e 0c  -         sta operation+1     // Write the new speed to the code (self modified)    
-0bd1: ad ff e4  - go_down:lda SPRITE_YPOS
-0bd4: c9 96     -         cmp #150
-0bd6: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
-0bd8: a0 07     - reset_ypos:ldy #7
-0bda: a9 20     -         lda #$20              // Start Y position
-0bdc: 99 ff e4  -         sta SPRITE_YPOS,y 
-0bdf: 88        -         dey
-0be0: 10 fa     -         bpl !loop-
-0be2: a0 07     -         ldy #7
-0be4: a9 30     -         lda #$30              // Start Y position
-0be6: 99 07 e5  -         sta SPRITE_YPOS+8,y 
-0be9: 88        -         dey
-0bea: 10 fa     -         bpl !loop-
-0bec: a0 07     -         ldy #7
-0bee: a9 40     -         lda #$40              // Start Y position
-0bf0: 99 0f e5  -         sta SPRITE_YPOS+16,y 
-0bf3: 88        -         dey
-0bf4: 10 fa     -         bpl !loop-
-0bf6: 4c 07 0c  -         jmp move    
-0bf9: a0 17     - decrease:ldy #23             // Calculate position fpr 24 sprites
-0bfb: b9 ff e4  -         lda SPRITE_YPOS,y 
-0bfe: 18        -         clc
-0bff: 69 04     -         adc #4
-0c01: 99 ff e4  -         sta SPRITE_YPOS,y 
-0c04: 88        -         dey
-0c05: 10 f4     -         bpl !loop-
-0c07: a0 07     - move:   ldy #7               // Y is the sprite index. We have 8 sprites in a row 
-0c09: b9 df e4  -         lda SPRITE_XPOS,y    // Load current x position of the sprite   
-0c0c: 18        -         clc
-0c0d: 69 01     - operation:adc #1               // Add the speed
-0c0f: 99 df e4  -         sta SPRITE_XPOS,y    // save the new xpos 
-0c12: 99 e7 e4  -         sta SPRITE_XPOS+8,y  // Also for the second row
-0c15: 99 ef e4  -         sta SPRITE_XPOS+16,y // Also for the second row
-0c18: 88        -         dey
-0c19: 10 ee     -         bpl !loop-
-0c1b: ad 0d dc  - exit:   lda $dc0d            // Acknowledge the IRQ            
-0c1e: 68        -         pla
-0c1f: a8        -         tay 
-0c20: 68        -         pla 
-0c21: aa        -         tax 
-0c22: 68        -         pla
-0c23: 40        -         rti
+0bb3: 90 05     -         bcc draw_bullets
+0bb5: a9 30     -         lda #$30
+0bb7: 9d 44 e6  -         sta ALIEN_BULLETS_Y,x
+0bba: 20 d4 e5  - draw_bullets:jsr update_alien_bullets
+0bbd: ad df e4  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
+0bc0: c9 0a     -         cmp #10             // 10 is the minimum x position
+0bc2: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
+0bc4: a9 01     - left_underflow:lda #$01
+0bc6: 8d 15 0c  -         sta operation+1
+0bc9: 4c d8 0b  -         jmp go_down 
+0bcc: ad e6 e4  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
+0bcf: c9 ef     -         cmp #$ef            // Max xpos = 239
+0bd1: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
+0bd3: a9 ff     - right_overflow:lda #$ff            // By adding -1, we move left.
+0bd5: 8d 15 0c  -         sta operation+1     // Write the new speed to the code (self modified)    
+0bd8: ad ff e4  - go_down:lda SPRITE_YPOS
+0bdb: c9 96     -         cmp #150
+0bdd: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
+0bdf: a0 07     - reset_ypos:ldy #7
+0be1: a9 20     -         lda #$20              // Start Y position
+0be3: 99 ff e4  -         sta SPRITE_YPOS,y 
+0be6: 88        -         dey
+0be7: 10 fa     -         bpl !loop-
+0be9: a0 07     -         ldy #7
+0beb: a9 30     -         lda #$30              // Start Y position
+0bed: 99 07 e5  -         sta SPRITE_YPOS+8,y 
+0bf0: 88        -         dey
+0bf1: 10 fa     -         bpl !loop-
+0bf3: a0 07     -         ldy #7
+0bf5: a9 40     -         lda #$40              // Start Y position
+0bf7: 99 0f e5  -         sta SPRITE_YPOS+16,y 
+0bfa: 88        -         dey
+0bfb: 10 fa     -         bpl !loop-
+0bfd: 4c 0e 0c  -         jmp move    
+0c00: a0 17     - decrease:ldy #23             // Calculate position fpr 24 sprites
+0c02: b9 ff e4  -         lda SPRITE_YPOS,y 
+0c05: 18        -         clc
+0c06: 69 04     -         adc #4
+0c08: 99 ff e4  -         sta SPRITE_YPOS,y 
+0c0b: 88        -         dey
+0c0c: 10 f4     -         bpl !loop-
+0c0e: a0 07     - move:   ldy #7               // Y is the sprite index. We have 8 sprites in a row 
+0c10: b9 df e4  -         lda SPRITE_XPOS,y    // Load current x position of the sprite   
+0c13: 18        -         clc
+0c14: 69 01     - operation:adc #1               // Add the speed
+0c16: 99 df e4  -         sta SPRITE_XPOS,y    // save the new xpos 
+0c19: 99 e7 e4  -         sta SPRITE_XPOS+8,y  // Also for the second row
+0c1c: 99 ef e4  -         sta SPRITE_XPOS+16,y // Also for the second row
+0c1f: 88        -         dey
+0c20: 10 ee     -         bpl !loop-
+0c22: ad 0d dc  - exit:   lda $dc0d            // Acknowledge the IRQ            
+0c25: 68        -         pla
+0c26: a8        -         tay 
+0c27: 68        -         pla 
+0c28: aa        -         tax 
+0c29: 68        -         pla
+0c2a: 40        -         rti
 
 [Kernel Routines Entry Points]
 e000: 4c 00 e1  - get_key:jmp get_key_
@@ -735,156 +738,153 @@ e58f: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 e59f: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_HI:.fill 32, 0
 e5af: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
 e5bf: a2 04     - find_next_invisible_bullet:ldx #4
-e5c1: bd 46 e6  -         lda ALIEN_BULLETS_STAT,x 
-e5c4: 30 07     -         bmi !next+ // Visible. Next.
+e5c1: bd 3a e6  -         lda ALIEN_BULLETS_STAT,x 
+e5c4: 30 09     -         bmi !next+ // Visible. Next.
 e5c6: 09 80     -         ora #$80
-e5c8: 9d 46 e6  -         sta ALIEN_BULLETS_STAT, x
+e5c8: 9d 3a e6  -         sta ALIEN_BULLETS_STAT,x
 e5cb: 38        -         sec // Set carry flag (inicating we found a slot)
-e5cc: 60        -         rts // So we avoid a jump. But good practice?
-e5cd: ca        -         dex
-e5ce: 10 f1     -         bpl !loop-
-e5d0: 18        -         clc // Clear carry to indicate, we didn't found a free slot.
-e5d1: 60        -         rts
-e5d2: a2 04     - update_alien_bullets:ldx #4
-e5d4: bd 46 e6  -         lda ALIEN_BULLETS_STAT,x // Get status info for bullet.
-e5d7: 10 40     -         bpl !next+               // If bit 7 = 0 => bullet is not visible
-e5d9: bd 4b e6  - draw_bullet:lda ALIEN_BULLETS_X,x    // X-Pos low
-e5dc: 8d 15 d0  -         sta DIS00
-e5df: a9 00     -         lda #0
-e5e1: 8d 16 d0  -         sta DIS01   // xpos high
-e5e4: bd 50 e6  -         lda ALIEN_BULLETS_y,x 
-e5e7: 8d 17 d0  -         sta DIS02   // ypos 
-e5ea: a9 04     -         lda #4      // Length Low
-e5ec: 8d 18 d0  -         sta DIS03
-e5ef: a9 00     -         lda #0      // Length High
-e5f1: 8d 19 d0  -         sta DIS04   
-e5f4: a9 17     -         lda #23     // Color
-e5f6: 8d 1a d0  -         sta DIS05
-e5f9: 20 fe e1  -         jsr draw_vertical_line_
-e5fc: bd 50 e6  - move_bullet:lda ALIEN_BULLETS_y,x 
-e5ff: 18        -         clc 
-e600: 69 02     -         adc #2 
-e602: 9d 50 e6  -         sta ALIEN_BULLETS_y,x
-e605: 4c 19 e6  - check_bullet:jmp !next+
-e608: c9 be     -         cmp #190    // if ypos > 190 hide bullet 
-e60a: 30 0d     -         bmi !next+
-e60c: a9 00     - hide_bullet:lda #0
-e60e: 9d 50 e6  -         sta ALIEN_BULLETS_y,x       // Reset Y Position to zero
-e611: bd 46 e6  -         lda ALIEN_BULLETS_STAT,x 
-e614: 29 7f     -         and #%01111111
-e616: 9d 46 e6  -         sta ALIEN_BULLETS_STAT,x
-e619: ca        -         dex
-e61a: 10 b8     -         bpl !loop-
-e61c: 60        -         rts
-e61d: a2 04     - pure_draw_bullet:ldx #4
-e61f: bd 4b e6  -         lda ALIEN_BULLETS_X,x    // X-Pos low
-e622: 8d 15 d0  -         sta DIS00
-e625: a9 00     -         lda #0
-e627: 8d 16 d0  -         sta DIS01   // xpos high
-e62a: bd 50 e6  -         lda ALIEN_BULLETS_y,x 
-e62d: 8d 17 d0  -         sta DIS02   // ypos 
-e630: a9 04     -         lda #4      // Length Low
-e632: 8d 18 d0  -         sta DIS03
-e635: a9 00     -         lda #0      // Length High
-e637: 8d 19 d0  -         sta DIS04   
-e63a: a9 17     -         lda #23     // Color
-e63c: 8d 1a d0  -         sta DIS05
-e63f: 20 fe e1  -         jsr draw_vertical_line_
-e642: ca        -         dex 
-e643: 10 da     -         bpl !loop-
-e645: 60        -         rts
-e646: 04 04 04 04 04                                   - ALIEN_BULLETS_STAT:.fill BULLET_COUNT, $04  // Bit 0..3 length
-e64b: 30 40 50 60 70                                   - ALIEN_BULLETS_X:.byte $30, $40, $50, $60, $70  // xpos. If xpos > 255; stat bit 6 = 1
-e650: 20 20 20 20 20                                   - ALIEN_BULLETS_y:.fill BULLET_COUNT, $20  // ypos of the top
-e655: 02 02 02 02 02                                   - ALIEN_BULLETS_SPEED:.fill BULLET_COUNT, $02
-e65a: 00 00 01 00 00 02 00 00 04 00 00 08              - BCD_LOOKUP_TABLE:.byte    $00, $00, $01, $00, $00, $02, $00, $00, $04, $00, $00, $08
-e666: 00 00 16 00 00 32 00 00 64 00 01 28              -         .byte    $00, $00, $16, $00, $00, $32, $00, $00, $64, $00, $01, $28
-e672: 00 02 56 00 05 12 00 10 24 00 20 48              -         .byte    $00, $02, $56, $00, $05, $12, $00, $10, $24, $00, $20, $48
-e67e: 00 40 96 00 81 92 01 63 84 03 27 68              -         .byte    $00, $40, $96, $00, $81, $92, $01, $63, $84, $03, $27, $68
-e68a: 00 00     - HTD_IN: .byte $00, $00
-e68c: 00 00 00  - HTD_OUT:.byte $00, $00, $00 
-e68f: f8        - bcd_convert_word_:sed
-e690: da        -         phx
-e691: 48        -         pha
-e692: a9 00     -         lda #0
-e694: 8d 8c e6  -         sta HTD_OUT
-e697: 8d 8d e6  -         sta HTD_OUT+1
-e69a: 8d 8e e6  -         sta HTD_OUT+2
-e69d: a2 2d     -         ldx #$2d
-e69f: 0e 8a e6  -         asl HTD_IN 
-e6a2: 2e 8b e6  -         rol HTD_IN+1
-e6a5: 90 1c     -         bcc htd1
-e6a7: ad 8c e6  -         lda HTD_OUT
-e6aa: 18        -         clc 
-e6ab: 7d 5c e6  -         adc BCD_LOOKUP_TABLE+2,x
-e6ae: 8d 8c e6  -         sta HTD_OUT
-e6b1: ad 8d e6  -         lda HTD_OUT+1
-e6b4: 7d 5b e6  -         adc BCD_LOOKUP_TABLE+1,x
-e6b7: 8d 8d e6  -         sta HTD_OUT+1
-e6ba: ad 8e e6  -         lda HTD_OUT+2
-e6bd: 7d 5a e6  -         adc BCD_LOOKUP_TABLE,x
-e6c0: 8d 8e e6  -         sta HTD_OUT+2
-e6c3: ca        - htd1:   dex
-e6c4: ca        -         dex 
-e6c5: ca        -         dex 
-e6c6: 10 d7     -         bpl !loop- 
-e6c8: d8        -         cld
-e6c9: 68        -         pla
-e6ca: fa        -         plx 
-e6cb: 60        -         rts
-e6cc: a9 1f     - rand8,rand8b1-1:lda rand8b1:#31
-e6ce: 0a        -         asl
-e6cf: 49 35     - rand8a1-1:eor rand8a1:#53
-e6d1: 8d cd e6  -         sta rand8b1
-e6d4: 6d d0 e6  -         adc rand8a1
-e6d7: 8d d0 e6  -         sta rand8a1
-e6da: 60        -         rts
-e6db: 48        - set_seed:pha
-e6dc: 29 d9     -         and #217
-e6de: 18        -         clc
-e6df: 69 0f     -         adc #<21263
-e6e1: 8d d0 e6  -         sta rand8a1
-e6e4: 68        -         pla
-e6e5: 29 26     -         and #255-217
-e6e7: 69 53     -         adc #>21263
-e6e9: 8d cd e6  -         sta rand8b1
-e6ec: 60        -         rts
-e6ed: 48        - byte_to_hex:pha                     // Save value to stack.
-e6ee: 29 0f     -         and #%00001111
-e6f0: 85 e0     -         sta zpRegE0             // store the lower nibble
-e6f2: 68        -         pla                     // Load the original value
-e6f3: 48        -         pha                     // and save it again
-e6f4: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
-e6f5: 4a        -         lsr
-e6f6: 4a        -         lsr
-e6f7: 4a        -         lsr
-e6f8: 85 e1     -         sta zpRegE1             // store the higher nibble
-e6fa: 68        -         pla                     // restore the accu
-e6fb: 60        -         rts
-e6fc: a5 e0     - convert565:lda zpRegE0             // red value
-e6fe: 0a        -         asl                     // shift three to the left as we
-e6ff: 0a        -         asl                     // need to move the lower 5 bits of red
-e700: 0a        -         asl                     // to the bits 7-5
-e701: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
-e703: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
-e705: 4a        -         lsr                     // lower bits of the output highbyte
-e706: 4a        -         lsr
-e707: 4a        -         lsr
-e708: 29 07     -         and #%00000111          // Only the lower three bits.
-e70a: 05 e0     -         ora zpRegE0             // combine this with the compressed red
-e70c: 85 e0     -         sta zpRegE0             // Store the final high byte
-e70e: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
-e710: 0a        -         asl                     // Shift everything 5 bits to the left and fill
-e711: 0a        -         asl                     // it with zeros
-e712: 0a        -         asl
-e713: 0a        -         asl
-e714: 0a        -         asl
-e715: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
-e717: a5 e2     -         lda zpRegE2             // Load blue
-e719: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
-e71b: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
-e71d: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
-e71f: 60        -         rts
+e5cc: 4c d3 e5  -         jmp !end+
+e5cf: ca        -         dex
+e5d0: 10 ef     -         bpl !loop-
+e5d2: 18        -         clc // Clear carry to indicate, we didn't found a free slot.
+e5d3: 60        -         rts
+e5d4: 20 de e5  - update_alien_bullets:jsr move_bullets
+e5d7: 20 f2 e5  -         jsr check_bullets
+e5da: 20 0c e6  -         jsr draw_bullets
+e5dd: 60        -         rts
+e5de: a2 04     - move_bullets:ldx #4
+e5e0: bd 3a e6  -         lda ALIEN_BULLETS_STAT,x
+e5e3: 10 09     -         bpl !next+
+e5e5: bd 44 e6  -         lda ALIEN_BULLETS_Y,x 
+e5e8: 18        -         clc 
+e5e9: 69 02     -         adc #2 
+e5eb: 9d 44 e6  -         sta ALIEN_BULLETS_Y,x
+e5ee: ca        -         dex
+e5ef: 10 ef     -         bpl !loop- 
+e5f1: 60        -         rts
+e5f2: a2 04     - check_bullets:ldx #4
+e5f4: bd 3a e6  -         lda ALIEN_BULLETS_STAT,x
+e5f7: 10 0f     -         bpl !next+
+e5f9: bd 44 e6  -         lda ALIEN_BULLETS_Y,x
+e5fc: c9 aa     -         cmp #170    // if ypos > 190 hide bullet 
+e5fe: 30 08     -         bmi !next+
+e600: bd 3a e6  - hide_bullet:lda ALIEN_BULLETS_STAT,x 
+e603: 29 7f     -         and #$7f
+e605: 9d 3a e6  -         sta ALIEN_BULLETS_STAT,x
+e608: ca        -         dex
+e609: 10 e9     -         bpl !loop-
+e60b: 60        -         rts
+e60c: a9 00     - draw_bullets:lda #0
+e60e: 8d 16 d0  -         sta DIS01   // xpos high
+e611: a9 04     -         lda #4      // Length Low
+e613: 8d 18 d0  -         sta DIS03
+e616: a9 00     -         lda #0      // Length High
+e618: 8d 19 d0  -         sta DIS04   
+e61b: a9 17     -         lda #23     // Color
+e61d: 8d 1a d0  -         sta DIS05
+e620: a2 04     -         ldx #4
+e622: bd 3a e6  -         lda ALIEN_BULLETS_STAT,x 
+e625: 10 0f     -         bpl !next+
+e627: bd 3f e6  -         lda ALIEN_BULLETS_X,x       // X-Pos low
+e62a: 8d 15 d0  -         sta DIS00
+e62d: bd 44 e6  -         lda ALIEN_BULLETS_Y,x 
+e630: 8d 17 d0  -         sta DIS02                   // ypos 
+e633: 20 fe e1  -         jsr draw_vertical_line_
+e636: ca        -         dex 
+e637: 10 e9     -         bpl !loop-
+e639: 60        -         rts
+e63a: 04 04 04 04 04                                   - ALIEN_BULLETS_STAT:.fill BULLET_COUNT, $04  // Bit 0..3 length
+e63f: 30 40 50 60 70                                   - ALIEN_BULLETS_X:.byte $30, $40, $50, $60, $70  // xpos. If xpos > 255; stat bit 6 = 1
+e644: 20 20 20 20 20                                   - ALIEN_BULLETS_Y:.fill BULLET_COUNT, $20  // ypos of the top
+e649: 02 02 02 02 02                                   - ALIEN_BULLETS_SPEED:.fill BULLET_COUNT, $02
+e64e: 00 00 01 00 00 02 00 00 04 00 00 08              - BCD_LOOKUP_TABLE:.byte    $00, $00, $01, $00, $00, $02, $00, $00, $04, $00, $00, $08
+e65a: 00 00 16 00 00 32 00 00 64 00 01 28              -         .byte    $00, $00, $16, $00, $00, $32, $00, $00, $64, $00, $01, $28
+e666: 00 02 56 00 05 12 00 10 24 00 20 48              -         .byte    $00, $02, $56, $00, $05, $12, $00, $10, $24, $00, $20, $48
+e672: 00 40 96 00 81 92 01 63 84 03 27 68              -         .byte    $00, $40, $96, $00, $81, $92, $01, $63, $84, $03, $27, $68
+e67e: 00 00     - HTD_IN: .byte $00, $00
+e680: 00 00 00  - HTD_OUT:.byte $00, $00, $00 
+e683: f8        - bcd_convert_word_:sed
+e684: da        -         phx
+e685: 48        -         pha
+e686: a9 00     -         lda #0
+e688: 8d 80 e6  -         sta HTD_OUT
+e68b: 8d 81 e6  -         sta HTD_OUT+1
+e68e: 8d 82 e6  -         sta HTD_OUT+2
+e691: a2 2d     -         ldx #$2d
+e693: 0e 7e e6  -         asl HTD_IN 
+e696: 2e 7f e6  -         rol HTD_IN+1
+e699: 90 1c     -         bcc htd1
+e69b: ad 80 e6  -         lda HTD_OUT
+e69e: 18        -         clc 
+e69f: 7d 50 e6  -         adc BCD_LOOKUP_TABLE+2,x
+e6a2: 8d 80 e6  -         sta HTD_OUT
+e6a5: ad 81 e6  -         lda HTD_OUT+1
+e6a8: 7d 4f e6  -         adc BCD_LOOKUP_TABLE+1,x
+e6ab: 8d 81 e6  -         sta HTD_OUT+1
+e6ae: ad 82 e6  -         lda HTD_OUT+2
+e6b1: 7d 4e e6  -         adc BCD_LOOKUP_TABLE,x
+e6b4: 8d 82 e6  -         sta HTD_OUT+2
+e6b7: ca        - htd1:   dex
+e6b8: ca        -         dex 
+e6b9: ca        -         dex 
+e6ba: 10 d7     -         bpl !loop- 
+e6bc: d8        -         cld
+e6bd: 68        -         pla
+e6be: fa        -         plx 
+e6bf: 60        -         rts
+e6c0: a9 1f     - rand8,rand8b1-1:lda rand8b1:#31
+e6c2: 0a        -         asl
+e6c3: 49 35     - rand8a1-1:eor rand8a1:#53
+e6c5: 8d c1 e6  -         sta rand8b1
+e6c8: 6d c4 e6  -         adc rand8a1
+e6cb: 8d c4 e6  -         sta rand8a1
+e6ce: 60        -         rts
+e6cf: 48        - set_seed:pha
+e6d0: 29 d9     -         and #217
+e6d2: 18        -         clc
+e6d3: 69 0f     -         adc #<21263
+e6d5: 8d c4 e6  -         sta rand8a1
+e6d8: 68        -         pla
+e6d9: 29 26     -         and #255-217
+e6db: 69 53     -         adc #>21263
+e6dd: 8d c1 e6  -         sta rand8b1
+e6e0: 60        -         rts
+e6e1: 48        - byte_to_hex:pha                     // Save value to stack.
+e6e2: 29 0f     -         and #%00001111
+e6e4: 85 e0     -         sta zpRegE0             // store the lower nibble
+e6e6: 68        -         pla                     // Load the original value
+e6e7: 48        -         pha                     // and save it again
+e6e8: 4a        -         lsr                     // shift the higher nibbel to the lower nibble
+e6e9: 4a        -         lsr
+e6ea: 4a        -         lsr
+e6eb: 4a        -         lsr
+e6ec: 85 e1     -         sta zpRegE1             // store the higher nibble
+e6ee: 68        -         pla                     // restore the accu
+e6ef: 60        -         rts
+e6f0: a5 e0     - convert565:lda zpRegE0             // red value
+e6f2: 0a        -         asl                     // shift three to the left as we
+e6f3: 0a        -         asl                     // need to move the lower 5 bits of red
+e6f4: 0a        -         asl                     // to the bits 7-5
+e6f5: 85 e0     -         sta zpRegE0             // Save as the High Byte of the compressed color
+e6f7: a5 e1     -         lda zpRegE1             // load green. We need the bits 3-5 to be the 
+e6f9: 4a        -         lsr                     // lower bits of the output highbyte
+e6fa: 4a        -         lsr
+e6fb: 4a        -         lsr
+e6fc: 29 07     -         and #%00000111          // Only the lower three bits.
+e6fe: 05 e0     -         ora zpRegE0             // combine this with the compressed red
+e700: 85 e0     -         sta zpRegE0             // Store the final high byte
+e702: a5 e1     -         lda zpRegE1             // Load green again. We need the lower three bits
+e704: 0a        -         asl                     // Shift everything 5 bits to the left and fill
+e705: 0a        -         asl                     // it with zeros
+e706: 0a        -         asl
+e707: 0a        -         asl
+e708: 0a        -         asl
+e709: 85 e1     -         sta zpRegE1             // Store the green part in the lowbyte of the result
+e70b: a5 e2     -         lda zpRegE2             // Load blue
+e70d: 29 1f     -         and #%00011111          // Only need the 5 lower bits.
+e70f: 05 e1     -         ora zpRegE1             // Combine it with the green fraction
+e711: 85 e1     -         sta zpRegE1             // Store the final low byte of the compressed color
+e713: 60        -         rts
 
 [Kernel Data]
 f000: 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46  - hex_chars:.text "0123456789ABCDEF"

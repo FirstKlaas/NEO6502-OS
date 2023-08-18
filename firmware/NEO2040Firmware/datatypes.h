@@ -41,6 +41,7 @@ typedef struct HardwareType_ {
   CIA_t cia; 
   unsigned long clock_cycle;
   unsigned long frame_number;
+  bool cpu_running;
 } TContext, *TContextPtr;
 
 #endif
