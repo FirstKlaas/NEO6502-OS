@@ -176,6 +176,18 @@ main_isr:  {
                 jsr print_hex_
             }
 
+            // Animate Alien
+            SetCursorI(2,25)
+            lda ALIEN_ANIM_FRAME_LO
+            clc
+            adc #%00010000
+            sta ALIEN_ANIM_FRAME_LO
+            lda ALIEN_ANIM_FRAME_HI
+            adc #00
+            and #3
+            sta ALIEN_ANIM_FRAME_HI
+            jsr print_hex_
+
             // Delay triggered shot
             dec shot_delay      // Shot delay
             bne draw_bullets    // Still positive. No Shot

@@ -1,6 +1,32 @@
 .cpu _65c02
-.const SPRITE_ENABLE_FLAG = $C0
-.const BULLET_COUNT = 5
+.const SPRITE_ENABLE_FLAG       = $C0
+.const BULLET_COUNT             =   5
+.const MAX_BULLET_COUNT         =  20
+.const BULLET_MAX_HEIGHT        = 170
+.const BULLET_MIN_HEIGHT        =  20
+.const BULLET_COLOR             =  23
+.const BULLET_LENGTH            =   4
+.const BULLET_ENABLE_FLAG       = $80
+
+// GAME_STATES
+.const GAME_STATE_INTRO         =   1
+.const GAME_STATE_LEVEL_START   =   2
+.const GAME_STATE_FIGHT         =   3
+.const GAME_STATE_WIN           =   4
+.const GAME_STATE_LOST          =   5
+
+
+// Zero Page Variables
+*=$02 virtual 
+.zp {
+    SCORE_LO:                .byte $02
+    SCORE_HI:                .byte $03
+    GAME_STATE:              .byte $04
+    ALIEN_ANIM_FRAME_LO:     .byte $05 // Subpixel Animation Frame
+    ALIEN_ANIM_FRAME_HI:     .byte $06 // Animation Frame
+}
+
+.const ALIEN_ANIM_SPEED         = %00010000
 
 .macro SetSpriteAddress_IM(index, address) {
     ldx #index
@@ -70,6 +96,30 @@ init_sprites_:  .for (var i=0; i<8; i++) {
 !wait:
                 bit DISCR               // Check, if the irg flag is cleared
                 bmi !wait-              // No! Let's wait
+
+
+                // -----------------------------------------
+                // Init Alien Animation
+                // The Sprite Adress for each frame sprite 
+                // is stored in a table
+                // -----------------------------------------
+                // Frame 0 and 2
+                lda #<SPACE_ALIEN_A
+                sta ALIEN_A_SPRITE_ANIMATION_LO
+                sta ALIEN_A_SPRITE_ANIMATION_LO+2
+                lda #>SPACE_ALIEN_A
+                sta ALIEN_A_SPRITE_ANIMATION_HI
+                sta ALIEN_A_SPRITE_ANIMATION_HI+2
+                // Frame 1
+                lda #<SPACE_ALIEN_A1
+                sta ALIEN_A_SPRITE_ANIMATION_LO+1
+                lda #>SPACE_ALIEN_A1
+                sta ALIEN_A_SPRITE_ANIMATION_HI+1
+                // Frame 1
+                lda #<SPACE_ALIEN_A2
+                sta ALIEN_A_SPRITE_ANIMATION_LO+3
+                lda #>SPACE_ALIEN_A2
+                sta ALIEN_A_SPRITE_ANIMATION_HI+3
                 rts
                     
 SPACE_ALIEN_A:      .byte %00000010, %01000000
@@ -80,6 +130,24 @@ SPACE_ALIEN_A:      .byte %00000010, %01000000
                     .byte %00010111, %11101000
                     .byte %00000010, %01000000
                     .byte %00000110, %01100000
+
+SPACE_ALIEN_A1:     .byte %00000010, %01000000
+                    .byte %00000111, %11100000
+                    .byte %00001111, %11110000
+                    .byte %00011101, %10111000
+                    .byte %00010111, %11101000
+                    .byte %00010111, %11101000
+                    .byte %00000010, %01100000
+                    .byte %00000110, %00000000
+
+SPACE_ALIEN_A2:     .byte %00000010, %01000000
+                    .byte %00000111, %11100000
+                    .byte %00001111, %11110000
+                    .byte %00011101, %10111000
+                    .byte %00010111, %11101000
+                    .byte %00010111, %11101000
+                    .byte %00000110, %01000000
+                    .byte %00000000, %01100000
 
 SPACE_ALIEN_B:      .byte %00000000, %00000000
                     .byte %00000100, %01000000
@@ -134,6 +202,9 @@ SPRITE_HEIGHT:      .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 00-0
 SPRITE_DATA_LO:     .fill 32, 0
 SPRITE_DATA_HI:     .fill 32, 0
 
+ALIEN_A_SPRITE_ANIMATION_LO:    .fill 4, 0
+ALIEN_A_SPRITE_ANIMATION_HI:    .fill 4, 0
+
 /* ===============================================================================
     Look for the next "invisible" bullet in the table. A invisible bullet is 
     marked with the bit 7 set to zero in the stat byte. The carry bit is used 
@@ -143,12 +214,12 @@ SPRITE_DATA_HI:     .fill 32, 0
     bit is set. Not no free slot is availabe, the carry bit is cleared.
 */
 find_next_invisible_bullet: {
-    ldx #4
+    ldx #(BULLET_COUNT-1)
 !loop:
     lda ALIEN_BULLETS_STAT,x 
     bmi !next+ // Visible. Next.
     // Make this bullet visible
-    ora #$80
+    ora #BULLET_ENABLE_FLAG
     sta ALIEN_BULLETS_STAT,x
     sec // Set carry flag (inicating we found a slot)
     jmp !end+
@@ -172,15 +243,18 @@ update_alien_bullets: {
     rts
 }
 
+/* =======================================================================
+   Move every (visible) bullet down by the defined speed
+   -----------------------------------------------------------------------
+*/
 move_bullets: {
-    ldx #4
+    ldx #(BULLET_COUNT)
 !loop:
     lda ALIEN_BULLETS_STAT,x
     bpl !next+
     lda ALIEN_BULLETS_Y,x 
     clc 
-    //adc ALIEN_BULLETS_SPEED,x
-    adc #2 
+    adc ALIEN_BULLETS_SPEED,x
     sta ALIEN_BULLETS_Y,x
 !next:
     dex
@@ -188,18 +262,23 @@ move_bullets: {
     rts
 }
 
+/* =======================================================================
+   Check the visible bullets, whether they are in the visible range or 
+   not. If not, the bullet's state is set to "hidden" 
+   -----------------------------------------------------------------------
+*/
 check_bullets: {
-    ldx #4
+    ldx #(BULLET_COUNT-1)
 !loop:
     lda ALIEN_BULLETS_STAT,x
     bpl !next+
     lda ALIEN_BULLETS_Y,x
-    cmp #170    // if ypos > 190 hide bullet 
+    cmp #BULLET_MAX_HEIGHT    // if ypos > BULLET_MAX_HEIGHT hide bullet 
     bmi !next+
     // hide bullet
 hide_bullet:
     lda ALIEN_BULLETS_STAT,x 
-    and #$7f
+    and #(~BULLET_ENABLE_FLAG)
     sta ALIEN_BULLETS_STAT,x
 !next:
     dex
@@ -207,17 +286,21 @@ hide_bullet:
     rts
 }
 
+/* =======================================================================
+   Draw every (visible) bullet to the screen
+   -----------------------------------------------------------------------
+*/
 draw_bullets: {
 
     lda #0
-    sta DIS01   // xpos high
-    lda #4      // Length Low
+    sta DIS01                   // xpos high
+    lda #BULLET_LENGTH          // Length Low
     sta DIS03
-    lda #0      // Length High
+    lda #0                      // Length High
     sta DIS04   
-    lda #23     // Color
+    lda #BULLET_COLOR           // Color
     sta DIS05
-    ldx #4
+    ldx #(BULLET_COUNT-1)
 !loop:
     lda ALIEN_BULLETS_STAT,x 
     bpl !next+
@@ -236,6 +319,6 @@ draw_bullets: {
 ALIEN_BULLETS_STAT:     .fill BULLET_COUNT, $04  // Bit 0..3 length
                                                  // Bit 7: Visibility. 1 = Visible
                                                  // Bit 6: High Bit Xpos: 1 = Xpos > 255
-ALIEN_BULLETS_X:        .byte $30, $40, $50, $60, $70  // xpos. If xpos > 255; stat bit 6 = 1
+ALIEN_BULLETS_X:        .fill BULLET_COUNT, $00  // xpos. If xpos > 255; stat bit 6 = 1
 ALIEN_BULLETS_Y:        .fill BULLET_COUNT, $20  // ypos of the top
 ALIEN_BULLETS_SPEED:    .fill BULLET_COUNT, $02
