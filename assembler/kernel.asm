@@ -72,6 +72,16 @@
                 .const CMD_FILL_CIRCLE      = $1D
                 .const CMD_DRAW_SPRITES     = $1E
 
+                .const CMD_DRAW_BITMAP      = $1F
+                .const CMD_DRAW_PIXEL       = $20
+                .const CMD_DRAW_TRIANGLE    = $21
+                .const CMD_FILL_TRIANGLE    = $22
+                .const CMD_DRAW_ROUND_RECT  = $23
+                .const CMD_FILL_ROUND_RECT  = $24
+                .const CMD_DRAW_CIRCLE      = $25
+                .const CMD_FILL_CIRCLE      = $26
+                
+
 
 .import source "asm/colors.asm"
 

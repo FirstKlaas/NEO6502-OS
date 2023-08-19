@@ -358,6 +358,67 @@ void executeCommand(TContextPtr ctx)
     drawSprites(ctx);
     break;
 
+  case CMD_DRAW_BITMAP:
+    display.drawBitmap(
+      word(params),   // XPOS   DIS00 DIS01
+      params[2],      // YPOS   DIS02
+      ctx->memory + word(params+3), // DATA LO/HI   DIS03 DIS04
+      word(params+5), // WIDTH  DIS05 DIS06
+      params[7],      // HEIGHT DIS07
+      params[8]       // COLOR  DIS08
+    );
+    break; 
+
+  case CMD_DRAW_PIXEL:
+    display.drawPixel(
+      word(params),   // XPOS   DIS00 DIS01
+      params[2],      // YPOS   DIS02
+      params[3]       // COLOR  DIS03
+    );
+    break;
+
+  case CMD_DRAW_CIRCLE:
+    display.drawCircle(
+      word(params),   // XPOS   DIS00 DIS01
+      params[2],      // YPOS   DIS02
+      params[3],      // RADIUS DIS03
+      params[4]       // COLOR  DIS04
+    );
+    break;
+
+  case CMD_FILL_CIRCLE:
+    display.fillCircle(
+      word(params),   // XPOS   DIS00 DIS01
+      params[2],      // YPOS   DIS02
+      params[3],      // RADIUS DIS03
+      params[4]       // COLOR  DIS04
+    );
+    break;
+  
+  case CMD_DRAW_TRIANGLE:
+    display.drawTriangle(
+      word(params),   // XPOS1  DIS00 DIS01
+      params[2],      // YPOS1  DIS02
+      word(params+3), // XPOS2  DIS03 DIS04
+      params[5],      // YPOS2  DIS05
+      word(params+6), // XPOS3  DIS06 DIS07
+      params[8],      // YPOS3  DIS08
+      params[9]       // COLOR  DIS09
+    );
+    break;
+
+  case CMD_FILL_TRIANGLE:
+    display.fillTriangle(
+      word(params),   // XPOS1  DIS00 DIS01
+      params[2],      // YPOS1  DIS02
+      word(params+3), // XPOS2  DIS03 DIS04
+      params[5],      // YPOS2  DIS05
+      word(params+6), // XPOS3  DIS06 DIS07
+      params[8],      // YPOS3  DIS08
+      params[9]       // COLOR  DIS09
+    );
+    break;
+
   case CMD_SET_SDB:
   {
     screendata.sdb.address = ((ctx->memory[DIS01] << 8) | ctx->memory[DIS00]);
