@@ -142,4 +142,40 @@ draw_sprites_: {
     rts
 }
 
+draw_pixel_: {
+    lda #CMD_DRAW_PIXEL
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+draw_bitmap_: {
+    lda #CMD_DRAW_BITMAP
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+draw_circle_: {
+    lda #CMD_DRAW_CIRCLE
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+fill_circle_: {
+    lda #CMD_FILL_CIRCLE
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+draw_triangle_: {
+    lda #CMD_DRAW_TRIANGLE
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+fill_triangle_: {
+    lda #CMD_FILL_TRIANGLE
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
 
