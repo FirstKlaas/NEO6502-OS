@@ -1,3 +1,5 @@
+.cpu _65c02
+
 // --------------------------------
 // NEO6502 OS V0.0.1
 // --------------------------------
@@ -85,8 +87,19 @@
                 Returnvalues.
    ----------------------------------------------------------------------------
 */
-                
-*=$E0 virtual 
+// Zero Page Variables
+*=$02 "Game Variables" virtual
+.zp {
+    SCORE_LO:               .byte $02
+    SCORE_HI:               .byte $03
+    GAME_STATE:             .byte $04
+    ALIEN_ANIM_FRAME_LO:    .byte $05 // Subpixel Animation Frame
+    ALIEN_ANIM_FRAME_HI:    .byte $06 // Animation Frame
+    CURRENT_GAME_STATE:     .byte $07
+    CURRENT_LEVEL:          .byte $08
+} 
+              
+*=$E0 "Zero Kernel" virtual 
 .zp {
                 zpRegE0: .byte 0
                 zpRegE1: .byte 0
@@ -159,84 +172,10 @@ print_char:     jmp print_char_
 
                 * = $E100 "Kernel Routines"
 
+.import source "asm/math.asm"
 .import source "asm/kernel_text_routines.asm"
 .import source "asm/kernel_graphic_primitives.asm"
 .import source "asm/kernel_sprite.asm"
-.import source "asm/math.asm"
-
-
-/* ----------------------------------------------------------------------------
-    convert a single byte to two hex values (not characters).
-    The value to be converted has to be in the accu and is left unchanged
-    after return.
-  
-    Params In:
-        Accu    : Value to be converted
-
-    Params Out:
-        zpRegE0 : Hexvalue lowbyte
-        zpRegE1 : Hex value highbyte
-
-    Since         : 31.07.2023
-    Last modified : 31.07.2023
-   ----------------------------------------------------------------------------
-*/
-byte_to_hex:    pha                     // Save value to stack.
-                and #%00001111
-                sta zpRegE0             // store the lower nibble
-                pla                     // Load the original value
-                pha                     // and save it again
-                lsr                     // shift the higher nibbel to the lower nibble
-                lsr
-                lsr
-                lsr
-                sta zpRegE1             // store the higher nibble
-                pla                     // restore the accu
-                rts
-
-
-
-/* ----------------------------------------------------------------------------
-   converting a three byte color value (r,g,b) to a compressed two byte value
-   (5-6-5).
-
-   The input values are stored in the zeropage addresses
-
-   @param: zpRegE0: Red Value 
-   @param: zpRegE1: Green Value 
-   @param: zpRegE2: Blue Value
-
-   @return: 16bit color value. Highbyte in zpRegE0 und low byte in zpRegE1
-
-  
-   Since         : 31.07.2023
-   Last modified : 31.07.2023
-   ----------------------------------------------------------------------------
-*/
-convert565:     lda zpRegE0             // red value
-                asl                     // shift three to the left as we
-                asl                     // need to move the lower 5 bits of red
-                asl                     // to the bits 7-5
-                sta zpRegE0             // Save as the High Byte of the compressed color
-                lda zpRegE1             // load green. We need the bits 3-5 to be the 
-                lsr                     // lower bits of the output highbyte
-                lsr
-                lsr
-                and #%00000111          // Only the lower three bits.
-                ora zpRegE0             // combine this with the compressed red
-                sta zpRegE0             // Store the final high byte
-                lda zpRegE1             // Load green again. We need the lower three bits
-                asl                     // Shift everything 5 bits to the left and fill
-                asl                     // it with zeros
-                asl
-                asl
-                asl
-                sta zpRegE1             // Store the green part in the lowbyte of the result
-                lda zpRegE2             // Load blue
-                and #%00011111          // Only need the 5 lower bits.
-                ora zpRegE1             // Combine it with the green fraction
-                sta zpRegE1             // Store the final low byte of the compressed color
-                rts
 
 /* ============================================================================
                 KERNAL DATA

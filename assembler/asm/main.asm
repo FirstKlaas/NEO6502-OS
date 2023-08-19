@@ -1,3 +1,4 @@
+.cpu _65c02
 .macro EnableCursorAutoAdjustment() {
     lda DISCR   // Set the auto adjust 
     ora #$0C    // and wrap flag
@@ -21,6 +22,47 @@
     lda #>addr
     sta zpRegE1
     jsr print_text_
+}
+
+.macro UpdateAlienAnimationFrame() {
+    lda ALIEN_ANIM_FRAME_LO
+    clc
+    adc #%01000000
+    sta ALIEN_ANIM_FRAME_LO
+    lda ALIEN_ANIM_FRAME_HI
+    adc #00
+    and #3
+    sta ALIEN_ANIM_FRAME_HI
+}
+
+.macro PrintFrameNumber(sx,sy) {
+    SetCursorI(sx,sy)
+    lda $d0fd       // Framecounter LO Byte
+    sta HTD_IN
+    lda $d0fe       // Framecounter HI Byte
+    sta HTD_IN+1
+    jsr bcd_convert_word_
+    lda HTD_OUT+2
+    HexPrintA()
+    lda HTD_OUT+1
+    HexPrintA()
+    lda HTD_OUT
+    HexPrintA()
+}
+
+.macro PrintScore(sx,sy) {
+    SetCursorI(sx,sy)
+    lda SCORE_LO       
+    sta HTD_IN
+    lda SCORE_HI       
+    sta HTD_IN+1
+    jsr bcd_convert_word_
+    lda HTD_OUT+2
+    HexPrintA()
+    lda HTD_OUT+1
+    HexPrintA()
+    lda HTD_OUT
+    HexPrintA()
 }
 
 // Colors
@@ -87,14 +129,8 @@ setup_timer:
                 // End Test. Timer should now be running and trigger 
                 // an interrupt to enter the ISR           
                 rts
-border_top:     .byte $c8,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
-                .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$ba,$00
 
-border_bottom:  .byte $c7,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc
-                .byte $cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$cc,$bb,$00
-
-text_bar:       .fill 37,$da 
-                .byte 0
+// ########################################################################################
 
 welcome:        .encoding "ascii"
                 .text "NE/OS v0.1 - FirstKlaas Experience"
@@ -103,6 +139,15 @@ welcome:        .encoding "ascii"
 txt_frame:      .encoding "ascii"
                 .text "FRAME:"
                 .byte 0
+
+txt_level:      .encoding "ascii"
+                .text "LEVEL"
+                .byte 0
+
+txt_score:      .encoding "ascii"
+                .text "SCORE"
+                .byte 0
+
 
                 * = $0A00 "ISR"
 /*  ====================================================================================
@@ -130,74 +175,64 @@ txt_frame:      .encoding "ascii"
     ------------------------------------------------------------------------------------
 */
 
-shot_delay: .byte 1
+shot_delay: .byte $04
 
 main_isr:  { 
             pha
-            txa 
-            pha 
-            tya 
-            pha
+            phx 
+            phy 
             FILL_RECT_I(5,0,20,250,0,160,55)
+            UpdateAlienAnimationFrame()
+            jsr animate_aliens
             DRAW_SPRITES()
-            FILL_RECT_I(5,0,181,250,0,59,42)
-            DRAW_HLINE_I(5,0,180,250,0,23)
+            FILL_RECT_I(5,0,180,250,0,60,42)
+            DRAW_RECT_I(5,0,20,250,0,160,23)
             SetForgroundColorI(43)
+
             // Printing the frame numer to the screen
-            SetCursorI(2,23)
+            SetCursorI(2,26)
             PrintText(txt_frame)
-            SetCursorI(9,23)
-            lda $d0fd       // Framecounter LO Byte
-            sta HTD_IN
-            lda $d0fe       // Framecounter HI Byte
-            sta HTD_IN+1
-            jsr bcd_convert_word_
-            lda HTD_OUT+2
-            jsr print_hex_
-            lda HTD_OUT+1
-            jsr print_hex_
-            lda HTD_OUT
-            jsr print_hex_
+            PrintFrameNumber(9,23)
             
-            
+            // Print Level
+            SetCursorI(2,23)
+            PrintText(txt_level)
+
+            // Print Score
+            SetCursorI(2,24)
+            PrintText(txt_score)
+            PrintScore(9,24)
+
+            // Print Bullet Memory Debug Info 
+            /*
             .for (var i=0; i<5; i++) {
                 SetCursorI(18+(i*3),23)
                 lda ALIEN_BULLETS_X+i
-                jsr print_hex_
+                HexPrintA()
             }
             .for (var i=0; i<5; i++) {
                 SetCursorI(18+(i*3),24)
                 lda ALIEN_BULLETS_Y+i
-                jsr print_hex_
+                HexPrintA()
             }
             .for (var i=0; i<5; i++) {
                 SetCursorI(18+(i*3),25)
                 lda ALIEN_BULLETS_STAT+i
-                jsr print_hex_
+                HexPrintA()
             }
-
-            // Animate Alien
-            SetCursorI(2,25)
-            lda ALIEN_ANIM_FRAME_LO
-            clc
-            adc #%00010000
-            sta ALIEN_ANIM_FRAME_LO
-            lda ALIEN_ANIM_FRAME_HI
-            adc #00
-            and #3
-            sta ALIEN_ANIM_FRAME_HI
-            jsr print_hex_
-
+            */
+            
             // Delay triggered shot
             dec shot_delay      // Shot delay
             bne draw_bullets    // Still positive. No Shot
             jsr rand8           // New delay in frames ( 0..255)
-            and #15
-            adc #7              // Just in case the lower bits are all 0
+            and #7
+            adc #7              // Increase to at least 7 frames. 
             sta shot_delay      // Store new delay
             jsr find_next_invisible_bullet
-            bcc draw_bullets
+            bcc draw_bullets    // We couln't find any free slot. So just draw.    
 
+            // Found a new free bullet slot.
             // X contains the free bullet index
             // Now lets find a random alien monster
             // that shoots.
@@ -214,25 +249,11 @@ main_isr:  {
             sta ALIEN_BULLETS_Y,x
             
 
-            /*
-            lda #$80
-            sta ALIEN_BULLETS_STAT,x 
-            txa
-            asl
-            clc
-            adc #$80
-            sta ALIEN_BULLETS_STAT,x 
-            lda #100
-            sta ALIEN_BULLETS_X,x
-            lda #20
-            sta ALIEN_BULLETS_Y,x
-            lda #3
-            sta ALIEN_BULLETS_SPEED,x
-            */
 draw_bullets:            
             jsr update_alien_bullets
-            //jsr pure_draw_bullet
 
+            // Now let's check the position of the
+            // Aliens and update it properly
 check_left:           
             lda SPRITE_XPOS     // Get the x position of the leftmost sprite
             cmp #10             // 10 is the minimum x position
@@ -309,10 +330,8 @@ operation:  adc #1               // Add the speed
             bpl !loop-
 exit:
             lda $dc0d            // Acknowledge the IRQ            
-            pla
-            tay 
-            pla 
-            tax 
+            ply
+            plx  
             pla
             rti
 }

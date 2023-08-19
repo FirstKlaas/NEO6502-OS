@@ -15,17 +15,6 @@
 .const GAME_STATE_WIN           =   4
 .const GAME_STATE_LOST          =   5
 
-
-// Zero Page Variables
-*=$02 virtual 
-.zp {
-    SCORE_LO:                .byte $02
-    SCORE_HI:                .byte $03
-    GAME_STATE:              .byte $04
-    ALIEN_ANIM_FRAME_LO:     .byte $05 // Subpixel Animation Frame
-    ALIEN_ANIM_FRAME_HI:     .byte $06 // Animation Frame
-}
-
 .const ALIEN_ANIM_SPEED         = %00010000
 
 .macro SetSpriteAddress_IM(index, address) {
@@ -71,57 +60,74 @@
     SetSpriteColor_IA(index)
 }
 
-init_sprites_:  .for (var i=0; i<8; i++) {
-                    SetSpriteAddress_IM(i,    SPACE_ALIEN_A)
-                    SetSpriteAddress_IM(i+8,  SPACE_ALIEN_B)
-                    SetSpriteAddress_IM(i+16, SPACE_ALIEN_C)
-                }
-                
-                .for (var i=0;i<24;i++) { 
-                    EnableSprite_I(i)
-                }
+init_sprites_: {
 
-                // Init the sprite definition block
-                lda #<SPRITE_DEFINITON_BLOCK
-                sta DIS00
-                lda #>SPRITE_DEFINITON_BLOCK
-                sta DIS01
-                lda #32                 // Set number of sprites
-                sta DIS02
-                lda #CMD_SET_SDB        // Command "Set Sprite Definition Block"
-                sta DISCMD              //                                          
-                lda DISCR               // Load Display command register
-                ora #$80                // Set the "Command Exceution" Flag
-                sta DISCR               // Raise the IRQ flag
+    .for (var i=0; i<8; i++) {
+        SetSpriteAddress_IM(i,    SPACE_ALIEN_A)
+        SetSpriteAddress_IM(i+8,  SPACE_ALIEN_B)
+        SetSpriteAddress_IM(i+16, SPACE_ALIEN_C)
+    }
+    
+    .for (var i=0;i<24;i++) { 
+        EnableSprite_I(i)
+    }
+
+    // Init the sprite definition block
+    lda #<SPRITE_DEFINITON_BLOCK
+    sta DIS00
+    lda #>SPRITE_DEFINITON_BLOCK
+    sta DIS01
+    lda #32                 // Set number of sprites
+    sta DIS02
+    lda #CMD_SET_SDB        // Command "Set Sprite Definition Block"
+    sta DISCMD              //                                          
+    lda DISCR               // Load Display command register
+    ora #$80                // Set the "Command Exceution" Flag
+    sta DISCR               // Raise the IRQ flag
 !wait:
-                bit DISCR               // Check, if the irg flag is cleared
-                bmi !wait-              // No! Let's wait
+    bit DISCR               // Check, if the irg flag is cleared
+    bmi !wait-              // No! Let's wait
+
+    // -----------------------------------------
+    // Init Alien Animation
+    // The Sprite Adress for each frame sprite 
+    // is stored in a table
+    // -----------------------------------------
+    // Frame 0 and 2
+    lda #<SPACE_ALIEN_A
+    sta ALIEN_A_SPRITE_ANIMATION_LO
+    sta ALIEN_A_SPRITE_ANIMATION_LO+2
+    lda #>SPACE_ALIEN_A
+    sta ALIEN_A_SPRITE_ANIMATION_HI
+    sta ALIEN_A_SPRITE_ANIMATION_HI+2
+    // Frame 1
+    lda #<SPACE_ALIEN_A1
+    sta ALIEN_A_SPRITE_ANIMATION_LO+1
+    lda #>SPACE_ALIEN_A1
+    sta ALIEN_A_SPRITE_ANIMATION_HI+1
+    // Frame 1
+    lda #<SPACE_ALIEN_A2
+    sta ALIEN_A_SPRITE_ANIMATION_LO+3
+    lda #>SPACE_ALIEN_A2
+    sta ALIEN_A_SPRITE_ANIMATION_HI+3
+    
+    rts
+}
+
+animate_aliens: {
+    ldx ALIEN_ANIM_FRAME_HI
+    lda ALIEN_A_SPRITE_ANIMATION_LO,x
+    .for (var i=0; i<8; i++) {
+        sta SPRITE_DATA_LO+i    
+    }
+    lda ALIEN_A_SPRITE_ANIMATION_HI,x
+    .for (var i=0; i<8; i++) {
+        sta SPRITE_DATA_HI+i    
+    }
+    rts
+}          
 
 
-                // -----------------------------------------
-                // Init Alien Animation
-                // The Sprite Adress for each frame sprite 
-                // is stored in a table
-                // -----------------------------------------
-                // Frame 0 and 2
-                lda #<SPACE_ALIEN_A
-                sta ALIEN_A_SPRITE_ANIMATION_LO
-                sta ALIEN_A_SPRITE_ANIMATION_LO+2
-                lda #>SPACE_ALIEN_A
-                sta ALIEN_A_SPRITE_ANIMATION_HI
-                sta ALIEN_A_SPRITE_ANIMATION_HI+2
-                // Frame 1
-                lda #<SPACE_ALIEN_A1
-                sta ALIEN_A_SPRITE_ANIMATION_LO+1
-                lda #>SPACE_ALIEN_A1
-                sta ALIEN_A_SPRITE_ANIMATION_HI+1
-                // Frame 1
-                lda #<SPACE_ALIEN_A2
-                sta ALIEN_A_SPRITE_ANIMATION_LO+3
-                lda #>SPACE_ALIEN_A2
-                sta ALIEN_A_SPRITE_ANIMATION_HI+3
-                rts
-                    
 SPACE_ALIEN_A:      .byte %00000010, %01000000
                     .byte %00000111, %11100000
                     .byte %00001111, %11110000
@@ -136,7 +142,7 @@ SPACE_ALIEN_A1:     .byte %00000010, %01000000
                     .byte %00001111, %11110000
                     .byte %00011101, %10111000
                     .byte %00010111, %11101000
-                    .byte %00010111, %11101000
+                    .byte %00000111, %11001000
                     .byte %00000010, %01100000
                     .byte %00000110, %00000000
 
@@ -145,7 +151,7 @@ SPACE_ALIEN_A2:     .byte %00000010, %01000000
                     .byte %00001111, %11110000
                     .byte %00011101, %10111000
                     .byte %00010111, %11101000
-                    .byte %00010111, %11101000
+                    .byte %00010011, %11100000
                     .byte %00000110, %01000000
                     .byte %00000000, %01100000
 

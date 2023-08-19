@@ -36,6 +36,26 @@
     pla 
 }
 
+.macro DRAW_RECT_I(xlo, xhi, y, width_lo, width_hi, height,col) {
+    pha
+    lda #xlo
+    sta DIS00
+    lda #xhi 
+    sta DIS01
+    lda #y 
+    sta DIS02
+    lda #width_lo 
+    sta DIS03
+    lda #width_hi
+    sta DIS04
+    lda #height
+    sta DIS05
+    lda #col 
+    sta DIS06
+    jsr draw_rect_
+    pla 
+}
+
 .macro DRAW_SPRITES() {
     jsr draw_sprites_
 }
