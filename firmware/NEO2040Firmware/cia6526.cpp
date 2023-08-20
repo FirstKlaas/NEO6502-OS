@@ -13,10 +13,10 @@
 #define ICR_NO_IRQ         0x00 //
 #define ICR_SOURCE_MASK    0x7f // Bit 0-6: 01111111
 
-#define TIMER_A_INTERRUPT_FLAG  0x01
-#define TIMER_B_INTERRUPT_FLAG  0x02
-#define FRAME_INTERRUPT_FLAG    0x04
-#define KBD_INTERRUPT_FLAG      0x08
+  #define TIMER_A_INTERRUPT_FLAG  0x01
+  #define TIMER_B_INTERRUPT_FLAG  0x02
+  #define FRAME_INTERRUPT_FLAG    0x04
+  #define KBD_INTERRUPT_FLAG      0x08
 
 #define CIA_IRQ_MASK            0x0f
 

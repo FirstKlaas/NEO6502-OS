@@ -60,6 +60,21 @@
     jsr draw_sprites_
 }
 
+.macro FILL_SCREEN_A(color) {
+    sta DIS00
+    jsr fill_screen_
+}
+
+.macro FILL_SCREEN_I(color) {
+    lda #color 
+    FILL_SCREEN_A()
+}
+
+.macro FILL_SCREEN_M(color) {
+    lda color
+    FILL_SCREEN_A()
+}
+
 .macro EXECUTE_DISPLAY_COMMAND_A() {
     sta DISCMD
     lda DISCR
@@ -190,5 +205,10 @@ fill_round_rect_: {
     rts
 }
 
+fill_screen_: {
+    lda #CMD_FILL_SCREEN
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
 
 
