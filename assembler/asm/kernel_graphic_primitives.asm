@@ -178,4 +178,17 @@ fill_triangle_: {
     rts
 }
 
+draw_round_rect_: {
+    lda #CMD_DRAW_ROUND_RECT
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+fill_round_rect_: {
+    lda #CMD_FILL_ROUND_RECT
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
+
+
 
