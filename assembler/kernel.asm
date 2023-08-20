@@ -94,17 +94,6 @@
                 Returnvalues.
    ----------------------------------------------------------------------------
 */
-// Zero Page Variables
-*=$02 "Game Variables" virtual
-.zp {
-    SCORE_LO:               .byte $02
-    SCORE_HI:               .byte $03
-    GAME_STATE:             .byte $04
-    ALIEN_ANIM_FRAME_LO:    .byte $05 // Subpixel Animation Frame
-    ALIEN_ANIM_FRAME_HI:    .byte $06 // Animation Frame
-    CURRENT_GAME_STATE:     .byte $07
-    CURRENT_LEVEL:          .byte $08
-} 
               
 *=$E0 "Zero Kernel" virtual 
 .zp {
@@ -182,7 +171,9 @@ print_char:     jmp print_char_
 .import source "asm/math.asm"
 .import source "asm/kernel_text_routines.asm"
 .import source "asm/kernel_graphic_primitives.asm"
-.import source "asm/kernel_sprite.asm"
+
+// Starts at 0x1000
+.import source "asm/space_invaders/spin_main.asm"
 
 /* ============================================================================
                 KERNAL DATA
