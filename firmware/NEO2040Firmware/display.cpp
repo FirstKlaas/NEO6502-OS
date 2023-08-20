@@ -312,6 +312,17 @@ void executeCommand(TContextPtr ctx)
   case CMD_GET_BG_COLOR:
     ctx->memory[DIS00] = screendata.currentBgColor;
     break;
+
+  case CMD_FILL_SCREEN:
+    display.fillScreen(ctx->memory[DIS00]);
+    markScreenDirty();
+    break;
+
+  case CMD_CLEAR_SCREEN:
+    display.fillScreen(screendata.currentBgColor);
+    markScreenDirty();
+    break;
+
   case CMD_DRAW_HLINE:
     display.drawFastHLine(
       word(params),   // XPOS   DIS00 DIS01
@@ -356,6 +367,7 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_DRAW_SPRITES:
     drawSprites(ctx);
+    markScreenDirty();
     break;
 
   case CMD_DRAW_BITMAP:
@@ -367,6 +379,7 @@ void executeCommand(TContextPtr ctx)
       params[7],      // HEIGHT DIS07
       params[8]       // COLOR  DIS08
     );
+    markScreenDirty();
     break; 
 
   case CMD_DRAW_PIXEL:
@@ -375,6 +388,7 @@ void executeCommand(TContextPtr ctx)
       params[2],      // YPOS   DIS02
       params[3]       // COLOR  DIS03
     );
+    markScreenDirty();
     break;
 
   case CMD_DRAW_CIRCLE:
@@ -384,6 +398,7 @@ void executeCommand(TContextPtr ctx)
       params[3],      // RADIUS DIS03
       params[4]       // COLOR  DIS04
     );
+    markScreenDirty();
     break;
 
   case CMD_FILL_CIRCLE:
@@ -393,6 +408,7 @@ void executeCommand(TContextPtr ctx)
       params[3],      // RADIUS DIS03
       params[4]       // COLOR  DIS04
     );
+    markScreenDirty();
     break;
   
   case CMD_DRAW_TRIANGLE:
@@ -405,6 +421,7 @@ void executeCommand(TContextPtr ctx)
       params[8],      // YPOS3  DIS08
       params[9]       // COLOR  DIS09
     );
+    markScreenDirty();
     break;
 
   case CMD_FILL_TRIANGLE:
@@ -417,6 +434,7 @@ void executeCommand(TContextPtr ctx)
       params[8],      // YPOS3  DIS08
       params[9]       // COLOR  DIS09
     );
+    markScreenDirty();
     break;
 
   case CMD_SET_SDB:

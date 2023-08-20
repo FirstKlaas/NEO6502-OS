@@ -60,7 +60,7 @@
     jsr draw_sprites_
 }
 
-.macro FILL_SCREEN_A(color) {
+.macro FILL_SCREEN_A() {
     sta DIS00
     jsr fill_screen_
 }

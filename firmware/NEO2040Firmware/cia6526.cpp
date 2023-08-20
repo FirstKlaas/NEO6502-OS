@@ -326,6 +326,33 @@ void checkTimer(TContextPtr ctx) {
   };
 }
 
+#define FLAG_UNCONSUMED_KEY 0x80  // 1000 0000 / Bit 7
+
+void checkKeyboard(TContextPtr ctx) {
+  if (ctx->cia.irq_active) return;
+  
+  if (Serial.available()) {
+    // First check for reset key (^R)
+    // Not yet implemented. Code fpr ^R is 0x12
+    // Test, if the interrupt has been cleared? 
+    if ((ctx->memory[KBDCR] & FLAG_UNCONSUMED_KEY) == 0) {
+        // There is no unconsumed character
+        noInterrupts();
+        ctx->memory[KBD] = Serial.read();
+        ctx->memory[KBDCR] |= FLAG_UNCONSUMED_KEY;
+        interrupts();
+        //#ifdef DEBUG_KEYBOARD
+        Serial.printf("checkForKeyPressed: Key pressed. Code is [%d] (0x%02X)\n", ctx->memory[KBD], ctx->memory[KBD]);
+        //#endif
+        ctx->cia.raised_interrupts |= KBD_INTERRUPT_FLAG;
+    } else {
+        #ifdef DEBUG_KEYBOARD
+        Serial.println("checkForKeyPressed: New key available, but there is still an unconsumed character in the register.");
+        #endif          
+    }
+  }
+}
+
 void raiseFrameRequest(TContextPtr ctx) {
   ctx->frame_number++;
   ctx->memory[0xd0fd] = (ctx->frame_number & 0xff);
@@ -342,6 +369,7 @@ void checkCIA(TContextPtr ctx) {
   if (ctx->cia.irq_active) return;
   if (!ctx->cia.enabled_interrupts) return;
   checkTimer(ctx);
+  checkKeyboard(ctx);
 
   if (ctx->cia.enabled_interrupts & ctx->cia.raised_interrupts) {
     trigger6502IRQ(ctx);

@@ -10,6 +10,11 @@
     sta $dc0d
 }
 
+.macro EnableKeyboardIRQ() {
+    lda #(CIA_SET_FLAGS | KBD_INTERRUPT_FLAG)
+    sta $dc0d
+}
+
 .macro DisableCursorAutoAdjustment() {
     lda DISCR   // Clear the auto adjust 
     and #$fd    // flag>
@@ -63,7 +68,6 @@ start:          ldx #$ff    // Set the stackpointer to
                 txs         // highest possible position.
 
                 EnableCursorAutoAdjustment()
-                EnableFrameIRQ()                
                 FILL_SCREEN_I(STD_BACKGROUND_COLOR)
                 SetForgroundColorI(TITLE_FG_COLOR)
                 SetCursorI(2,1)
@@ -71,9 +75,9 @@ start:          ldx #$ff    // Set the stackpointer to
                 SetForgroundColorI(STD_FOREGROUND_COLOR)
 
                 // Print the main menu                
-                SetCursor(10,10)
+                SetCursorI(10,10)
                 PrintText(txt_menue_1)
-                SetCursor(10,11)
+                SetCursorI(10,12)
                 PrintText(txt_menue_2)
 
                 // Set isr vector for IRQ and NMI
@@ -87,9 +91,11 @@ start:          ldx #$ff    // Set the stackpointer to
                 sta $ffff
                 sta $fffb
 
+                //EnableFrameIRQ()   
+                EnableKeyboardIRQ()             
                 //jsr SpaceInvaders.init
                 
-endless         jmp *
+endless:        jmp *
             
 setup_timer:
                 // -----------------------------------------------------
@@ -114,15 +120,14 @@ setup_timer:
 
 // Default kernel interrupt routine.
 
-IRQ_DATA .byte $00
+IRQ_DATA: .byte $00
 
 kernel_isr: {
     pha
     phx
     phy
-    lda 
     lda $dc0d            // Acknowledge the IRQ
-    bpl exit             // No IRQ. Should never happen. Only relevant, when polling            
+    //bpl exit           // No IRQ. Should never happen. Only relevant, when polling            
     sta IRQ_DATA
 
 test_frame_irq:
@@ -131,18 +136,24 @@ test_frame_irq:
     beq test_keyboard
     // We have a frame intterrupt
     jmp exit
+
 test_keyboard:
     lda #KBD_INTERRUPT_FLAG
     bit IRQ_DATA
-    beq test timer_a 
+    beq test_timer_a 
     // We have an keyboard interrupt.
+    lda #$EA
+    sta DEBUG
+    jsr handle_key_event
     jmp exit
+
 test_timer_a:
     lda #TIMER_A_INTERRUPT_FLAG
     bit IRQ_DATA
     beq test_timer_b
     // We have an timer a interrupt.
     jmp exit
+
 test_timer_b:
     lda #TIMER_B_INTERRUPT_FLAG
     bit IRQ_DATA
@@ -156,6 +167,23 @@ exit:
     rti
 }
 
+
+handle_key_event: {
+    lda KBD
+    sta DEBUG
+    cmp #$32    // Key 2
+    bne exit
+    // TODO: Start space invaders
+    // Clear IRQs
+    lda #$ae
+    lda #CIA_IRQ_MASK
+    sta REG_CIA_ICR
+    FILL_SCREEN_I(AMBER)
+    jsr SpaceInvaders.init
+
+exit:
+    rts
+}
 
 welcome:        .encoding "ascii"
                 .text "NE/OS v0.1 - FirstKlaas Experience"

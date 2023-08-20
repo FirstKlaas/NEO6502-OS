@@ -35,6 +35,11 @@
                 .const DISFH = $d0fe    // Frame number hi
                 .const DEBUG = $d0ff    // Debug register
 
+                // CIA register and constants
+                .const REG_CIA_ICR  = $dc0d
+
+                .const CIA_IRQ_MASK = %01111111
+
                 .const KBD_IRQ_FLAG = $80
                 .const DIS_IRQ_FLAG = $80
 

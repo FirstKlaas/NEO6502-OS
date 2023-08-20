@@ -105,7 +105,28 @@
 
         .import source "game_loop_isr.asm"
 
+    /* ########################################################################
+       # Initialisation of the Space Invader Game
+       #
+       # 1) Disable interrupts
+       # 2) Install new ISR routine for the game
+       # 3) Draw Base Screen
+       # 4) Initialize Sprite
+       # 5) Initialize Sprite Definition Block
+       # 5) Enable interrupts
+       ########################################################################
+    */
     init: {
+
+        // Disable all interrupts        
+        lda #CIA_IRQ_MASK
+        sta REG_CIA_ICR
+
+        // Fill Screen
+        FILL_SCREEN_I(STD_BACKGROUND_COLOR)
+
+
+        sei
         // Set isr vector for IRQ
         lda #<main_isr
         sta $fffe 
@@ -117,7 +138,8 @@
         sta $fffa 
         lda #>main_isr
         sta $fffb
-
+        cli
+        // Initialize Sprites
         .for (var i=0; i<8; i++) {
             SetSpriteAddress_IM(i,    SPACE_ALIEN_A)
             SetSpriteAddress_IM(i+8,  SPACE_ALIEN_B)
@@ -127,6 +149,7 @@
         .for (var i=0;i<24;i++) { 
             EnableSprite_I(i)
         }
+        
 
         // Init the sprite definition block
         lda #<SPRITE_DEFINITON_BLOCK
@@ -144,11 +167,13 @@
         bit DISCR               // Check, if the irg flag is cleared
         bmi !wait-              // No! Let's wait
 
+
         // -----------------------------------------
         // Init Alien Animation
         // The Sprite Adress for each frame sprite 
         // is stored in a table
         // -----------------------------------------
+        // Alien A
         // Frame 0 and 2
         lda #<SPACE_ALIEN_A
         sta ALIEN_A_SPRITE_ANIMATION_LO
@@ -161,17 +186,36 @@
         sta ALIEN_A_SPRITE_ANIMATION_LO+1
         lda #>SPACE_ALIEN_A1
         sta ALIEN_A_SPRITE_ANIMATION_HI+1
-        // Frame 1
+        // Frame 3
         lda #<SPACE_ALIEN_A2
         sta ALIEN_A_SPRITE_ANIMATION_LO+3
         lda #>SPACE_ALIEN_A2
         sta ALIEN_A_SPRITE_ANIMATION_HI+3
-        
+
+        // Alien B
+        lda #<SPACE_ALIEN_B
+        sta ALIEN_B_SPRITE_ANIMATION_LO
+        sta ALIEN_B_SPRITE_ANIMATION_LO+2
+        lda #>SPACE_ALIEN_B
+        sta ALIEN_B_SPRITE_ANIMATION_HI
+        sta ALIEN_B_SPRITE_ANIMATION_HI+2
+        // Frame 1
+        lda #<SPACE_ALIEN_B1
+        sta ALIEN_B_SPRITE_ANIMATION_LO+1
+        lda #>SPACE_ALIEN_B1
+        sta ALIEN_B_SPRITE_ANIMATION_HI+1
+        // Frame 1
+        lda #<SPACE_ALIEN_B2
+        sta ALIEN_B_SPRITE_ANIMATION_LO+3
+        lda #>SPACE_ALIEN_B2
+        sta ALIEN_B_SPRITE_ANIMATION_HI+3
+        EnableFrameIRQ()
         rts
     }
 
     animate_aliens: {
         ldx ALIEN_ANIM_FRAME_HI
+        // Alien A
         lda ALIEN_A_SPRITE_ANIMATION_LO,x
         .for (var i=0; i<8; i++) {
             sta SPRITE_DATA_LO+i    
@@ -180,6 +224,19 @@
         .for (var i=0; i<8; i++) {
             sta SPRITE_DATA_HI+i    
         }
+        // Alien B
+        lda ALIEN_B_SPRITE_ANIMATION_LO,x
+        .for (var i=8; i<16; i++) {
+            sta SPRITE_DATA_LO+i    
+        }
+        lda ALIEN_B_SPRITE_ANIMATION_HI,x
+        .for (var i=8; i<16; i++) {
+            sta SPRITE_DATA_HI+i    
+        }
+
+        // Enable IRQs
+        EnableFrameIRQ()
+        FILL_SCREEN_I(63)
         rts
     }          
 
@@ -221,6 +278,8 @@
 
     ALIEN_A_SPRITE_ANIMATION_LO:    .fill 4, 0
     ALIEN_A_SPRITE_ANIMATION_HI:    .fill 4, 0
+    ALIEN_B_SPRITE_ANIMATION_LO:    .fill 4, 0
+    ALIEN_B_SPRITE_ANIMATION_HI:    .fill 4, 0
 
     /* ===============================================================================
         Look for the next "invisible" bullet in the table. A invisible bullet is 
