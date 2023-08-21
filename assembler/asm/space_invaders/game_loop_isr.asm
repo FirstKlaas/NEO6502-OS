@@ -31,6 +31,7 @@
                 pha
                 phx 
                 phy 
+                FILL_SCREEN_I(STD_BACKGROUND_COLOR)
                 FILL_RECT_I(5,0,20,250,0,160,55)
                 UpdateAlienAnimationFrame()
                 jsr SpaceInvaders.animate_aliens

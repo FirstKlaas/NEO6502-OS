@@ -14,9 +14,9 @@
 081a: 20 d2 e1  -         jsr set_cursor_x_
 081d: a9 01     -         lda #ypos
 081f: 20 ea e1  -         jsr set_cursor_y_    
-0822: a9 e1     -         lda #<addr
+0822: a9 01     -         lda #<addr
 0824: 85 e0     -         sta zpRegE0
-0826: a9 08     -         lda #>addr
+0826: a9 09     -         lda #>addr
 0828: 85 e1     -         sta zpRegE1
 082a: 20 76 e2  -         jsr print_text_
 082d: a9 1f     -         lda #color
@@ -25,7 +25,7 @@
 0834: 20 d2 e1  -         jsr set_cursor_x_
 0837: a9 0a     -         lda #ypos
 0839: 20 ea e1  -         jsr set_cursor_y_    
-083c: a9 17     -         lda #<addr
+083c: a9 37     -         lda #<addr
 083e: 85 e0     -         sta zpRegE0
 0840: a9 09     -         lda #>addr
 0842: 85 e1     -         sta zpRegE1
@@ -34,12 +34,12 @@
 0849: 20 d2 e1  -         jsr set_cursor_x_
 084c: a9 0c     -         lda #ypos
 084e: 20 ea e1  -         jsr set_cursor_y_    
-0851: a9 28     -         lda #<addr
+0851: a9 48     -         lda #<addr
 0853: 85 e0     -         sta zpRegE0
 0855: a9 09     -         lda #>addr
 0857: 85 e1     -         sta zpRegE1
 0859: 20 76 e2  -         jsr print_text_
-085c: a9 8a     -         lda #<kernel_isr
+085c: a9 a5     -         lda #<kernel_isr
 085e: 8d fe ff  -         sta $fffe 
 0861: 8d fa ff  -         sta $fffa 
 0864: a9 08     -         lda #>kernel_isr
@@ -47,736 +47,748 @@
 0869: 8d fb ff  -         sta $fffb
 086c: a9 88     -         lda #(CIA_SET_FLAGS | KBD_INTERRUPT_FLAG)
 086e: 8d 0d dc  -         sta $dc0d
-0871: 4c 71 08  - endless:jmp *
-0874: a9 f0     - setup_timer:lda #$f0
-0876: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
-0879: a9 00     -         lda #$00
-087b: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
-087e: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
-0880: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
-0883: a9 11     -         lda #%00010001  // Bit 4: 1 = Load values from latch
-0885: 8d 0e dc  -         sta $dc0e       // Load values and start timer
-0888: 60        -         rts
-0889: 00        - IRQ_DATA:.byte $00
-088a: 48        - kernel_isr:pha
-088b: da        -         phx
-088c: 5a        -         phy
-088d: ad 0d dc  -         lda $dc0d            // Acknowledge the IRQ
-0890: 8d 89 08  -         sta IRQ_DATA
-0893: a9 04     - test_frame_irq:lda #FRAME_INTERRUPT_FLAG
-0895: 2c 89 08  -         bit IRQ_DATA
-0898: f0 03     -         beq test_keyboard
-089a: 4c c0 08  -         jmp exit
-089d: a9 08     - test_keyboard:lda #KBD_INTERRUPT_FLAG
-089f: 2c 89 08  -         bit IRQ_DATA
-08a2: f0 0b     -         beq test_timer_a 
-08a4: a9 ea     -         lda #$EA
-08a6: 8d ff d0  -         sta DEBUG
-08a9: 20 c4 08  -         jsr handle_key_event
-08ac: 4c c0 08  -         jmp exit
-08af: a9 01     - test_timer_a:lda #TIMER_A_INTERRUPT_FLAG
-08b1: 2c 89 08  -         bit IRQ_DATA
-08b4: f0 03     -         beq test_timer_b
-08b6: 4c c0 08  -         jmp exit
-08b9: a9 02     - test_timer_b:lda #TIMER_B_INTERRUPT_FLAG
-08bb: 2c 89 08  -         bit IRQ_DATA
-08be: f0 00     -         beq exit
-08c0: 7a        - exit:   ply 
-08c1: fa        -         plx 
-08c2: 68        -         pla 
-08c3: 40        -         rti
-08c4: ad 10 d0  - handle_key_event:lda KBD
-08c7: 8d ff d0  -         sta DEBUG
-08ca: c9 32     -         cmp #$32    // Key 2
-08cc: d0 12     -         bne exit
-08ce: a9 ae     -         lda #$ae
-08d0: a9 7f     -         lda #CIA_IRQ_MASK
-08d2: 8d 0d dc  -         sta REG_CIA_ICR
-08d5: a9 20     -         lda #color 
-08d7: 8d 15 d0  -         sta DIS00
-08da: 20 bb e3  -         jsr fill_screen_
-08dd: 20 c9 11  -         jsr SpaceInvaders.init
-08e0: 60        - exit:   rts
-08e1: 4e 45 2f 4f 53 20 76 30 2e 31 20 2d 20 46 69 72  - welcome:.text "NE/OS v0.1 - FirstKlaas Experience"
-08f1: 73 74 4b 6c 61 61 73 20 45 78 70 65 72 69 65 6e 
-0901: 63 65                                           
-0903: 00        -         .byte 0
-0904: 46 52 41 4d 45 3a                                - txt_frame:.text "FRAME:"
-090a: 00        -         .byte 0
-090b: 4c 45 56 45 4c                                   - txt_level:.text "LEVEL"
-0910: 00        -         .byte 0
-0911: 53 43 4f 52 45                                   - txt_score:.text "SCORE"
-0916: 00        -         .byte 0
-0917: 5b 31 5d 20 4c 6f 61 64 20 70 72 6f 67 72 61 6d  - txt_menue_1:.text "[1] Load program"
-0927: 00        -         .byte 0
-0928: 5b 32 5d 20 50 6c 61 79 20 53 70 61 63 65 20 49  - txt_menue_2:.text "[2] Play Space Invaders"
-0938: 6e 76 61 64 65 72 73                            
-093f: 00        -         .byte 0
+0871: ad 8e 08  - endless:lda PROGRAM_ADR_CR
+0874: 10 fb     -         bpl endless 
+0876: a9 00     -         lda #0
+0878: 8d 8e 08  -         sta PROGRAM_ADR_CR
+087b: a9 22     -         lda #color 
+087d: 8d 15 d0  -         sta DIS00
+0880: 20 bb e3  -         jsr fill_screen_
+0883: 20 cc 11  -         jsr SpaceInvaders.init
+0886: 4c 86 08  -         jmp *
+0889: 6c 8c 08  -         jmp (PROGRAM_ADR_LO)
+088c: 00        - PROGRAM_ADR_LO:.byte 0
+088d: 00        - PROGRAM_ADR_HI:.byte 0
+088e: 00        - PROGRAM_ADR_CR:.byte 0
+088f: a9 f0     - setup_timer:lda #$f0
+0891: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
+0894: a9 00     -         lda #$00
+0896: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
+0899: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
+089b: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
+089e: a9 11     -         lda #%00010001  // Bit 4: 1 = Load values from latch
+08a0: 8d 0e dc  -         sta $dc0e       // Load values and start timer
+08a3: 60        -         rts
+08a4: 00        - IRQ_DATA:.byte $00
+08a5: 48        - kernel_isr:pha
+08a6: da        -         phx
+08a7: 5a        -         phy
+08a8: ad 0d dc  -         lda $dc0d            // Acknowledge the IRQ
+08ab: 8d a4 08  -         sta IRQ_DATA
+08ae: a9 04     - test_frame_irq:lda #FRAME_INTERRUPT_FLAG
+08b0: 2c a4 08  -         bit IRQ_DATA
+08b3: f0 03     -         beq test_keyboard
+08b5: 4c d6 08  -         jmp exit
+08b8: a9 08     - test_keyboard:lda #KBD_INTERRUPT_FLAG
+08ba: 2c a4 08  -         bit IRQ_DATA
+08bd: f0 06     -         beq test_timer_a 
+08bf: 20 da 08  -         jsr handle_key_event
+08c2: 4c d6 08  -         jmp exit
+08c5: a9 01     - test_timer_a:lda #TIMER_A_INTERRUPT_FLAG
+08c7: 2c a4 08  -         bit IRQ_DATA
+08ca: f0 03     -         beq test_timer_b
+08cc: 4c d6 08  -         jmp exit
+08cf: a9 02     - test_timer_b:lda #TIMER_B_INTERRUPT_FLAG
+08d1: 2c a4 08  -         bit IRQ_DATA
+08d4: f0 00     -         beq exit
+08d6: 7a        - exit:   ply 
+08d7: fa        -         plx 
+08d8: 68        -         pla 
+08d9: 40        -         rti
+08da: ad 10 d0  - handle_key_event:lda KBD
+08dd: c9 32     -         cmp #$32    // Key 2
+08df: d0 1f     -         bne exit
+08e1: a9 ea     -         lda #$ea 
+08e3: 8d ff d0  -         sta DEBUG
+08e6: a9 7f     -         lda #CIA_IRQ_MASK
+08e8: 8d 0d dc  -         sta REG_CIA_ICR
+08eb: a9 20     -         lda #color 
+08ed: 8d 15 d0  -         sta DIS00
+08f0: 20 bb e3  -         jsr fill_screen_
+08f3: a9 3f     -         lda #color 
+08f5: 8d 15 d0  -         sta DIS00
+08f8: 20 bb e3  -         jsr fill_screen_
+08fb: a9 80     -         lda #$80
+08fd: 8d 8e 08  -         sta PROGRAM_ADR_CR
+0900: 60        - exit:   rts
+0901: 4e 45 2f 4f 53 20 76 30 2e 31 20 2d 20 46 69 72  - welcome:.text "NE/OS v0.1 - FirstKlaas Experience"
+0911: 73 74 4b 6c 61 61 73 20 45 78 70 65 72 69 65 6e 
+0921: 63 65                                           
+0923: 00        -         .byte 0
+0924: 46 52 41 4d 45 3a                                - txt_frame:.text "FRAME:"
+092a: 00        -         .byte 0
+092b: 4c 45 56 45 4c                                   - txt_level:.text "LEVEL"
+0930: 00        -         .byte 0
+0931: 53 43 4f 52 45                                   - txt_score:.text "SCORE"
+0936: 00        -         .byte 0
+0937: 5b 31 5d 20 4c 6f 61 64 20 70 72 6f 67 72 61 6d  - txt_menue_1:.text "[1] Load program"
+0947: 00        -         .byte 0
+0948: 5b 32 5d 20 50 6c 61 79 20 53 70 61 63 65 20 49  - txt_menue_2:.text "[2] Play Space Invaders"
+0958: 6e 76 61 64 65 72 73                            
+095f: 00        -         .byte 0
 
 [Space Invaders]
 1000: 04        - shot_delay:.byte $04
 1001: 48        - main_isr:pha
 1002: da        -         phx 
 1003: 5a        -         phy 
-1004: a9 bb     -         lda #$bb 
-1006: 8d ff d0  -         sta DEBUG
-1009: 48        -         pha
-100a: a9 05     -         lda #xlo
-100c: 8d 15 d0  -         sta DIS00
-100f: a9 00     -         lda #xhi 
-1011: 8d 16 d0  -         sta DIS01
-1014: a9 14     -         lda #y 
-1016: 8d 17 d0  -         sta DIS02
-1019: a9 fa     -         lda #width_lo 
-101b: 8d 18 d0  -         sta DIS03
-101e: a9 00     -         lda #width_hi
-1020: 8d 19 d0  -         sta DIS04
-1023: a9 a0     -         lda #height
-1025: 8d 1a d0  -         sta DIS05
-1028: a9 37     -         lda #col 
-102a: 8d 1b d0  -         sta DIS06
-102d: 20 fd e2  -         jsr fill_rect_
-1030: 68        -         pla 
-1031: a5 05     -         lda ALIEN_ANIM_FRAME_LO
-1033: 18        -         clc
-1034: 69 40     -         adc #%01000000
-1036: 85 05     -         sta ALIEN_ANIM_FRAME_LO
-1038: a5 06     -         lda ALIEN_ANIM_FRAME_HI
-103a: 69 00     -         adc #00
-103c: 29 03     -         and #3
-103e: 85 06     -         sta ALIEN_ANIM_FRAME_HI
-1040: 20 6b 14  -         jsr SpaceInvaders.animate_aliens
-1043: 20 10 e3  -         jsr draw_sprites_
-1046: 48        -         pha
-1047: a9 05     -         lda #xlo
-1049: 8d 15 d0  -         sta DIS00
-104c: a9 00     -         lda #xhi 
-104e: 8d 16 d0  -         sta DIS01
-1051: a9 b4     -         lda #y 
-1053: 8d 17 d0  -         sta DIS02
-1056: a9 fa     -         lda #width_lo 
-1058: 8d 18 d0  -         sta DIS03
-105b: a9 00     -         lda #width_hi
-105d: 8d 19 d0  -         sta DIS04
-1060: a9 3c     -         lda #height
-1062: 8d 1a d0  -         sta DIS05
-1065: a9 2a     -         lda #col 
-1067: 8d 1b d0  -         sta DIS06
-106a: 20 fd e2  -         jsr fill_rect_
-106d: 68        -         pla 
-106e: 48        -         pha
-106f: a9 05     -         lda #xlo
-1071: 8d 15 d0  -         sta DIS00
-1074: a9 00     -         lda #xhi 
-1076: 8d 16 d0  -         sta DIS01
-1079: a9 14     -         lda #y 
-107b: 8d 17 d0  -         sta DIS02
-107e: a9 fa     -         lda #width_lo 
-1080: 8d 18 d0  -         sta DIS03
-1083: a9 00     -         lda #width_hi
-1085: 8d 19 d0  -         sta DIS04
-1088: a9 a0     -         lda #height
-108a: 8d 1a d0  -         sta DIS05
-108d: a9 17     -         lda #col 
-108f: 8d 1b d0  -         sta DIS06
-1092: 20 ea e2  -         jsr draw_rect_
-1095: 68        -         pla 
-1096: a9 2b     -         lda #color
-1098: 20 02 e2  -         jsr set_fg_color_
-109b: a9 02     -         lda #xpos
-109d: 20 d2 e1  -         jsr set_cursor_x_
-10a0: a9 1a     -         lda #ypos
-10a2: 20 ea e1  -         jsr set_cursor_y_    
-10a5: a9 04     -         lda #<addr
-10a7: 85 e0     -         sta zpRegE0
-10a9: a9 09     -         lda #>addr
-10ab: 85 e1     -         sta zpRegE1
-10ad: 20 76 e2  -         jsr print_text_
-10b0: a9 09     -         lda #xpos
-10b2: 20 d2 e1  -         jsr set_cursor_x_
-10b5: a9 17     -         lda #ypos
-10b7: 20 ea e1  -         jsr set_cursor_y_    
-10ba: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
-10bd: 8d 30 e1  -         sta HTD_IN
-10c0: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
-10c3: 8d 31 e1  -         sta HTD_IN+1
-10c6: 20 68 e1  -         jsr bcd_convert_word_
-10c9: ad 34 e1  -         lda HTD_OUT+2
-10cc: 20 8e e2  -         jsr print_hex_
-10cf: ad 33 e1  -         lda HTD_OUT+1
-10d2: 20 8e e2  -         jsr print_hex_
-10d5: ad 32 e1  -         lda HTD_OUT
-10d8: 20 8e e2  -         jsr print_hex_
-10db: a9 02     -         lda #xpos
-10dd: 20 d2 e1  -         jsr set_cursor_x_
-10e0: a9 17     -         lda #ypos
-10e2: 20 ea e1  -         jsr set_cursor_y_    
-10e5: a9 0b     -         lda #<addr
-10e7: 85 e0     -         sta zpRegE0
-10e9: a9 09     -         lda #>addr
-10eb: 85 e1     -         sta zpRegE1
-10ed: 20 76 e2  -         jsr print_text_
-10f0: a9 02     -         lda #xpos
-10f2: 20 d2 e1  -         jsr set_cursor_x_
-10f5: a9 18     -         lda #ypos
-10f7: 20 ea e1  -         jsr set_cursor_y_    
-10fa: a9 11     -         lda #<addr
-10fc: 85 e0     -         sta zpRegE0
-10fe: a9 09     -         lda #>addr
-1100: 85 e1     -         sta zpRegE1
-1102: 20 76 e2  -         jsr print_text_
-1105: a9 09     -         lda #xpos
-1107: 20 d2 e1  -         jsr set_cursor_x_
-110a: a9 18     -         lda #ypos
-110c: 20 ea e1  -         jsr set_cursor_y_    
-110f: a5 02     -         lda SCORE_LO       
-1111: 8d 30 e1  -         sta HTD_IN
-1114: a5 03     -         lda SCORE_HI       
-1116: 8d 31 e1  -         sta HTD_IN+1
-1119: 20 68 e1  -         jsr bcd_convert_word_
-111c: ad 34 e1  -         lda HTD_OUT+2
-111f: 20 8e e2  -         jsr print_hex_
-1122: ad 33 e1  -         lda HTD_OUT+1
-1125: 20 8e e2  -         jsr print_hex_
-1128: ad 32 e1  -         lda HTD_OUT
-112b: 20 8e e2  -         jsr print_hex_
-112e: ce 00 10  -         dec shot_delay      // Shot delay countdown
-1131: d0 27     -         bne draw_bullets    // Still positive. No Shot
-1133: 20 a5 e1  -         jsr rand8           // New delay in frames ( 0..255)
-1136: 29 07     -         and #7
-1138: 69 07     -         adc #7              // Increase to at least 7 frames. 
-113a: 8d 00 10  -         sta shot_delay      // Store new delay
-113d: 20 67 16  -         jsr find_next_invisible_bullet
-1140: 90 18     -         bcc draw_bullets    // We couln't find any free slot. So just draw.    
-1142: 20 a5 e1  -         jsr rand8  // Random value to accu
-1145: 29 0f     -         and #15    // One of the first sixteen aliens
-1147: a8        -         tay        // Using y as alien index
-1148: b9 77 15  -         lda SPRITE_XPOS,y
-114b: 18        -         clc
-114c: 69 08     -         adc #8
-114e: 9d e8 16  -         sta ALIEN_BULLETS_X,x
-1151: b9 97 15  -         lda SPRITE_YPOS,y
-1154: 18        -         clc
-1155: 69 04     -         adc #4
-1157: 9d ed 16  -         sta ALIEN_BULLETS_Y,x
-115a: 20 7c 16  - draw_bullets:jsr update_alien_bullets
-115d: ad 77 15  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
-1160: c9 0a     -         cmp #10             // 10 is the minimum x position
-1162: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
-1164: a9 01     - left_underflow:lda #$01
-1166: 8d b5 11  -         sta operation+1
-1169: 4c 78 11  -         jmp go_down 
-116c: ad 7e 15  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
-116f: c9 ef     -         cmp #$ef            // Max xpos = 239
-1171: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
-1173: a9 ff     - right_overflow:lda #$ff            // By adding -1, we move left.
-1175: 8d b5 11  -         sta operation+1     // Write the new speed to the code (self modified)    
-1178: ad 97 15  - go_down:lda SPRITE_YPOS
-117b: c9 96     -         cmp #150
-117d: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
-117f: a0 07     - reset_ypos:ldy #7
-1181: a9 20     -         lda #$20              // Start Y position
-1183: 99 97 15  -         sta SPRITE_YPOS,y 
-1186: 88        -         dey
-1187: 10 fa     -         bpl !loop-
-1189: a0 07     -         ldy #7
-118b: a9 30     -         lda #$30              // Start Y position
-118d: 99 9f 15  -         sta SPRITE_YPOS+8,y 
-1190: 88        -         dey
-1191: 10 fa     -         bpl !loop-
-1193: a0 07     -         ldy #7
-1195: a9 40     -         lda #$40              // Start Y position
-1197: 99 a7 15  -         sta SPRITE_YPOS+16,y 
-119a: 88        -         dey
-119b: 10 fa     -         bpl !loop-
-119d: 4c ae 11  -         jmp move    
-11a0: a0 17     - decrease:ldy #23             // Calculate position fpr 24 sprites
-11a2: b9 97 15  -         lda SPRITE_YPOS,y 
-11a5: 18        -         clc
-11a6: 69 04     -         adc #4
-11a8: 99 97 15  -         sta SPRITE_YPOS,y 
-11ab: 88        -         dey
-11ac: 10 f4     -         bpl !loop-
-11ae: a0 07     - move:   ldy #7               // Y is the sprite index. We have 8 sprites in a row 
-11b0: b9 77 15  -         lda SPRITE_XPOS,y    // Load current x position of the sprite   
-11b3: 18        -         clc
-11b4: 69 01     - operation:adc #1               // Add the speed
-11b6: 99 77 15  -         sta SPRITE_XPOS,y    // save the new xpos 
-11b9: 99 7f 15  -         sta SPRITE_XPOS+8,y  // Also for the second row
-11bc: 99 87 15  -         sta SPRITE_XPOS+16,y // Also for the second row
-11bf: 88        -         dey
-11c0: 10 ee     -         bpl !loop-
-11c2: ad 0d dc  - exit:   lda $dc0d            // Acknowledge the IRQ            
-11c5: 7a        -         ply
-11c6: fa        -         plx  
-11c7: 68        -         pla
-11c8: 40        -         rti
-11c9: a9 7f     - init:   lda #CIA_IRQ_MASK
-11cb: 8d 0d dc  -         sta REG_CIA_ICR
-11ce: a9 29     -         lda #color 
-11d0: 8d 15 d0  -         sta DIS00
-11d3: 20 bb e3  -         jsr fill_screen_
-11d6: 78        -         sei
-11d7: a9 01     -         lda #<main_isr
-11d9: 8d fe ff  -         sta $fffe 
-11dc: a9 10     -         lda #>main_isr
-11de: 8d ff ff  -         sta $ffff
-11e1: a9 01     -         lda #<main_isr
-11e3: 8d fa ff  -         sta $fffa 
-11e6: a9 10     -         lda #>main_isr
-11e8: 8d fb ff  -         sta $fffb
-11eb: 58        -         cli
-11ec: a2 00     -         ldx #index
-11ee: a9 e7     -         lda #<address
-11f0: 9d 17 16  -         sta SPRITE_DATA_LO, x
-11f3: a9 14     -         lda #>address
-11f5: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-11f8: a2 08     -         ldx #index
-11fa: a9 17     -         lda #<address
-11fc: 9d 17 16  -         sta SPRITE_DATA_LO, x
-11ff: a9 15     -         lda #>address
-1201: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1204: a2 10     -         ldx #index
-1206: a9 47     -         lda #<address
-1208: 9d 17 16  -         sta SPRITE_DATA_LO, x
-120b: a9 15     -         lda #>address
-120d: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1210: a2 01     -         ldx #index
-1212: a9 e7     -         lda #<address
-1214: 9d 17 16  -         sta SPRITE_DATA_LO, x
-1217: a9 14     -         lda #>address
-1219: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-121c: a2 09     -         ldx #index
-121e: a9 17     -         lda #<address
-1220: 9d 17 16  -         sta SPRITE_DATA_LO, x
-1223: a9 15     -         lda #>address
-1225: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1228: a2 11     -         ldx #index
-122a: a9 47     -         lda #<address
-122c: 9d 17 16  -         sta SPRITE_DATA_LO, x
-122f: a9 15     -         lda #>address
-1231: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1234: a2 02     -         ldx #index
-1236: a9 e7     -         lda #<address
-1238: 9d 17 16  -         sta SPRITE_DATA_LO, x
-123b: a9 14     -         lda #>address
-123d: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1240: a2 0a     -         ldx #index
-1242: a9 17     -         lda #<address
-1244: 9d 17 16  -         sta SPRITE_DATA_LO, x
-1247: a9 15     -         lda #>address
-1249: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-124c: a2 12     -         ldx #index
-124e: a9 47     -         lda #<address
-1250: 9d 17 16  -         sta SPRITE_DATA_LO, x
-1253: a9 15     -         lda #>address
-1255: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1258: a2 03     -         ldx #index
-125a: a9 e7     -         lda #<address
-125c: 9d 17 16  -         sta SPRITE_DATA_LO, x
-125f: a9 14     -         lda #>address
-1261: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1264: a2 0b     -         ldx #index
-1266: a9 17     -         lda #<address
-1268: 9d 17 16  -         sta SPRITE_DATA_LO, x
-126b: a9 15     -         lda #>address
-126d: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1270: a2 13     -         ldx #index
-1272: a9 47     -         lda #<address
-1274: 9d 17 16  -         sta SPRITE_DATA_LO, x
-1277: a9 15     -         lda #>address
-1279: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-127c: a2 04     -         ldx #index
-127e: a9 e7     -         lda #<address
-1280: 9d 17 16  -         sta SPRITE_DATA_LO, x
-1283: a9 14     -         lda #>address
-1285: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1288: a2 0c     -         ldx #index
-128a: a9 17     -         lda #<address
-128c: 9d 17 16  -         sta SPRITE_DATA_LO, x
-128f: a9 15     -         lda #>address
-1291: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1294: a2 14     -         ldx #index
-1296: a9 47     -         lda #<address
-1298: 9d 17 16  -         sta SPRITE_DATA_LO, x
-129b: a9 15     -         lda #>address
-129d: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-12a0: a2 05     -         ldx #index
-12a2: a9 e7     -         lda #<address
-12a4: 9d 17 16  -         sta SPRITE_DATA_LO, x
-12a7: a9 14     -         lda #>address
-12a9: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-12ac: a2 0d     -         ldx #index
-12ae: a9 17     -         lda #<address
-12b0: 9d 17 16  -         sta SPRITE_DATA_LO, x
-12b3: a9 15     -         lda #>address
-12b5: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-12b8: a2 15     -         ldx #index
-12ba: a9 47     -         lda #<address
-12bc: 9d 17 16  -         sta SPRITE_DATA_LO, x
-12bf: a9 15     -         lda #>address
-12c1: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-12c4: a2 06     -         ldx #index
-12c6: a9 e7     -         lda #<address
-12c8: 9d 17 16  -         sta SPRITE_DATA_LO, x
-12cb: a9 14     -         lda #>address
-12cd: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-12d0: a2 0e     -         ldx #index
-12d2: a9 17     -         lda #<address
-12d4: 9d 17 16  -         sta SPRITE_DATA_LO, x
-12d7: a9 15     -         lda #>address
-12d9: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-12dc: a2 16     -         ldx #index
-12de: a9 47     -         lda #<address
-12e0: 9d 17 16  -         sta SPRITE_DATA_LO, x
-12e3: a9 15     -         lda #>address
-12e5: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-12e8: a2 07     -         ldx #index
-12ea: a9 e7     -         lda #<address
-12ec: 9d 17 16  -         sta SPRITE_DATA_LO, x
-12ef: a9 14     -         lda #>address
-12f1: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-12f4: a2 0f     -         ldx #index
-12f6: a9 17     -         lda #<address
-12f8: 9d 17 16  -         sta SPRITE_DATA_LO, x
-12fb: a9 15     -         lda #>address
-12fd: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-1300: a2 17     -         ldx #index
-1302: a9 47     -         lda #<address
-1304: 9d 17 16  -         sta SPRITE_DATA_LO, x
-1307: a9 15     -         lda #>address
-1309: 9d 37 16  -         sta SPRITE_DATA_HI, x                
-130c: a2 00     -         ldx #index
-130e: bd 57 15  -         lda SPRITE_FLAGS, x
-1311: 05 c0     -         ora SPRITE_ENABLE_FLAG
-1313: 9d 57 15  -         sta SPRITE_FLAGS, x
-1316: a2 01     -         ldx #index
-1318: bd 57 15  -         lda SPRITE_FLAGS, x
-131b: 05 c0     -         ora SPRITE_ENABLE_FLAG
-131d: 9d 57 15  -         sta SPRITE_FLAGS, x
-1320: a2 02     -         ldx #index
-1322: bd 57 15  -         lda SPRITE_FLAGS, x
-1325: 05 c0     -         ora SPRITE_ENABLE_FLAG
-1327: 9d 57 15  -         sta SPRITE_FLAGS, x
-132a: a2 03     -         ldx #index
-132c: bd 57 15  -         lda SPRITE_FLAGS, x
-132f: 05 c0     -         ora SPRITE_ENABLE_FLAG
-1331: 9d 57 15  -         sta SPRITE_FLAGS, x
-1334: a2 04     -         ldx #index
-1336: bd 57 15  -         lda SPRITE_FLAGS, x
-1339: 05 c0     -         ora SPRITE_ENABLE_FLAG
-133b: 9d 57 15  -         sta SPRITE_FLAGS, x
-133e: a2 05     -         ldx #index
-1340: bd 57 15  -         lda SPRITE_FLAGS, x
-1343: 05 c0     -         ora SPRITE_ENABLE_FLAG
-1345: 9d 57 15  -         sta SPRITE_FLAGS, x
-1348: a2 06     -         ldx #index
-134a: bd 57 15  -         lda SPRITE_FLAGS, x
-134d: 05 c0     -         ora SPRITE_ENABLE_FLAG
-134f: 9d 57 15  -         sta SPRITE_FLAGS, x
-1352: a2 07     -         ldx #index
-1354: bd 57 15  -         lda SPRITE_FLAGS, x
-1357: 05 c0     -         ora SPRITE_ENABLE_FLAG
-1359: 9d 57 15  -         sta SPRITE_FLAGS, x
-135c: a2 08     -         ldx #index
-135e: bd 57 15  -         lda SPRITE_FLAGS, x
-1361: 05 c0     -         ora SPRITE_ENABLE_FLAG
-1363: 9d 57 15  -         sta SPRITE_FLAGS, x
-1366: a2 09     -         ldx #index
-1368: bd 57 15  -         lda SPRITE_FLAGS, x
-136b: 05 c0     -         ora SPRITE_ENABLE_FLAG
-136d: 9d 57 15  -         sta SPRITE_FLAGS, x
-1370: a2 0a     -         ldx #index
-1372: bd 57 15  -         lda SPRITE_FLAGS, x
-1375: 05 c0     -         ora SPRITE_ENABLE_FLAG
-1377: 9d 57 15  -         sta SPRITE_FLAGS, x
-137a: a2 0b     -         ldx #index
-137c: bd 57 15  -         lda SPRITE_FLAGS, x
-137f: 05 c0     -         ora SPRITE_ENABLE_FLAG
-1381: 9d 57 15  -         sta SPRITE_FLAGS, x
-1384: a2 0c     -         ldx #index
-1386: bd 57 15  -         lda SPRITE_FLAGS, x
-1389: 05 c0     -         ora SPRITE_ENABLE_FLAG
-138b: 9d 57 15  -         sta SPRITE_FLAGS, x
-138e: a2 0d     -         ldx #index
-1390: bd 57 15  -         lda SPRITE_FLAGS, x
-1393: 05 c0     -         ora SPRITE_ENABLE_FLAG
-1395: 9d 57 15  -         sta SPRITE_FLAGS, x
-1398: a2 0e     -         ldx #index
-139a: bd 57 15  -         lda SPRITE_FLAGS, x
-139d: 05 c0     -         ora SPRITE_ENABLE_FLAG
-139f: 9d 57 15  -         sta SPRITE_FLAGS, x
-13a2: a2 0f     -         ldx #index
-13a4: bd 57 15  -         lda SPRITE_FLAGS, x
-13a7: 05 c0     -         ora SPRITE_ENABLE_FLAG
-13a9: 9d 57 15  -         sta SPRITE_FLAGS, x
-13ac: a2 10     -         ldx #index
-13ae: bd 57 15  -         lda SPRITE_FLAGS, x
-13b1: 05 c0     -         ora SPRITE_ENABLE_FLAG
-13b3: 9d 57 15  -         sta SPRITE_FLAGS, x
-13b6: a2 11     -         ldx #index
-13b8: bd 57 15  -         lda SPRITE_FLAGS, x
-13bb: 05 c0     -         ora SPRITE_ENABLE_FLAG
-13bd: 9d 57 15  -         sta SPRITE_FLAGS, x
-13c0: a2 12     -         ldx #index
-13c2: bd 57 15  -         lda SPRITE_FLAGS, x
-13c5: 05 c0     -         ora SPRITE_ENABLE_FLAG
-13c7: 9d 57 15  -         sta SPRITE_FLAGS, x
-13ca: a2 13     -         ldx #index
-13cc: bd 57 15  -         lda SPRITE_FLAGS, x
-13cf: 05 c0     -         ora SPRITE_ENABLE_FLAG
-13d1: 9d 57 15  -         sta SPRITE_FLAGS, x
-13d4: a2 14     -         ldx #index
-13d6: bd 57 15  -         lda SPRITE_FLAGS, x
-13d9: 05 c0     -         ora SPRITE_ENABLE_FLAG
-13db: 9d 57 15  -         sta SPRITE_FLAGS, x
-13de: a2 15     -         ldx #index
-13e0: bd 57 15  -         lda SPRITE_FLAGS, x
-13e3: 05 c0     -         ora SPRITE_ENABLE_FLAG
-13e5: 9d 57 15  -         sta SPRITE_FLAGS, x
-13e8: a2 16     -         ldx #index
-13ea: bd 57 15  -         lda SPRITE_FLAGS, x
-13ed: 05 c0     -         ora SPRITE_ENABLE_FLAG
-13ef: 9d 57 15  -         sta SPRITE_FLAGS, x
-13f2: a2 17     -         ldx #index
-13f4: bd 57 15  -         lda SPRITE_FLAGS, x
-13f7: 05 c0     -         ora SPRITE_ENABLE_FLAG
-13f9: 9d 57 15  -         sta SPRITE_FLAGS, x
-13fc: a9 57     -         lda #<SPRITE_DEFINITON_BLOCK
-13fe: 8d 15 d0  -         sta DIS00
-1401: a9 15     -         lda #>SPRITE_DEFINITON_BLOCK
-1403: 8d 16 d0  -         sta DIS01
-1406: a9 20     -         lda #32                 // Set number of sprites
-1408: 8d 17 d0  -         sta DIS02
-140b: a9 17     -         lda #CMD_SET_SDB        // Command "Set Sprite Definition Block"
-140d: 8d 14 d0  -         sta DISCMD              //                                          
-1410: ad 13 d0  -         lda DISCR               // Load Display command register
-1413: 09 80     -         ora #$80                // Set the "Command Exceution" Flag
-1415: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
-1418: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
-141b: 30 fb     -         bmi !wait-              // No! Let's wait
-141d: a9 e7     -         lda #<SPACE_ALIEN_A
-141f: 8d 57 16  -         sta ALIEN_A_SPRITE_ANIMATION_LO
-1422: 8d 59 16  -         sta ALIEN_A_SPRITE_ANIMATION_LO+2
-1425: a9 14     -         lda #>SPACE_ALIEN_A
-1427: 8d 5b 16  -         sta ALIEN_A_SPRITE_ANIMATION_HI
-142a: 8d 5d 16  -         sta ALIEN_A_SPRITE_ANIMATION_HI+2
-142d: a9 f7     -         lda #<SPACE_ALIEN_A1
-142f: 8d 58 16  -         sta ALIEN_A_SPRITE_ANIMATION_LO+1
-1432: a9 14     -         lda #>SPACE_ALIEN_A1
-1434: 8d 5c 16  -         sta ALIEN_A_SPRITE_ANIMATION_HI+1
-1437: a9 07     -         lda #<SPACE_ALIEN_A2
-1439: 8d 5a 16  -         sta ALIEN_A_SPRITE_ANIMATION_LO+3
-143c: a9 15     -         lda #>SPACE_ALIEN_A2
-143e: 8d 5e 16  -         sta ALIEN_A_SPRITE_ANIMATION_HI+3
-1441: a9 17     -         lda #<SPACE_ALIEN_B
-1443: 8d 5f 16  -         sta ALIEN_B_SPRITE_ANIMATION_LO
-1446: 8d 61 16  -         sta ALIEN_B_SPRITE_ANIMATION_LO+2
-1449: a9 15     -         lda #>SPACE_ALIEN_B
-144b: 8d 63 16  -         sta ALIEN_B_SPRITE_ANIMATION_HI
-144e: 8d 65 16  -         sta ALIEN_B_SPRITE_ANIMATION_HI+2
-1451: a9 27     -         lda #<SPACE_ALIEN_B1
-1453: 8d 60 16  -         sta ALIEN_B_SPRITE_ANIMATION_LO+1
-1456: a9 15     -         lda #>SPACE_ALIEN_B1
-1458: 8d 64 16  -         sta ALIEN_B_SPRITE_ANIMATION_HI+1
-145b: a9 37     -         lda #<SPACE_ALIEN_B2
-145d: 8d 62 16  -         sta ALIEN_B_SPRITE_ANIMATION_LO+3
-1460: a9 15     -         lda #>SPACE_ALIEN_B2
-1462: 8d 66 16  -         sta ALIEN_B_SPRITE_ANIMATION_HI+3
-1465: a9 84     -         lda #(CIA_SET_FLAGS | FRAME_INTERRUPT_FLAG)
-1467: 8d 0d dc  -         sta $dc0d
-146a: 60        -         rts
-146b: a6 06     - animate_aliens:ldx ALIEN_ANIM_FRAME_HI
-146d: bd 57 16  -         lda ALIEN_A_SPRITE_ANIMATION_LO,x
-1470: 8d 17 16  -         sta SPRITE_DATA_LO+i    
-1473: 8d 18 16  -         sta SPRITE_DATA_LO+i    
-1476: 8d 19 16  -         sta SPRITE_DATA_LO+i    
-1479: 8d 1a 16  -         sta SPRITE_DATA_LO+i    
-147c: 8d 1b 16  -         sta SPRITE_DATA_LO+i    
-147f: 8d 1c 16  -         sta SPRITE_DATA_LO+i    
-1482: 8d 1d 16  -         sta SPRITE_DATA_LO+i    
-1485: 8d 1e 16  -         sta SPRITE_DATA_LO+i    
-1488: bd 5b 16  -         lda ALIEN_A_SPRITE_ANIMATION_HI,x
-148b: 8d 37 16  -         sta SPRITE_DATA_HI+i    
-148e: 8d 38 16  -         sta SPRITE_DATA_HI+i    
-1491: 8d 39 16  -         sta SPRITE_DATA_HI+i    
-1494: 8d 3a 16  -         sta SPRITE_DATA_HI+i    
-1497: 8d 3b 16  -         sta SPRITE_DATA_HI+i    
-149a: 8d 3c 16  -         sta SPRITE_DATA_HI+i    
-149d: 8d 3d 16  -         sta SPRITE_DATA_HI+i    
-14a0: 8d 3e 16  -         sta SPRITE_DATA_HI+i    
-14a3: bd 5f 16  -         lda ALIEN_B_SPRITE_ANIMATION_LO,x
-14a6: 8d 1f 16  -         sta SPRITE_DATA_LO+i    
-14a9: 8d 20 16  -         sta SPRITE_DATA_LO+i    
-14ac: 8d 21 16  -         sta SPRITE_DATA_LO+i    
-14af: 8d 22 16  -         sta SPRITE_DATA_LO+i    
-14b2: 8d 23 16  -         sta SPRITE_DATA_LO+i    
-14b5: 8d 24 16  -         sta SPRITE_DATA_LO+i    
-14b8: 8d 25 16  -         sta SPRITE_DATA_LO+i    
-14bb: 8d 26 16  -         sta SPRITE_DATA_LO+i    
-14be: bd 63 16  -         lda ALIEN_B_SPRITE_ANIMATION_HI,x
-14c1: 8d 3f 16  -         sta SPRITE_DATA_HI+i    
-14c4: 8d 40 16  -         sta SPRITE_DATA_HI+i    
-14c7: 8d 41 16  -         sta SPRITE_DATA_HI+i    
-14ca: 8d 42 16  -         sta SPRITE_DATA_HI+i    
-14cd: 8d 43 16  -         sta SPRITE_DATA_HI+i    
-14d0: 8d 44 16  -         sta SPRITE_DATA_HI+i    
-14d3: 8d 45 16  -         sta SPRITE_DATA_HI+i    
-14d6: 8d 46 16  -         sta SPRITE_DATA_HI+i    
-14d9: a9 84     -         lda #(CIA_SET_FLAGS | FRAME_INTERRUPT_FLAG)
-14db: 8d 0d dc  -         sta $dc0d
-14de: a9 3f     -         lda #color 
-14e0: 8d 15 d0  -         sta DIS00
-14e3: 20 bb e3  -         jsr fill_screen_
-14e6: 60        -         rts
-14e7: 02 40     - SPACE_ALIEN_A:.byte %00000010, %01000000
-14e9: 07 e0     -         .byte %00000111, %11100000
-14eb: 0f f0     -         .byte %00001111, %11110000
-14ed: 1d b8     -         .byte %00011101, %10111000
-14ef: 17 e8     -         .byte %00010111, %11101000
-14f1: 17 e8     -         .byte %00010111, %11101000
-14f3: 02 40     -         .byte %00000010, %01000000
-14f5: 06 60     -         .byte %00000110, %01100000
-14f7: 02 40     - SPACE_ALIEN_A1:.byte %00000010, %01000000
-14f9: 07 e0     -         .byte %00000111, %11100000
-14fb: 0f f0     -         .byte %00001111, %11110000
-14fd: 1d b8     -         .byte %00011101, %10111000
-14ff: 17 e8     -         .byte %00010111, %11101000
-1501: 07 c0     -         .byte %00000111, %11000000
-1503: 02 60     -         .byte %00000010, %01100000
-1505: 06 00     -         .byte %00000110, %00000000
-1507: 02 40     - SPACE_ALIEN_A2:.byte %00000010, %01000000
-1509: 07 e0     -         .byte %00000111, %11100000
-150b: 0f f0     -         .byte %00001111, %11110000
-150d: 1d b8     -         .byte %00011101, %10111000
-150f: 17 e8     -         .byte %00010111, %11101000
-1511: 03 e0     -         .byte %00000011, %11100000
-1513: 06 40     -         .byte %00000110, %01000000
-1515: 00 60     -         .byte %00000000, %01100000
-1517: 00 00     - SPACE_ALIEN_B:.byte %00000000, %00000000
-1519: 04 40     -         .byte %00000100, %01000000
-151b: 03 80     -         .byte %00000011, %10000000
-151d: 07 c0     -         .byte %00000111, %11000000
-151f: 05 40     -         .byte %00000101, %01000000
-1521: 07 c0     -         .byte %00000111, %11000000
-1523: 0a a0     -         .byte %00001010, %10100000
-1525: 0a a0     -         .byte %00001010, %10100000
-1527: 00 00     - SPACE_ALIEN_B1:.byte %00000000, %00000000
-1529: 04 40     -         .byte %00000100, %01000000
-152b: 03 80     -         .byte %00000011, %10000000
-152d: 07 c0     -         .byte %00000111, %11000000
-152f: 05 40     -         .byte %00000101, %01000000
-1531: 07 c0     -         .byte %00000111, %11000000
-1533: 0a a0     -         .byte %00001010, %10100000
-1535: 15 40     -         .byte %00010101, %01000000
-1537: 00 00     - SPACE_ALIEN_B2:.byte %00000000, %00000000
-1539: 04 40     -         .byte %00000100, %01000000
-153b: 03 80     -         .byte %00000011, %10000000
-153d: 07 c0     -         .byte %00000111, %11000000
-153f: 05 40     -         .byte %00000101, %01000000
-1541: 07 c0     -         .byte %00000111, %11000000
-1543: 0a a0     -         .byte %00001010, %10100000
-1545: 05 50     -         .byte %00000101, %01010000
-1547: 00 00     - SPACE_ALIEN_C:.byte %00000000, %00000000
-1549: 04 40     -         .byte %00000100, %01000000
-154b: 0f e0     -         .byte %00001111, %11100000
-154d: 19 30     -         .byte %00011001, %00110000
-154f: 1f f0     -         .byte %00011111, %11110000
-1551: 1f f0     -         .byte %00011111, %11110000
-1553: 15 50     -         .byte %00010101, %01010000
-1555: 0a a0     -         .byte %00001010, %10100000
-1557: 80 80 80 80 80 80 80 80                          - SPRITE_DEFINITON_BLOCK,SPRITE_FLAGS:.byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 00-07
-155f: 80 80 80 80 80 80 80 80                          -         .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 08-15
-1567: 80 80 80 80 80 80 80 80                          -         .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 16-23
-156f: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-1577: 10 20 30 40 50 60 70 80                          - SPRITE_XPOS:.byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 00-07
-157f: 10 20 30 40 50 60 70 80                          -         .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 08-15
-1587: 10 20 30 40 50 60 70 80                          -         .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 16-23
-158f: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-1597: 20 20 20 20 20 20 20 20                          - SPRITE_YPOS:.byte $20, $20, $20, $20, $20, $20, $20, $20  // Sprite 00-07
-159f: 30 30 30 30 30 30 30 30                          -         .byte $30, $30, $30, $30, $30, $30, $30, $30  // Sprite 08-15
-15a7: 40 40 40 40 40 40 40 40                          -         .byte $40, $40, $40, $40, $40, $40, $40, $40  // Sprite 16-23
-15af: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-15b7: 1f 1f 1f 1f 1f 1f 1f 1f                          - SPRITE_COLOR:.byte $1f, $1f, $1f, $1f, $1f, $1f, $1f, $1f  // Sprite 00-07
-15bf: 23 23 23 23 23 23 23 23                          -         .byte $23, $23, $23, $23, $23, $23, $23, $23  // Sprite 08-15
-15c7: 2c 2c 2c 2c 2c 2c 2c 2c                          -         .byte $2c, $2c, $2c, $2c, $2c, $2c, $2c, $2c  // Sprite 16-23
-15cf: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-15d7: 10 10 10 10 10 10 10 10                          - SPRITE_WIDTH:.byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 00-07
-15df: 10 10 10 10 10 10 10 10                          -         .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 08-15
-15e7: 10 10 10 10 10 10 10 10                          -         .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 16-23
-15ef: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-15f7: 08 08 08 08 08 08 08 08                          - SPRITE_HEIGHT:.byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 00-07
-15ff: 08 08 08 08 08 08 08 08                          -         .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 08-15
-1607: 08 08 08 08 08 08 08 08                          -         .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 16-23
-160f: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
-1617: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_LO:.fill 32, 0
-1627: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
-1637: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_HI:.fill 32, 0
-1647: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
-1657: 00 00 00 00                                      - ALIEN_A_SPRITE_ANIMATION_LO:.fill 4, 0
-165b: 00 00 00 00                                      - ALIEN_A_SPRITE_ANIMATION_HI:.fill 4, 0
-165f: 00 00 00 00                                      - ALIEN_B_SPRITE_ANIMATION_LO:.fill 4, 0
-1663: 00 00 00 00                                      - ALIEN_B_SPRITE_ANIMATION_HI:.fill 4, 0
-1667: a2 04     - find_next_invisible_bullet:ldx #(BULLET_COUNT-1)
-1669: bd e3 16  -         lda ALIEN_BULLETS_STAT,x 
-166c: 30 09     -         bmi !next+ // Visible. Next.
-166e: 09 80     -         ora #BULLET_ENABLE_FLAG
-1670: 9d e3 16  -         sta ALIEN_BULLETS_STAT,x
-1673: 38        -         sec // Set carry flag (inicating we found a slot)
-1674: 4c 7b 16  -         jmp !end+
-1677: ca        -         dex
-1678: 10 ef     -         bpl !loop-
-167a: 18        -         clc // Clear carry to indicate, we didn't found a free slot.
-167b: 60        -         rts
-167c: 20 86 16  - update_alien_bullets:jsr move_bullets
-167f: 20 9b 16  -         jsr check_bullets
-1682: 20 b5 16  -         jsr draw_bullets
-1685: 60        -         rts
-1686: a2 05     - move_bullets:ldx #(BULLET_COUNT)
-1688: bd e3 16  -         lda ALIEN_BULLETS_STAT,x
-168b: 10 0a     -         bpl !next+
-168d: bd ed 16  -         lda ALIEN_BULLETS_Y,x 
-1690: 18        -         clc 
-1691: 7d f2 16  -         adc ALIEN_BULLETS_SPEED,x
-1694: 9d ed 16  -         sta ALIEN_BULLETS_Y,x
-1697: ca        -         dex
-1698: 10 ee     -         bpl !loop- 
-169a: 60        -         rts
-169b: a2 04     - check_bullets:ldx #(BULLET_COUNT-1)
-169d: bd e3 16  -         lda ALIEN_BULLETS_STAT,x
-16a0: 10 0f     -         bpl !next+
-16a2: bd ed 16  -         lda ALIEN_BULLETS_Y,x
-16a5: c9 aa     -         cmp #BULLET_MAX_HEIGHT    // if ypos > BULLET_MAX_HEIGHT hide bullet 
-16a7: 30 08     -         bmi !next+
-16a9: bd e3 16  - hide_bullet:lda ALIEN_BULLETS_STAT,x 
-16ac: 29 7f     -         and #(~BULLET_ENABLE_FLAG)
-16ae: 9d e3 16  -         sta ALIEN_BULLETS_STAT,x
-16b1: ca        -         dex
-16b2: 10 e9     -         bpl !loop-
-16b4: 60        -         rts
-16b5: a9 00     - draw_bullets:lda #0
-16b7: 8d 16 d0  -         sta DIS01                   // xpos high
-16ba: a9 04     -         lda #BULLET_LENGTH          // Length Low
-16bc: 8d 18 d0  -         sta DIS03
-16bf: a9 00     -         lda #0                      // Length High
-16c1: 8d 19 d0  -         sta DIS04   
-16c4: a9 17     -         lda #BULLET_COLOR           // Color
-16c6: 8d 1a d0  -         sta DIS05
-16c9: a2 04     -         ldx #(BULLET_COUNT-1)
-16cb: bd e3 16  -         lda ALIEN_BULLETS_STAT,x 
-16ce: 10 0f     -         bpl !next+
-16d0: bd e8 16  -         lda ALIEN_BULLETS_X,x       // X-Pos low
-16d3: 8d 15 d0  -         sta DIS00
-16d6: bd ed 16  -         lda ALIEN_BULLETS_Y,x 
-16d9: 8d 17 d0  -         sta DIS02                   // ypos 
-16dc: 20 c4 e2  -         jsr draw_vertical_line_
-16df: ca        -         dex 
-16e0: 10 e9     -         bpl !loop-
-16e2: 60        -         rts
-16e3: 04 04 04 04 04                                   - ALIEN_BULLETS_STAT:.fill BULLET_COUNT, $04  // Bit 0..3 length
-16e8: 00 00 00 00 00                                   - ALIEN_BULLETS_X:.fill BULLET_COUNT, $00  // xpos. If xpos > 255; stat bit 6 = 1
-16ed: 20 20 20 20 20                                   - ALIEN_BULLETS_Y:.fill BULLET_COUNT, $20  // ypos of the top
-16f2: 02 02 02 02 02                                   - ALIEN_BULLETS_SPEED:.fill BULLET_COUNT, $02
+1004: a9 29     -         lda #color 
+1006: 8d 15 d0  -         sta DIS00
+1009: 20 bb e3  -         jsr fill_screen_
+100c: 48        -         pha
+100d: a9 05     -         lda #xlo
+100f: 8d 15 d0  -         sta DIS00
+1012: a9 00     -         lda #xhi 
+1014: 8d 16 d0  -         sta DIS01
+1017: a9 14     -         lda #y 
+1019: 8d 17 d0  -         sta DIS02
+101c: a9 fa     -         lda #width_lo 
+101e: 8d 18 d0  -         sta DIS03
+1021: a9 00     -         lda #width_hi
+1023: 8d 19 d0  -         sta DIS04
+1026: a9 a0     -         lda #height
+1028: 8d 1a d0  -         sta DIS05
+102b: a9 37     -         lda #col 
+102d: 8d 1b d0  -         sta DIS06
+1030: 20 fd e2  -         jsr fill_rect_
+1033: 68        -         pla 
+1034: a5 05     -         lda ALIEN_ANIM_FRAME_LO
+1036: 18        -         clc
+1037: 69 40     -         adc #%01000000
+1039: 85 05     -         sta ALIEN_ANIM_FRAME_LO
+103b: a5 06     -         lda ALIEN_ANIM_FRAME_HI
+103d: 69 00     -         adc #00
+103f: 29 03     -         and #3
+1041: 85 06     -         sta ALIEN_ANIM_FRAME_HI
+1043: 20 6e 14  -         jsr SpaceInvaders.animate_aliens
+1046: 20 10 e3  -         jsr draw_sprites_
+1049: 48        -         pha
+104a: a9 05     -         lda #xlo
+104c: 8d 15 d0  -         sta DIS00
+104f: a9 00     -         lda #xhi 
+1051: 8d 16 d0  -         sta DIS01
+1054: a9 b4     -         lda #y 
+1056: 8d 17 d0  -         sta DIS02
+1059: a9 fa     -         lda #width_lo 
+105b: 8d 18 d0  -         sta DIS03
+105e: a9 00     -         lda #width_hi
+1060: 8d 19 d0  -         sta DIS04
+1063: a9 3c     -         lda #height
+1065: 8d 1a d0  -         sta DIS05
+1068: a9 2a     -         lda #col 
+106a: 8d 1b d0  -         sta DIS06
+106d: 20 fd e2  -         jsr fill_rect_
+1070: 68        -         pla 
+1071: 48        -         pha
+1072: a9 05     -         lda #xlo
+1074: 8d 15 d0  -         sta DIS00
+1077: a9 00     -         lda #xhi 
+1079: 8d 16 d0  -         sta DIS01
+107c: a9 14     -         lda #y 
+107e: 8d 17 d0  -         sta DIS02
+1081: a9 fa     -         lda #width_lo 
+1083: 8d 18 d0  -         sta DIS03
+1086: a9 00     -         lda #width_hi
+1088: 8d 19 d0  -         sta DIS04
+108b: a9 a0     -         lda #height
+108d: 8d 1a d0  -         sta DIS05
+1090: a9 17     -         lda #col 
+1092: 8d 1b d0  -         sta DIS06
+1095: 20 ea e2  -         jsr draw_rect_
+1098: 68        -         pla 
+1099: a9 2b     -         lda #color
+109b: 20 02 e2  -         jsr set_fg_color_
+109e: a9 02     -         lda #xpos
+10a0: 20 d2 e1  -         jsr set_cursor_x_
+10a3: a9 1a     -         lda #ypos
+10a5: 20 ea e1  -         jsr set_cursor_y_    
+10a8: a9 24     -         lda #<addr
+10aa: 85 e0     -         sta zpRegE0
+10ac: a9 09     -         lda #>addr
+10ae: 85 e1     -         sta zpRegE1
+10b0: 20 76 e2  -         jsr print_text_
+10b3: a9 09     -         lda #xpos
+10b5: 20 d2 e1  -         jsr set_cursor_x_
+10b8: a9 17     -         lda #ypos
+10ba: 20 ea e1  -         jsr set_cursor_y_    
+10bd: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
+10c0: 8d 30 e1  -         sta HTD_IN
+10c3: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
+10c6: 8d 31 e1  -         sta HTD_IN+1
+10c9: 20 68 e1  -         jsr bcd_convert_word_
+10cc: ad 34 e1  -         lda HTD_OUT+2
+10cf: 20 8e e2  -         jsr print_hex_
+10d2: ad 33 e1  -         lda HTD_OUT+1
+10d5: 20 8e e2  -         jsr print_hex_
+10d8: ad 32 e1  -         lda HTD_OUT
+10db: 20 8e e2  -         jsr print_hex_
+10de: a9 02     -         lda #xpos
+10e0: 20 d2 e1  -         jsr set_cursor_x_
+10e3: a9 17     -         lda #ypos
+10e5: 20 ea e1  -         jsr set_cursor_y_    
+10e8: a9 2b     -         lda #<addr
+10ea: 85 e0     -         sta zpRegE0
+10ec: a9 09     -         lda #>addr
+10ee: 85 e1     -         sta zpRegE1
+10f0: 20 76 e2  -         jsr print_text_
+10f3: a9 02     -         lda #xpos
+10f5: 20 d2 e1  -         jsr set_cursor_x_
+10f8: a9 18     -         lda #ypos
+10fa: 20 ea e1  -         jsr set_cursor_y_    
+10fd: a9 31     -         lda #<addr
+10ff: 85 e0     -         sta zpRegE0
+1101: a9 09     -         lda #>addr
+1103: 85 e1     -         sta zpRegE1
+1105: 20 76 e2  -         jsr print_text_
+1108: a9 09     -         lda #xpos
+110a: 20 d2 e1  -         jsr set_cursor_x_
+110d: a9 18     -         lda #ypos
+110f: 20 ea e1  -         jsr set_cursor_y_    
+1112: a5 02     -         lda SCORE_LO       
+1114: 8d 30 e1  -         sta HTD_IN
+1117: a5 03     -         lda SCORE_HI       
+1119: 8d 31 e1  -         sta HTD_IN+1
+111c: 20 68 e1  -         jsr bcd_convert_word_
+111f: ad 34 e1  -         lda HTD_OUT+2
+1122: 20 8e e2  -         jsr print_hex_
+1125: ad 33 e1  -         lda HTD_OUT+1
+1128: 20 8e e2  -         jsr print_hex_
+112b: ad 32 e1  -         lda HTD_OUT
+112e: 20 8e e2  -         jsr print_hex_
+1131: ce 00 10  -         dec shot_delay      // Shot delay countdown
+1134: d0 27     -         bne draw_bullets    // Still positive. No Shot
+1136: 20 a5 e1  -         jsr rand8           // New delay in frames ( 0..255)
+1139: 29 07     -         and #7
+113b: 69 07     -         adc #7              // Increase to at least 7 frames. 
+113d: 8d 00 10  -         sta shot_delay      // Store new delay
+1140: 20 62 16  -         jsr find_next_invisible_bullet
+1143: 90 18     -         bcc draw_bullets    // We couln't find any free slot. So just draw.    
+1145: 20 a5 e1  -         jsr rand8  // Random value to accu
+1148: 29 0f     -         and #15    // One of the first sixteen aliens
+114a: a8        -         tay        // Using y as alien index
+114b: b9 72 15  -         lda SPRITE_XPOS,y
+114e: 18        -         clc
+114f: 69 08     -         adc #8
+1151: 9d e3 16  -         sta ALIEN_BULLETS_X,x
+1154: b9 92 15  -         lda SPRITE_YPOS,y
+1157: 18        -         clc
+1158: 69 04     -         adc #4
+115a: 9d e8 16  -         sta ALIEN_BULLETS_Y,x
+115d: 20 77 16  - draw_bullets:jsr update_alien_bullets
+1160: ad 72 15  - check_left:lda SPRITE_XPOS     // Get the x position of the leftmost sprite
+1163: c9 0a     -         cmp #10             // 10 is the minimum x position
+1165: 10 08     -         bpl check_right     // xpos - 10 >= 0 => check right border 
+1167: a9 01     - left_underflow:lda #$01
+1169: 8d b8 11  -         sta operation+1
+116c: 4c 7b 11  -         jmp go_down 
+116f: ad 79 15  - check_right:lda SPRITE_XPOS+7   // get the xpos position of the rightmost sprite
+1172: c9 ef     -         cmp #$ef            // Max xpos = 239
+1174: 30 3b     -         bmi move            // if xpos - 239 < 0 => move
+1176: a9 ff     - right_overflow:lda #$ff            // By adding -1, we move left.
+1178: 8d b8 11  -         sta operation+1     // Write the new speed to the code (self modified)    
+117b: ad 92 15  - go_down:lda SPRITE_YPOS
+117e: c9 96     -         cmp #150
+1180: 30 21     -         bmi decrease         // if SPRITE ypos < 100 decrease ypos
+1182: a0 07     - reset_ypos:ldy #7
+1184: a9 20     -         lda #$20              // Start Y position
+1186: 99 92 15  -         sta SPRITE_YPOS,y 
+1189: 88        -         dey
+118a: 10 fa     -         bpl !loop-
+118c: a0 07     -         ldy #7
+118e: a9 30     -         lda #$30              // Start Y position
+1190: 99 9a 15  -         sta SPRITE_YPOS+8,y 
+1193: 88        -         dey
+1194: 10 fa     -         bpl !loop-
+1196: a0 07     -         ldy #7
+1198: a9 40     -         lda #$40              // Start Y position
+119a: 99 a2 15  -         sta SPRITE_YPOS+16,y 
+119d: 88        -         dey
+119e: 10 fa     -         bpl !loop-
+11a0: 4c b1 11  -         jmp move    
+11a3: a0 17     - decrease:ldy #23             // Calculate position fpr 24 sprites
+11a5: b9 92 15  -         lda SPRITE_YPOS,y 
+11a8: 18        -         clc
+11a9: 69 04     -         adc #4
+11ab: 99 92 15  -         sta SPRITE_YPOS,y 
+11ae: 88        -         dey
+11af: 10 f4     -         bpl !loop-
+11b1: a0 07     - move:   ldy #7               // Y is the sprite index. We have 8 sprites in a row 
+11b3: b9 72 15  -         lda SPRITE_XPOS,y    // Load current x position of the sprite   
+11b6: 18        -         clc
+11b7: 69 01     - operation:adc #1               // Add the speed
+11b9: 99 72 15  -         sta SPRITE_XPOS,y    // save the new xpos 
+11bc: 99 7a 15  -         sta SPRITE_XPOS+8,y  // Also for the second row
+11bf: 99 82 15  -         sta SPRITE_XPOS+16,y // Also for the second row
+11c2: 88        -         dey
+11c3: 10 ee     -         bpl !loop-
+11c5: ad 0d dc  - exit:   lda $dc0d            // Acknowledge the IRQ            
+11c8: 7a        -         ply
+11c9: fa        -         plx  
+11ca: 68        -         pla
+11cb: 40        -         rti
+11cc: a9 7f     - init:   lda #CIA_IRQ_MASK
+11ce: 8d 0d dc  -         sta REG_CIA_ICR
+11d1: a9 29     -         lda #color 
+11d3: 8d 15 d0  -         sta DIS00
+11d6: 20 bb e3  -         jsr fill_screen_
+11d9: 78        -         sei
+11da: a9 01     -         lda #<main_isr
+11dc: 8d fe ff  -         sta $fffe 
+11df: a9 10     -         lda #>main_isr
+11e1: 8d ff ff  -         sta $ffff
+11e4: a9 01     -         lda #<main_isr
+11e6: 8d fa ff  -         sta $fffa 
+11e9: a9 10     -         lda #>main_isr
+11eb: 8d fb ff  -         sta $fffb
+11ee: 58        -         cli
+11ef: a2 00     -         ldx #index
+11f1: a9 e2     -         lda #<address
+11f3: 9d 12 16  -         sta SPRITE_DATA_LO, x
+11f6: a9 14     -         lda #>address
+11f8: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+11fb: a2 08     -         ldx #index
+11fd: a9 12     -         lda #<address
+11ff: 9d 12 16  -         sta SPRITE_DATA_LO, x
+1202: a9 15     -         lda #>address
+1204: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+1207: a2 10     -         ldx #index
+1209: a9 42     -         lda #<address
+120b: 9d 12 16  -         sta SPRITE_DATA_LO, x
+120e: a9 15     -         lda #>address
+1210: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+1213: a2 01     -         ldx #index
+1215: a9 e2     -         lda #<address
+1217: 9d 12 16  -         sta SPRITE_DATA_LO, x
+121a: a9 14     -         lda #>address
+121c: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+121f: a2 09     -         ldx #index
+1221: a9 12     -         lda #<address
+1223: 9d 12 16  -         sta SPRITE_DATA_LO, x
+1226: a9 15     -         lda #>address
+1228: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+122b: a2 11     -         ldx #index
+122d: a9 42     -         lda #<address
+122f: 9d 12 16  -         sta SPRITE_DATA_LO, x
+1232: a9 15     -         lda #>address
+1234: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+1237: a2 02     -         ldx #index
+1239: a9 e2     -         lda #<address
+123b: 9d 12 16  -         sta SPRITE_DATA_LO, x
+123e: a9 14     -         lda #>address
+1240: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+1243: a2 0a     -         ldx #index
+1245: a9 12     -         lda #<address
+1247: 9d 12 16  -         sta SPRITE_DATA_LO, x
+124a: a9 15     -         lda #>address
+124c: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+124f: a2 12     -         ldx #index
+1251: a9 42     -         lda #<address
+1253: 9d 12 16  -         sta SPRITE_DATA_LO, x
+1256: a9 15     -         lda #>address
+1258: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+125b: a2 03     -         ldx #index
+125d: a9 e2     -         lda #<address
+125f: 9d 12 16  -         sta SPRITE_DATA_LO, x
+1262: a9 14     -         lda #>address
+1264: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+1267: a2 0b     -         ldx #index
+1269: a9 12     -         lda #<address
+126b: 9d 12 16  -         sta SPRITE_DATA_LO, x
+126e: a9 15     -         lda #>address
+1270: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+1273: a2 13     -         ldx #index
+1275: a9 42     -         lda #<address
+1277: 9d 12 16  -         sta SPRITE_DATA_LO, x
+127a: a9 15     -         lda #>address
+127c: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+127f: a2 04     -         ldx #index
+1281: a9 e2     -         lda #<address
+1283: 9d 12 16  -         sta SPRITE_DATA_LO, x
+1286: a9 14     -         lda #>address
+1288: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+128b: a2 0c     -         ldx #index
+128d: a9 12     -         lda #<address
+128f: 9d 12 16  -         sta SPRITE_DATA_LO, x
+1292: a9 15     -         lda #>address
+1294: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+1297: a2 14     -         ldx #index
+1299: a9 42     -         lda #<address
+129b: 9d 12 16  -         sta SPRITE_DATA_LO, x
+129e: a9 15     -         lda #>address
+12a0: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+12a3: a2 05     -         ldx #index
+12a5: a9 e2     -         lda #<address
+12a7: 9d 12 16  -         sta SPRITE_DATA_LO, x
+12aa: a9 14     -         lda #>address
+12ac: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+12af: a2 0d     -         ldx #index
+12b1: a9 12     -         lda #<address
+12b3: 9d 12 16  -         sta SPRITE_DATA_LO, x
+12b6: a9 15     -         lda #>address
+12b8: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+12bb: a2 15     -         ldx #index
+12bd: a9 42     -         lda #<address
+12bf: 9d 12 16  -         sta SPRITE_DATA_LO, x
+12c2: a9 15     -         lda #>address
+12c4: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+12c7: a2 06     -         ldx #index
+12c9: a9 e2     -         lda #<address
+12cb: 9d 12 16  -         sta SPRITE_DATA_LO, x
+12ce: a9 14     -         lda #>address
+12d0: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+12d3: a2 0e     -         ldx #index
+12d5: a9 12     -         lda #<address
+12d7: 9d 12 16  -         sta SPRITE_DATA_LO, x
+12da: a9 15     -         lda #>address
+12dc: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+12df: a2 16     -         ldx #index
+12e1: a9 42     -         lda #<address
+12e3: 9d 12 16  -         sta SPRITE_DATA_LO, x
+12e6: a9 15     -         lda #>address
+12e8: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+12eb: a2 07     -         ldx #index
+12ed: a9 e2     -         lda #<address
+12ef: 9d 12 16  -         sta SPRITE_DATA_LO, x
+12f2: a9 14     -         lda #>address
+12f4: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+12f7: a2 0f     -         ldx #index
+12f9: a9 12     -         lda #<address
+12fb: 9d 12 16  -         sta SPRITE_DATA_LO, x
+12fe: a9 15     -         lda #>address
+1300: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+1303: a2 17     -         ldx #index
+1305: a9 42     -         lda #<address
+1307: 9d 12 16  -         sta SPRITE_DATA_LO, x
+130a: a9 15     -         lda #>address
+130c: 9d 32 16  -         sta SPRITE_DATA_HI, x                
+130f: a2 00     -         ldx #index
+1311: bd 52 15  -         lda SPRITE_FLAGS, x
+1314: 05 c0     -         ora SPRITE_ENABLE_FLAG
+1316: 9d 52 15  -         sta SPRITE_FLAGS, x
+1319: a2 01     -         ldx #index
+131b: bd 52 15  -         lda SPRITE_FLAGS, x
+131e: 05 c0     -         ora SPRITE_ENABLE_FLAG
+1320: 9d 52 15  -         sta SPRITE_FLAGS, x
+1323: a2 02     -         ldx #index
+1325: bd 52 15  -         lda SPRITE_FLAGS, x
+1328: 05 c0     -         ora SPRITE_ENABLE_FLAG
+132a: 9d 52 15  -         sta SPRITE_FLAGS, x
+132d: a2 03     -         ldx #index
+132f: bd 52 15  -         lda SPRITE_FLAGS, x
+1332: 05 c0     -         ora SPRITE_ENABLE_FLAG
+1334: 9d 52 15  -         sta SPRITE_FLAGS, x
+1337: a2 04     -         ldx #index
+1339: bd 52 15  -         lda SPRITE_FLAGS, x
+133c: 05 c0     -         ora SPRITE_ENABLE_FLAG
+133e: 9d 52 15  -         sta SPRITE_FLAGS, x
+1341: a2 05     -         ldx #index
+1343: bd 52 15  -         lda SPRITE_FLAGS, x
+1346: 05 c0     -         ora SPRITE_ENABLE_FLAG
+1348: 9d 52 15  -         sta SPRITE_FLAGS, x
+134b: a2 06     -         ldx #index
+134d: bd 52 15  -         lda SPRITE_FLAGS, x
+1350: 05 c0     -         ora SPRITE_ENABLE_FLAG
+1352: 9d 52 15  -         sta SPRITE_FLAGS, x
+1355: a2 07     -         ldx #index
+1357: bd 52 15  -         lda SPRITE_FLAGS, x
+135a: 05 c0     -         ora SPRITE_ENABLE_FLAG
+135c: 9d 52 15  -         sta SPRITE_FLAGS, x
+135f: a2 08     -         ldx #index
+1361: bd 52 15  -         lda SPRITE_FLAGS, x
+1364: 05 c0     -         ora SPRITE_ENABLE_FLAG
+1366: 9d 52 15  -         sta SPRITE_FLAGS, x
+1369: a2 09     -         ldx #index
+136b: bd 52 15  -         lda SPRITE_FLAGS, x
+136e: 05 c0     -         ora SPRITE_ENABLE_FLAG
+1370: 9d 52 15  -         sta SPRITE_FLAGS, x
+1373: a2 0a     -         ldx #index
+1375: bd 52 15  -         lda SPRITE_FLAGS, x
+1378: 05 c0     -         ora SPRITE_ENABLE_FLAG
+137a: 9d 52 15  -         sta SPRITE_FLAGS, x
+137d: a2 0b     -         ldx #index
+137f: bd 52 15  -         lda SPRITE_FLAGS, x
+1382: 05 c0     -         ora SPRITE_ENABLE_FLAG
+1384: 9d 52 15  -         sta SPRITE_FLAGS, x
+1387: a2 0c     -         ldx #index
+1389: bd 52 15  -         lda SPRITE_FLAGS, x
+138c: 05 c0     -         ora SPRITE_ENABLE_FLAG
+138e: 9d 52 15  -         sta SPRITE_FLAGS, x
+1391: a2 0d     -         ldx #index
+1393: bd 52 15  -         lda SPRITE_FLAGS, x
+1396: 05 c0     -         ora SPRITE_ENABLE_FLAG
+1398: 9d 52 15  -         sta SPRITE_FLAGS, x
+139b: a2 0e     -         ldx #index
+139d: bd 52 15  -         lda SPRITE_FLAGS, x
+13a0: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13a2: 9d 52 15  -         sta SPRITE_FLAGS, x
+13a5: a2 0f     -         ldx #index
+13a7: bd 52 15  -         lda SPRITE_FLAGS, x
+13aa: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13ac: 9d 52 15  -         sta SPRITE_FLAGS, x
+13af: a2 10     -         ldx #index
+13b1: bd 52 15  -         lda SPRITE_FLAGS, x
+13b4: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13b6: 9d 52 15  -         sta SPRITE_FLAGS, x
+13b9: a2 11     -         ldx #index
+13bb: bd 52 15  -         lda SPRITE_FLAGS, x
+13be: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13c0: 9d 52 15  -         sta SPRITE_FLAGS, x
+13c3: a2 12     -         ldx #index
+13c5: bd 52 15  -         lda SPRITE_FLAGS, x
+13c8: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13ca: 9d 52 15  -         sta SPRITE_FLAGS, x
+13cd: a2 13     -         ldx #index
+13cf: bd 52 15  -         lda SPRITE_FLAGS, x
+13d2: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13d4: 9d 52 15  -         sta SPRITE_FLAGS, x
+13d7: a2 14     -         ldx #index
+13d9: bd 52 15  -         lda SPRITE_FLAGS, x
+13dc: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13de: 9d 52 15  -         sta SPRITE_FLAGS, x
+13e1: a2 15     -         ldx #index
+13e3: bd 52 15  -         lda SPRITE_FLAGS, x
+13e6: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13e8: 9d 52 15  -         sta SPRITE_FLAGS, x
+13eb: a2 16     -         ldx #index
+13ed: bd 52 15  -         lda SPRITE_FLAGS, x
+13f0: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13f2: 9d 52 15  -         sta SPRITE_FLAGS, x
+13f5: a2 17     -         ldx #index
+13f7: bd 52 15  -         lda SPRITE_FLAGS, x
+13fa: 05 c0     -         ora SPRITE_ENABLE_FLAG
+13fc: 9d 52 15  -         sta SPRITE_FLAGS, x
+13ff: a9 52     -         lda #<SPRITE_DEFINITON_BLOCK
+1401: 8d 15 d0  -         sta DIS00
+1404: a9 15     -         lda #>SPRITE_DEFINITON_BLOCK
+1406: 8d 16 d0  -         sta DIS01
+1409: a9 20     -         lda #32                 // Set number of sprites
+140b: 8d 17 d0  -         sta DIS02
+140e: a9 17     -         lda #CMD_SET_SDB        // Command "Set Sprite Definition Block"
+1410: 8d 14 d0  -         sta DISCMD              //                                          
+1413: ad 13 d0  -         lda DISCR               // Load Display command register
+1416: 09 80     -         ora #$80                // Set the "Command Exceution" Flag
+1418: 8d 13 d0  -         sta DISCR               // Raise the IRQ flag
+141b: 2c 13 d0  -         bit DISCR               // Check, if the irg flag is cleared
+141e: 30 fb     -         bmi !wait-              // No! Let's wait
+1420: a9 e2     -         lda #<SPACE_ALIEN_A
+1422: 8d 52 16  -         sta ALIEN_A_SPRITE_ANIMATION_LO
+1425: 8d 54 16  -         sta ALIEN_A_SPRITE_ANIMATION_LO+2
+1428: a9 14     -         lda #>SPACE_ALIEN_A
+142a: 8d 56 16  -         sta ALIEN_A_SPRITE_ANIMATION_HI
+142d: 8d 58 16  -         sta ALIEN_A_SPRITE_ANIMATION_HI+2
+1430: a9 f2     -         lda #<SPACE_ALIEN_A1
+1432: 8d 53 16  -         sta ALIEN_A_SPRITE_ANIMATION_LO+1
+1435: a9 14     -         lda #>SPACE_ALIEN_A1
+1437: 8d 57 16  -         sta ALIEN_A_SPRITE_ANIMATION_HI+1
+143a: a9 02     -         lda #<SPACE_ALIEN_A2
+143c: 8d 55 16  -         sta ALIEN_A_SPRITE_ANIMATION_LO+3
+143f: a9 15     -         lda #>SPACE_ALIEN_A2
+1441: 8d 59 16  -         sta ALIEN_A_SPRITE_ANIMATION_HI+3
+1444: a9 12     -         lda #<SPACE_ALIEN_B
+1446: 8d 5a 16  -         sta ALIEN_B_SPRITE_ANIMATION_LO
+1449: 8d 5c 16  -         sta ALIEN_B_SPRITE_ANIMATION_LO+2
+144c: a9 15     -         lda #>SPACE_ALIEN_B
+144e: 8d 5e 16  -         sta ALIEN_B_SPRITE_ANIMATION_HI
+1451: 8d 60 16  -         sta ALIEN_B_SPRITE_ANIMATION_HI+2
+1454: a9 22     -         lda #<SPACE_ALIEN_B1
+1456: 8d 5b 16  -         sta ALIEN_B_SPRITE_ANIMATION_LO+1
+1459: a9 15     -         lda #>SPACE_ALIEN_B1
+145b: 8d 5f 16  -         sta ALIEN_B_SPRITE_ANIMATION_HI+1
+145e: a9 32     -         lda #<SPACE_ALIEN_B2
+1460: 8d 5d 16  -         sta ALIEN_B_SPRITE_ANIMATION_LO+3
+1463: a9 15     -         lda #>SPACE_ALIEN_B2
+1465: 8d 61 16  -         sta ALIEN_B_SPRITE_ANIMATION_HI+3
+1468: a9 84     -         lda #(CIA_SET_FLAGS | FRAME_INTERRUPT_FLAG)
+146a: 8d 0d dc  -         sta $dc0d
+146d: 60        -         rts
+146e: a6 06     - animate_aliens:ldx ALIEN_ANIM_FRAME_HI
+1470: bd 52 16  -         lda ALIEN_A_SPRITE_ANIMATION_LO,x
+1473: 8d 12 16  -         sta SPRITE_DATA_LO+i    
+1476: 8d 13 16  -         sta SPRITE_DATA_LO+i    
+1479: 8d 14 16  -         sta SPRITE_DATA_LO+i    
+147c: 8d 15 16  -         sta SPRITE_DATA_LO+i    
+147f: 8d 16 16  -         sta SPRITE_DATA_LO+i    
+1482: 8d 17 16  -         sta SPRITE_DATA_LO+i    
+1485: 8d 18 16  -         sta SPRITE_DATA_LO+i    
+1488: 8d 19 16  -         sta SPRITE_DATA_LO+i    
+148b: bd 56 16  -         lda ALIEN_A_SPRITE_ANIMATION_HI,x
+148e: 8d 32 16  -         sta SPRITE_DATA_HI+i    
+1491: 8d 33 16  -         sta SPRITE_DATA_HI+i    
+1494: 8d 34 16  -         sta SPRITE_DATA_HI+i    
+1497: 8d 35 16  -         sta SPRITE_DATA_HI+i    
+149a: 8d 36 16  -         sta SPRITE_DATA_HI+i    
+149d: 8d 37 16  -         sta SPRITE_DATA_HI+i    
+14a0: 8d 38 16  -         sta SPRITE_DATA_HI+i    
+14a3: 8d 39 16  -         sta SPRITE_DATA_HI+i    
+14a6: bd 5a 16  -         lda ALIEN_B_SPRITE_ANIMATION_LO,x
+14a9: 8d 1a 16  -         sta SPRITE_DATA_LO+i    
+14ac: 8d 1b 16  -         sta SPRITE_DATA_LO+i    
+14af: 8d 1c 16  -         sta SPRITE_DATA_LO+i    
+14b2: 8d 1d 16  -         sta SPRITE_DATA_LO+i    
+14b5: 8d 1e 16  -         sta SPRITE_DATA_LO+i    
+14b8: 8d 1f 16  -         sta SPRITE_DATA_LO+i    
+14bb: 8d 20 16  -         sta SPRITE_DATA_LO+i    
+14be: 8d 21 16  -         sta SPRITE_DATA_LO+i    
+14c1: bd 5e 16  -         lda ALIEN_B_SPRITE_ANIMATION_HI,x
+14c4: 8d 3a 16  -         sta SPRITE_DATA_HI+i    
+14c7: 8d 3b 16  -         sta SPRITE_DATA_HI+i    
+14ca: 8d 3c 16  -         sta SPRITE_DATA_HI+i    
+14cd: 8d 3d 16  -         sta SPRITE_DATA_HI+i    
+14d0: 8d 3e 16  -         sta SPRITE_DATA_HI+i    
+14d3: 8d 3f 16  -         sta SPRITE_DATA_HI+i    
+14d6: 8d 40 16  -         sta SPRITE_DATA_HI+i    
+14d9: 8d 41 16  -         sta SPRITE_DATA_HI+i    
+14dc: a9 84     -         lda #(CIA_SET_FLAGS | FRAME_INTERRUPT_FLAG)
+14de: 8d 0d dc  -         sta $dc0d
+14e1: 60        -         rts
+14e2: 02 40     - SPACE_ALIEN_A:.byte %00000010, %01000000
+14e4: 07 e0     -         .byte %00000111, %11100000
+14e6: 0f f0     -         .byte %00001111, %11110000
+14e8: 1d b8     -         .byte %00011101, %10111000
+14ea: 17 e8     -         .byte %00010111, %11101000
+14ec: 17 e8     -         .byte %00010111, %11101000
+14ee: 02 40     -         .byte %00000010, %01000000
+14f0: 06 60     -         .byte %00000110, %01100000
+14f2: 02 40     - SPACE_ALIEN_A1:.byte %00000010, %01000000
+14f4: 07 e0     -         .byte %00000111, %11100000
+14f6: 0f f0     -         .byte %00001111, %11110000
+14f8: 1d b8     -         .byte %00011101, %10111000
+14fa: 17 e8     -         .byte %00010111, %11101000
+14fc: 07 c0     -         .byte %00000111, %11000000
+14fe: 02 60     -         .byte %00000010, %01100000
+1500: 06 00     -         .byte %00000110, %00000000
+1502: 02 40     - SPACE_ALIEN_A2:.byte %00000010, %01000000
+1504: 07 e0     -         .byte %00000111, %11100000
+1506: 0f f0     -         .byte %00001111, %11110000
+1508: 1d b8     -         .byte %00011101, %10111000
+150a: 17 e8     -         .byte %00010111, %11101000
+150c: 03 e0     -         .byte %00000011, %11100000
+150e: 06 40     -         .byte %00000110, %01000000
+1510: 00 60     -         .byte %00000000, %01100000
+1512: 00 00     - SPACE_ALIEN_B:.byte %00000000, %00000000
+1514: 04 40     -         .byte %00000100, %01000000
+1516: 03 80     -         .byte %00000011, %10000000
+1518: 07 c0     -         .byte %00000111, %11000000
+151a: 05 40     -         .byte %00000101, %01000000
+151c: 07 c0     -         .byte %00000111, %11000000
+151e: 0a a0     -         .byte %00001010, %10100000
+1520: 0a a0     -         .byte %00001010, %10100000
+1522: 00 00     - SPACE_ALIEN_B1:.byte %00000000, %00000000
+1524: 04 40     -         .byte %00000100, %01000000
+1526: 03 80     -         .byte %00000011, %10000000
+1528: 07 c0     -         .byte %00000111, %11000000
+152a: 05 40     -         .byte %00000101, %01000000
+152c: 07 c0     -         .byte %00000111, %11000000
+152e: 0a a0     -         .byte %00001010, %10100000
+1530: 15 40     -         .byte %00010101, %01000000
+1532: 00 00     - SPACE_ALIEN_B2:.byte %00000000, %00000000
+1534: 04 40     -         .byte %00000100, %01000000
+1536: 03 80     -         .byte %00000011, %10000000
+1538: 07 c0     -         .byte %00000111, %11000000
+153a: 05 40     -         .byte %00000101, %01000000
+153c: 07 c0     -         .byte %00000111, %11000000
+153e: 0a a0     -         .byte %00001010, %10100000
+1540: 05 50     -         .byte %00000101, %01010000
+1542: 00 00     - SPACE_ALIEN_C:.byte %00000000, %00000000
+1544: 04 40     -         .byte %00000100, %01000000
+1546: 0f e0     -         .byte %00001111, %11100000
+1548: 19 30     -         .byte %00011001, %00110000
+154a: 1f f0     -         .byte %00011111, %11110000
+154c: 1f f0     -         .byte %00011111, %11110000
+154e: 15 50     -         .byte %00010101, %01010000
+1550: 0a a0     -         .byte %00001010, %10100000
+1552: 80 80 80 80 80 80 80 80                          - SPRITE_DEFINITON_BLOCK,SPRITE_FLAGS:.byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 00-07
+155a: 80 80 80 80 80 80 80 80                          -         .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 08-15
+1562: 80 80 80 80 80 80 80 80                          -         .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 16-23
+156a: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+1572: 10 20 30 40 50 60 70 80                          - SPRITE_XPOS:.byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 00-07
+157a: 10 20 30 40 50 60 70 80                          -         .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 08-15
+1582: 10 20 30 40 50 60 70 80                          -         .byte $10, $20, $30, $40, $50, $60, $70, $80  // Sprite 16-23
+158a: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+1592: 20 20 20 20 20 20 20 20                          - SPRITE_YPOS:.byte $20, $20, $20, $20, $20, $20, $20, $20  // Sprite 00-07
+159a: 30 30 30 30 30 30 30 30                          -         .byte $30, $30, $30, $30, $30, $30, $30, $30  // Sprite 08-15
+15a2: 40 40 40 40 40 40 40 40                          -         .byte $40, $40, $40, $40, $40, $40, $40, $40  // Sprite 16-23
+15aa: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+15b2: 1f 1f 1f 1f 1f 1f 1f 1f                          - SPRITE_COLOR:.byte $1f, $1f, $1f, $1f, $1f, $1f, $1f, $1f  // Sprite 00-07
+15ba: 23 23 23 23 23 23 23 23                          -         .byte $23, $23, $23, $23, $23, $23, $23, $23  // Sprite 08-15
+15c2: 2c 2c 2c 2c 2c 2c 2c 2c                          -         .byte $2c, $2c, $2c, $2c, $2c, $2c, $2c, $2c  // Sprite 16-23
+15ca: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+15d2: 10 10 10 10 10 10 10 10                          - SPRITE_WIDTH:.byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 00-07
+15da: 10 10 10 10 10 10 10 10                          -         .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 08-15
+15e2: 10 10 10 10 10 10 10 10                          -         .byte $10, $10, $10, $10, $10, $10, $10, $10  // Sprite 16-23
+15ea: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+15f2: 08 08 08 08 08 08 08 08                          - SPRITE_HEIGHT:.byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 00-07
+15fa: 08 08 08 08 08 08 08 08                          -         .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 08-15
+1602: 08 08 08 08 08 08 08 08                          -         .byte $08, $08, $08, $08, $08, $08, $08, $08  // Sprite 16-23
+160a: 00 00 00 00 00 00 00 00                          -         .byte $00, $00, $00, $00, $00, $00, $00, $00  // Sprite 24-32
+1612: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_LO:.fill 32, 0
+1622: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+1632: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  - SPRITE_DATA_HI:.fill 32, 0
+1642: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+1652: 00 00 00 00                                      - ALIEN_A_SPRITE_ANIMATION_LO:.fill 4, 0
+1656: 00 00 00 00                                      - ALIEN_A_SPRITE_ANIMATION_HI:.fill 4, 0
+165a: 00 00 00 00                                      - ALIEN_B_SPRITE_ANIMATION_LO:.fill 4, 0
+165e: 00 00 00 00                                      - ALIEN_B_SPRITE_ANIMATION_HI:.fill 4, 0
+1662: a2 04     - find_next_invisible_bullet:ldx #(BULLET_COUNT-1)
+1664: bd de 16  -         lda ALIEN_BULLETS_STAT,x 
+1667: 30 09     -         bmi !next+ // Visible. Next.
+1669: 09 80     -         ora #BULLET_ENABLE_FLAG
+166b: 9d de 16  -         sta ALIEN_BULLETS_STAT,x
+166e: 38        -         sec // Set carry flag (inicating we found a slot)
+166f: 4c 76 16  -         jmp !end+
+1672: ca        -         dex
+1673: 10 ef     -         bpl !loop-
+1675: 18        -         clc // Clear carry to indicate, we didn't found a free slot.
+1676: 60        -         rts
+1677: 20 81 16  - update_alien_bullets:jsr move_bullets
+167a: 20 96 16  -         jsr check_bullets
+167d: 20 b0 16  -         jsr draw_bullets
+1680: 60        -         rts
+1681: a2 05     - move_bullets:ldx #(BULLET_COUNT)
+1683: bd de 16  -         lda ALIEN_BULLETS_STAT,x
+1686: 10 0a     -         bpl !next+
+1688: bd e8 16  -         lda ALIEN_BULLETS_Y,x 
+168b: 18        -         clc 
+168c: 7d ed 16  -         adc ALIEN_BULLETS_SPEED,x
+168f: 9d e8 16  -         sta ALIEN_BULLETS_Y,x
+1692: ca        -         dex
+1693: 10 ee     -         bpl !loop- 
+1695: 60        -         rts
+1696: a2 04     - check_bullets:ldx #(BULLET_COUNT-1)
+1698: bd de 16  -         lda ALIEN_BULLETS_STAT,x
+169b: 10 0f     -         bpl !next+
+169d: bd e8 16  -         lda ALIEN_BULLETS_Y,x
+16a0: c9 aa     -         cmp #BULLET_MAX_HEIGHT    // if ypos > BULLET_MAX_HEIGHT hide bullet 
+16a2: 30 08     -         bmi !next+
+16a4: bd de 16  - hide_bullet:lda ALIEN_BULLETS_STAT,x 
+16a7: 29 7f     -         and #(~BULLET_ENABLE_FLAG)
+16a9: 9d de 16  -         sta ALIEN_BULLETS_STAT,x
+16ac: ca        -         dex
+16ad: 10 e9     -         bpl !loop-
+16af: 60        -         rts
+16b0: a9 00     - draw_bullets:lda #0
+16b2: 8d 16 d0  -         sta DIS01                   // xpos high
+16b5: a9 04     -         lda #BULLET_LENGTH          // Length Low
+16b7: 8d 18 d0  -         sta DIS03
+16ba: a9 00     -         lda #0                      // Length High
+16bc: 8d 19 d0  -         sta DIS04   
+16bf: a9 17     -         lda #BULLET_COLOR           // Color
+16c1: 8d 1a d0  -         sta DIS05
+16c4: a2 04     -         ldx #(BULLET_COUNT-1)
+16c6: bd de 16  -         lda ALIEN_BULLETS_STAT,x 
+16c9: 10 0f     -         bpl !next+
+16cb: bd e3 16  -         lda ALIEN_BULLETS_X,x       // X-Pos low
+16ce: 8d 15 d0  -         sta DIS00
+16d1: bd e8 16  -         lda ALIEN_BULLETS_Y,x 
+16d4: 8d 17 d0  -         sta DIS02                   // ypos 
+16d7: 20 c4 e2  -         jsr draw_vertical_line_
+16da: ca        -         dex 
+16db: 10 e9     -         bpl !loop-
+16dd: 60        -         rts
+16de: 04 04 04 04 04                                   - ALIEN_BULLETS_STAT:.fill BULLET_COUNT, $04  // Bit 0..3 length
+16e3: 00 00 00 00 00                                   - ALIEN_BULLETS_X:.fill BULLET_COUNT, $00  // xpos. If xpos > 255; stat bit 6 = 1
+16e8: 20 20 20 20 20                                   - ALIEN_BULLETS_Y:.fill BULLET_COUNT, $20  // ypos of the top
+16ed: 02 02 02 02 02                                   - ALIEN_BULLETS_SPEED:.fill BULLET_COUNT, $02
 
 [Kernel Routines Entry Points]
 e000: 4c c6 e1  - get_key:jmp get_key_

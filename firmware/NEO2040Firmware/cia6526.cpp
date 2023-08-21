@@ -117,18 +117,23 @@ boolean memWriteCIA(TContextPtr ctx)
   {
   case REG_CIA_ICR:
     ctx->memory[ctx->address] = ctx->data;
+    Serial.printf("CIA_ICR: %02x\n", ctx->data);
+    
     if (ctx->data & 0x80)
     {
       // Source bit (Bit7) equals 1: Every set bit (1) in data sets the corresponding
       // bit in irq mask
       ctx->cia.enabled_interrupts |= (ctx->data & ICR_SOURCE_MASK);
+      Serial.println("Set flags");
     }
     else
     {
       // Source bit is 0: Every set bit (1) clears the corresponding
       // bit in irq mask
       ctx->cia.enabled_interrupts &= ((~ctx->data) & ICR_SOURCE_MASK);
+      Serial.println("Clear flags");
     };
+    Serial.printf("CIA_ICR: %02x\n", ctx->cia.enabled_interrupts);
     break;
   case REG_CIA_TA_LO:
     // Setting the start time for timer a (low byte)
@@ -208,7 +213,7 @@ boolean memReadCIA(TContextPtr ctx)
       ctx->data = ICR_NO_IRQ;
     };
     // Set the source bits
-    ctx->data |= (ctx->cia.raised_interrupts & CIA_IRQ_MASK);
+    ctx->data |= (ctx->cia.raised_interrupts & CIA_IRQ_MASK & ctx->cia.enabled_interrupts);
     // So the valid information is returned, but only
     // once.
     // Reading this register automatically clears the

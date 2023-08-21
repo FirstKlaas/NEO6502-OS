@@ -119,9 +119,8 @@
     init: {
 
         // Disable all interrupts        
-        lda #CIA_IRQ_MASK
-        sta REG_CIA_ICR
-
+        DisableAllIRQ()
+        
         // Fill Screen
         FILL_SCREEN_I(STD_BACKGROUND_COLOR)
 
@@ -236,7 +235,6 @@
 
         // Enable IRQs
         EnableFrameIRQ()
-        FILL_SCREEN_I(63)
         rts
     }          
 

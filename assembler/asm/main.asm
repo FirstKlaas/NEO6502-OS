@@ -15,6 +15,11 @@
     sta $dc0d
 }
 
+.macro DisableAllIRQ() {
+    lda #CIA_IRQ_MASK
+    sta REG_CIA_ICR
+}
+
 .macro DisableCursorAutoAdjustment() {
     lda DISCR   // Clear the auto adjust 
     and #$fd    // flag>
@@ -95,8 +100,21 @@ start:          ldx #$ff    // Set the stackpointer to
                 EnableKeyboardIRQ()             
                 //jsr SpaceInvaders.init
                 
-endless:        jmp *
+endless:        lda PROGRAM_ADR_CR
+                bpl endless 
+
+                // Programm should be called
+                lda #0
+                sta PROGRAM_ADR_CR
+                FILL_SCREEN_I(34)
+                jsr SpaceInvaders.init
+                jmp *
+                jmp (PROGRAM_ADR_LO)
             
+PROGRAM_ADR_LO: .byte 0
+PROGRAM_ADR_HI: .byte 0
+PROGRAM_ADR_CR: .byte 0
+
 setup_timer:
                 // -----------------------------------------------------
                 // Timer Test
@@ -142,8 +160,6 @@ test_keyboard:
     bit IRQ_DATA
     beq test_timer_a 
     // We have an keyboard interrupt.
-    lda #$EA
-    sta DEBUG
     jsr handle_key_event
     jmp exit
 
@@ -170,16 +186,19 @@ exit:
 
 handle_key_event: {
     lda KBD
-    sta DEBUG
     cmp #$32    // Key 2
     bne exit
-    // TODO: Start space invaders
     // Clear IRQs
-    lda #$ae
+    lda #$ea 
+    sta DEBUG
     lda #CIA_IRQ_MASK
     sta REG_CIA_ICR
     FILL_SCREEN_I(AMBER)
-    jsr SpaceInvaders.init
+    // Start Game
+    FILL_SCREEN_I(63)
+    //jsr SpaceInvaders.init
+    lda #$80
+    sta PROGRAM_ADR_CR
 
 exit:
     rts
