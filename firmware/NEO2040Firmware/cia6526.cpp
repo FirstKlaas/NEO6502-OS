@@ -41,6 +41,7 @@ inline __attribute__((always_inline)) void trigger6502IRQ(TContextPtr ctx)
   //Serial.printf("CIA   : Setting IRQB LO. State is %d\n", ctx->cia.irq_active);
   if (ctx->cia.irq_active) return;
   ctx->cia.irq_active = true;
+  Serial.println("IRQ ON");
   setIRQB(IRQ_LOW); // IRQB is active low.
   //asm volatile("nop\nnop\nnop\nnop\nnop\n");
   /**
