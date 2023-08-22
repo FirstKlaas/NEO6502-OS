@@ -33,13 +33,14 @@ volatile bool needsDisplayUpdate;
 bool frame_update_callback(struct repeating_timer *t) {
   const TContextPtr ctx((TContextPtr)t->user_data);
   needsDisplayUpdate = true;
+  Serial.println("ISR: Frameupdate");
   return true;
 }
 
 void setup() {
   needsDisplayUpdate = false;
-  Serial.begin(9600);
-  while (!Serial && millis() < 10000UL);
+  Serial.begin(300);
+  while (!Serial && millis() < 1000UL);
   Serial.println("############ NEO6502 FirstKlaas OS v0.0.1 ############");
 
   ctx.clock_cycle = 0L;
@@ -63,16 +64,18 @@ void setup() {
   // Adding a repeating timer for the frame 
   // updates. We use a negative value, so the time between
   // calls is including the execution time
-  add_repeating_timer_us(-(FRAMETIME*1000), frame_update_callback, ctxPtr, &frame_timer);
+  //add_repeating_timer_us(-(FRAMETIME*1000), frame_update_callback, ctxPtr, &frame_timer);
 
   //sleep_ms(2000);
   Serial.println("Starting programm");
-  while(true) {
+  while(false) {
+    //Serial.flush();
     if (ctx.cpu_running) {
       if (needsDisplayUpdate) {
+        needsDisplayUpdate = false;
+        Serial.println("main: Needs Update");
         updateDisplay(ctxPtr);
         raiseFrameRequest(ctxPtr);
-        needsDisplayUpdate = false;
       };
       tick6502(ctxPtr);
       checkCIA(ctxPtr);    
@@ -85,17 +88,11 @@ void setup() {
  * Never gets called.
  */
 void loop() {
-  //gpio_put(uP_TICKCYCLE_PIN, true);
-  tick6502(ctxPtr);
-  //gpio_put(uP_TICKCYCLE_PIN, false);
   if ((millis() - lastClockTS) >= FRAMETIME) {
     lastClockTS = millis();
-    //gpio_put(uP_CLOCKCYCLE_PIN, true);
-    //clearDisplay();
-    drawSprites(ctxPtr);
     updateDisplay(ctxPtr);
     raiseFrameRequest(ctxPtr);
-    //gpio_put(uP_CLOCKCYCLE_PIN, false);
   }
+  tick6502(ctxPtr);
   checkCIA(ctxPtr);
 }

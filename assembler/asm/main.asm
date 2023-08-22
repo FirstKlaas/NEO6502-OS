@@ -20,6 +20,24 @@
     sta REG_CIA_ICR
 }
 
+.macro SetVectorNMI(label) {
+    lda #<label
+    sta $fffa 
+    lda #>label
+    sta $fffb
+}
+
+.macro SetVectorIRQ(label) {
+    lda #<label
+    sta $fffe 
+    lda #>label
+    sta $ffff
+}
+
+.macro AcknowledgeIRQ() {
+    lda REG_CIA_ICR
+}
+
 .macro DisableCursorAutoAdjustment() {
     lda DISCR   // Clear the auto adjust 
     and #$fd    // flag>
@@ -49,6 +67,11 @@
     HexPrintA()
 }
 
+.macro WriteDebugNumberI(code) {
+    lda #code
+    sta DEBUG
+}
+
 // Colors
 .const AMBER                    = 32
 
@@ -60,9 +83,17 @@
 
 .const CIA_SET_FLAGS            = $80
 
-.const STD_BACKGROUND_COLOR     = 41
-.const STD_FOREGROUND_COLOR     = 31
-.const TITLE_FG_COLOR           = 46
+.const STD_BACKGROUND_COLOR     =  41
+.const STD_FOREGROUND_COLOR     =  31
+.const TITLE_FG_COLOR           =  46
+.const FONT_CHAR_WIDTH          =   6
+.const FONT_CHAR_HEIGHT         =   8
+.const SCREEN_WIDTH             = 320
+.const SCREEN_HEIGHT            = 240
+.const LINECHARS                =  52
+.const LINES                    = SCREEN_HEIGHT / (FONT_CHAR_HEIGHT + 1)
+
+
 
 /* ============================================================================
                 MAIN PROGRAM
@@ -102,12 +133,12 @@ start:          ldx #$ff    // Set the stackpointer to
                 
 endless:        lda PROGRAM_ADR_CR
                 bpl endless 
-
+                WriteDebugNumberI($12)
                 // Programm should be called
                 lda #0
                 sta PROGRAM_ADR_CR
                 FILL_SCREEN_I(34)
-                jsr SpaceInvaders.init
+                jmp SpaceInvaders.init
                 jmp *
                 jmp (PROGRAM_ADR_LO)
             
@@ -144,15 +175,17 @@ kernel_isr: {
     pha
     phx
     phy
+    WriteDebugNumberI($55)
     lda $dc0d            // Acknowledge the IRQ
     //bpl exit           // No IRQ. Should never happen. Only relevant, when polling            
     sta IRQ_DATA
-
+    sta DEBUG
 test_frame_irq:
     lda #FRAME_INTERRUPT_FLAG
     bit IRQ_DATA
     beq test_keyboard
     // We have a frame intterrupt
+    WriteDebugNumberI($66)
     jmp exit
 
 test_keyboard:
@@ -160,6 +193,7 @@ test_keyboard:
     bit IRQ_DATA
     beq test_timer_a 
     // We have an keyboard interrupt.
+    WriteDebugNumberI($77)
     jsr handle_key_event
     jmp exit
 
@@ -168,6 +202,7 @@ test_timer_a:
     bit IRQ_DATA
     beq test_timer_b
     // We have an timer a interrupt.
+    WriteDebugNumberI($88)
     jmp exit
 
 test_timer_b:
@@ -175,8 +210,9 @@ test_timer_b:
     bit IRQ_DATA
     beq exit
     // We have an timer b interrupt.
+    WriteDebugNumberI($99)
 
-exit:    
+exit:  
     ply 
     plx 
     pla 
@@ -189,8 +225,7 @@ handle_key_event: {
     cmp #$32    // Key 2
     bne exit
     // Clear IRQs
-    lda #$ea 
-    sta DEBUG
+    WriteDebugNumberI($ea) 
     lda #CIA_IRQ_MASK
     sta REG_CIA_ICR
     FILL_SCREEN_I(AMBER)
