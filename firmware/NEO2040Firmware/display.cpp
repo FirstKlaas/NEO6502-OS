@@ -1,3 +1,4 @@
+#include "lwipopts.h"
 #include "display.h"
 #include "addr.h"
 #include <PicoDVI.h>
@@ -205,7 +206,7 @@ void setCursor(TContextPtr ctx, uint8_t x, uint8_t y)
   screendata.y = screendata.currentYpos * FONT_CHAR_HEIGHT + screendata.offset_y;
 
   display.setCursor(screendata.x, screendata.y);
-  if (ctx->memory[DISCR] && SHOW_CURSOR_FLAG)
+  if (ctx->memory[DISCR] & SHOW_CURSOR_FLAG)
   {
     // If there is a change and we show the cursor,
     // we need to refresh the screen.
@@ -242,8 +243,10 @@ void updateDisplay(TContextPtr ctx)
   // screendata.needsRefresh
   if (true)
   {
-
+    noInterrupts();
+    ctx->memory[DISCR] |= FRAME_UPDATE_IRQ;
     display.swap(true, false);
+    interrupts();
   };
   screendata.needsRefresh = 0;
 }
@@ -258,7 +261,7 @@ void writeChar(TContextPtr ctx, uint8_t c)
   screendata.needsRefresh++;
   // Check, if we need to adjust the cursor
   // automatically
-  if (ctx->memory[DISCR] && ADJUST_CURSOR_FLAG)
+  if (ctx->memory[DISCR] & ADJUST_CURSOR_FLAG)
   {
     setCursor(ctx, screendata.currentXpos + 1, screendata.currentYpos);
   }
@@ -454,7 +457,7 @@ void executeCommand(TContextPtr ctx)
     screendata.sdb.flags[0] = 0x80;
     screendata.sdb.flags[1] = 0x80;
     
-    //#ifdef DEBUG_DISPLAY
+    #ifdef DEBUG_DISPLAY
     Serial.printf(
         "Sprite initalisation: Address %04x | Count %02d | width %02d | height %02d | flags %02x | color %02x\n",
         screendata.sdb.address,
@@ -464,7 +467,7 @@ void executeCommand(TContextPtr ctx)
         screendata.sdb.flags[0],
         screendata.sdb.color[0]
         );
-    //#endif
+    #endif
     uint16_t offset = getSpriteOffset(ctx, 0);
   };
   break;

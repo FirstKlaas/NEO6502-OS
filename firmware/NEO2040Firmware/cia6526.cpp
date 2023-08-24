@@ -1,11 +1,12 @@
 #include "cia6526.h"
 #include <pico/stdlib.h>
 #include "addr.h"
+#include "mos6502c.h"
 
 #define USE_IRQB
 //#define DEBUG_CIA
 
-#define uP_IRQB   22      // UEXT
+#define uP_IRQB   24      // UEXT
 #define IRQ_LOW   false
 #define IRQ_HIGH  true
 
@@ -14,12 +15,14 @@
 #define ICR_NO_IRQ         0x00 //
 #define ICR_SOURCE_MASK    0x7f // Bit 0-6: 01111111
 
-  #define TIMER_A_INTERRUPT_FLAG  0x01
-  #define TIMER_B_INTERRUPT_FLAG  0x02
-  #define FRAME_INTERRUPT_FLAG    0x04
-  #define KBD_INTERRUPT_FLAG      0x08
+#define TIMER_A_INTERRUPT_FLAG  0x01
+#define TIMER_B_INTERRUPT_FLAG  0x02
+#define FRAME_INTERRUPT_FLAG    0x04
+#define KBD_INTERRUPT_FLAG      0x08
 
 #define CIA_IRQ_MASK            0x0f
+
+#define SERIAL_DELAY            5000
 
 void setIRQB(bool irqb)
 {
@@ -35,31 +38,29 @@ void requestFrameIinterrupt(TContextPtr ctx) {
   ctx->cia.raised_interrupts |= FRAME_INTERRUPT_FLAG;
 }
 
-inline __attribute__((always_inline)) void trigger6502IRQ(TContextPtr ctx)
+void trigger6502IRQ(TContextPtr ctx)
 {
+  if (ctx->cia.irq_active) return;
+
   // If IRQ is still active and not acknowledged,
   // ignore the IRQ request.
   #ifdef DEBUG_CIA
   Serial.printf("CIA   : Setting IRQB LO. State is %d\n", ctx->cia.irq_active);
   #endif
-  if (ctx->cia.irq_active) return;
-  ctx->cia.irq_active = true;
+  //if (ctx->cia.irq_active) return;
   setIRQB(IRQ_LOW); // IRQB is active low.
   asm volatile("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");
-  //setIRQB(IRQ_HIGH); // IRQB is active low.
+  asm volatile("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");
+  ctx->cia.irq_active = true;
+  
   #ifdef DEBUG_CIA
   Serial.println("IRQB LOW (Enabled)");
   #endif 
-  /**
-  setIRQB(IRQ_HIGH); // IRQB is active low.  
-  asm volatile("nop\nnop\nnop\nnop\nnop\n");
-  */
 }
 
 inline __attribute__((always_inline)) void release6502IRQ(TContextPtr ctx)
 {
-  if (!(ctx->cia.irq_active))
-    return;
+  if (!(ctx->cia.irq_active)) return;
   // If IRQ is not active
   // ignore the IRQ request.
   #ifdef DEBUG_CIA
@@ -68,7 +69,11 @@ inline __attribute__((always_inline)) void release6502IRQ(TContextPtr ctx)
 
   setIRQB(IRQ_HIGH); // IRQB is active low.
   asm volatile("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");
+  asm volatile("nop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\nnop\n");
   ctx->cia.irq_active = false;
+  #ifdef DEBUG_CIA
+  Serial.println("CIA   : Setting IRQB HI DONE");
+  #endif
 }
 
 void setupCIAPins()
@@ -77,10 +82,8 @@ void setupCIAPins()
 // Because it is active low, we set it high.
 // Pin BUS.24 needs to we wired to UEXT.22
 // to make it work.
-#ifdef USE_IRQB
   pinMode(uP_IRQB, OUTPUT);
-  setIRQB(IRQ_HIGH); // Because it's and active low signal.
-#endif
+  setIRQB(IRQ_HIGH); // Because it's an active low signal.
 }
 
 /**
@@ -130,7 +133,7 @@ boolean memWriteCIA(TContextPtr ctx)
   case REG_CIA_ICR:
     ctx->memory[ctx->address] = ctx->data;
     #ifdef DEBUG_CIA
-    Serial.printf("CIA_ICR: %02x\n", ctx->data);
+    Serial.printf("CIA_ICR: %02x [W]\n", ctx->data);
     #endif 
     if (ctx->data & 0x80)
     {
@@ -236,9 +239,13 @@ boolean memReadCIA(TContextPtr ctx)
   // Set the IRQ signaling flag (mask & flags > 0)
   case REG_CIA_ICR: {
     uint8_t active_irq_flags = (ctx->cia.raised_interrupts & CIA_IRQ_MASK & ctx->cia.enabled_interrupts);
+    #ifdef DEBUG_CIA
+    Serial.println("CIA ICR: READ / Clearing IRQ\n");
+    #endif
+    release6502IRQ(ctx);
     ctx->data = (active_irq_flags > 0 ? ICR_IRQ_FLAG : ICR_NO_IRQ) | active_irq_flags;
     #ifdef DEBUG_CIA
-    Serial.printf("CIA ICR: %02x|%02x|%02x\n", active_irq_flags, ctx->cia.raised_interrupts, ctx->cia.enabled_interrupts);
+    Serial.printf("CIA ICR: %02x|%02x|%02x [R]\n", active_irq_flags, ctx->cia.raised_interrupts, ctx->cia.enabled_interrupts);
     #endif
     // So the valid information is returned, but only
     // once.
@@ -252,8 +259,8 @@ boolean memReadCIA(TContextPtr ctx)
     // Also clear Keyboard "irq" flag
     ctx->memory[KBDCR] &= 0x7f;
 
-    release6502IRQ(ctx);
-    break;}
+    break;
+  }
   default:
     ctx->data = ctx->memory[ctx->address];
   };
@@ -280,6 +287,7 @@ boolean memReadCIA(TContextPtr ctx)
 * Clock stuff not implemented.
 */
 void checkTimer(TContextPtr ctx) {
+  
   if (ctx->cia.timer_a_running) {
     #ifdef DEBUG_CIA
     Serial.printf("CIA: Timer a is running: %04x [%03d]", ctx->cia.timer_a_counter, ctx->cia.enabled_interrupts);
@@ -392,7 +400,15 @@ void checkTimer(TContextPtr ctx) {
 #define FLAG_UNCONSUMED_KEY 0x80  // 1000 0000 / Bit 7
 
 void checkKeyboard(TContextPtr ctx) {
+  static uint16_t kbd_delay_counter(0);
+  
   if (ctx->cia.irq_active) return;
+  if (kbd_delay_counter > 0) {
+    kbd_delay_counter--;
+    return;
+  };
+  kbd_delay_counter = SERIAL_DELAY;
+
   if (Serial.available()) {
     #ifdef DEBUG_CIA
     Serial.println("Key available");
@@ -434,11 +450,11 @@ void checkCIA(TContextPtr ctx) {
   if (ctx->cia.irq_active) return;
   if (!ctx->cia.enabled_interrupts) return;
   //checkTimer(ctx);
-  checkKeyboard(ctx);
+  //checkKeyboard(ctx);
 
   if (ctx->cia.enabled_interrupts & ctx->cia.raised_interrupts) {
     #ifdef DEBUG_CIA
-    Serial.printf("CIA IRQ: %02x:%02x\n", ctx->cia.enabled_interrupts , ctx->cia.raised_interrupts);
+    Serial.printf("CIA IRQ: Enabled:%02x  Raised:%02x [Check CIA]\n", ctx->cia.enabled_interrupts , ctx->cia.raised_interrupts);
     #endif
     trigger6502IRQ(ctx);
   } else {

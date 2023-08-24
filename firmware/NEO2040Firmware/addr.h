@@ -51,6 +51,7 @@
 #define SHOW_CURSOR_FLAG    0x02     
 #define ADJUST_CURSOR_FLAG  0x04
 #define AUTO_WRAP_FLAG      0x08
+#define FRAME_UPDATE_IRQ    0x01
 
 #define KBD_IRQ_SET(h) = (h->reg.KBCR & REG_KBD_IRQ_FLAG == REG_KBD_IRQ_FLAG)
 

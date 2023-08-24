@@ -72,18 +72,25 @@ void writeToMemory(TContextPtr ctx)
     if (writeKeyboard(ctx)) return;
     if (memWriteDisplayRegister(ctx)) return;
     if (memWriteCIA(ctx)) return;
+    #ifdef DEBUG_MEMORY
     if (ctx->address == 0xd0ff) {
         Serial.printf("DEBUG REGISTER %02X\n", ctx->data);
     }
+    #endif
+    
     #ifdef DEBUG_MEMORY
     Serial.printf("[W] memory[%04X] <- %02X\n", ctx->address, ctx->data);
     #endif
     ctx->memory[ctx->address] = ctx->data;
 
     if (ctx->address == 0xffee) {
-      Serial.printf("Halt CPU: %02x\n", ctx->data);
+      //Serial.printf("Halt CPU: %02x\n", ctx->data);
       delay(5000); // (ctx->cpu_running = false;
     }
-    if (ctx->address == 0xfffe) Serial.printf("Setting ISR vector lowbyte. %02x\n", ctx->data);
-    if (ctx->address == 0xffff) Serial.printf("Setting ISR vector highbyte. %02x\n", ctx->data);
+    #ifdef DEBUG_MEMORY
+    if (ctx->address == 0xfffe) Serial.printf("Setting ISR 0xfffe vector lowbyte. %02x\n", ctx->data);
+    if (ctx->address == 0xffff) Serial.printf("Setting ISR 0xffff vector highbyte. %02x\n", ctx->data);
+    if (ctx->address == 0xfffa) Serial.printf("Setting ISR 0xfffa vector lowbyte. %02x\n", ctx->data);
+    if (ctx->address == 0xfffb) Serial.printf("Setting ISR 0xfffb vector highbyte. %02x\n", ctx->data);
+    #endif
 }

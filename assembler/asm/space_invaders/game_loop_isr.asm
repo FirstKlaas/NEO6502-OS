@@ -54,6 +54,7 @@
                 PrintText(txt_score)
                 PrintScore(9,24)
                 
+                
                 // Random Delay Triggered Shot
                 dec shot_delay      // Shot delay countdown
                 bne draw_bullets    // Still positive. No Shot
@@ -89,6 +90,7 @@
 
                 // Now let's check the position of the
                 // Aliens and update it properly
+
     check_left:           
                 lda SPRITE_XPOS     // Get the x position of the leftmost sprite
                 cmp #10             // 10 is the minimum x position
@@ -115,31 +117,8 @@
                 // Bring all sprites back up again
                 // -------------------------------------------------------
     reset_ypos:
-                // Row One / Sprite 0-7
-                ldy #7
-                lda #$20              // Start Y position
-    !loop:            
-                sta SPRITE_YPOS,y 
-                dey
-                bpl !loop-
-
-                // Row Two
-                ldy #7
-                lda #$30              // Start Y position
-    !loop:            
-                sta SPRITE_YPOS+8,y 
-                dey
-                bpl !loop-
-                
-                // Row Three
-                ldy #7
-                lda #$40              // Start Y position
-    !loop:            
-                sta SPRITE_YPOS+16,y 
-                dey
-                bpl !loop-
-                jmp move    
-
+                ResetAlienYPosition()
+                jmp move
     decrease:
                 ldy #23             // Calculate position fpr 24 sprites
     !loop:                  
@@ -169,5 +148,36 @@
                 plx  
                 pla
                 rti
+    }
+
+    move_aliens_down: {
+
+        rts
+    }
+
+    .macro ResetAlienYPosition() {
+            // Row One / Sprite 0-7
+            ldy #7
+            lda #$20              // Start Y position
+        !loop:            
+            sta SPRITE_YPOS,y 
+            dey
+            bpl !loop-
+
+            // Row Two
+            ldy #7
+            lda #$30              // Start Y position
+        !loop:            
+            sta SPRITE_YPOS+8,y 
+            dey
+            bpl !loop-
+            
+            // Row Three
+            ldy #7
+            lda #$40              // Start Y position
+        !loop:            
+            sta SPRITE_YPOS+16,y 
+            dey
+            bpl !loop-
     }
 }

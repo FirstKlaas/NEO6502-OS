@@ -120,31 +120,59 @@ start:          ldx #$ff    // Set the stackpointer to
                 // As IRQ currently does not work,
                 // we install the ISR on both. 
                 // NMI and IRQ
-                lda #<kernel_isr
-                sta $fffe 
-                sta $fffa 
-                lda #>kernel_isr
-                sta $ffff
-                sta $fffb
-
-                //EnableFrameIRQ()   
-                EnableKeyboardIRQ()             
+                SetVectorNMI(test_isr)
+                SetVectorIRQ(test_isr)
+                //SetVectorNMI(kernel_isr)
+                EnableFrameIRQ()   
+                //EnableKeyboardIRQ()             
                 //jsr SpaceInvaders.init
-                
-endless:        lda PROGRAM_ADR_CR
-                bpl endless 
-                WriteDebugNumberI($12)
-                // Programm should be called
-                lda #0
-                sta PROGRAM_ADR_CR
-                FILL_SCREEN_I(34)
+/*wait_for_frame:
+                lda DISCR
+                ror 
+                bcc wait_for_frame
+                lda DISCR
+                and #%11111110
+                sta DISCR
+                FILL_RECT_I(0,0,22*FONT_CHAR_HEIGHT,0,100,3*FONT_CHAR_HEIGHT,4)
+                PrintFrameNumber(9,23)
+                SetCursorI(2,26)
+                PrintText(txt_frame)
+                jmp wait_for_frame
+*/                
+endless:        
+                lda PROGRAM_ADR_CR
+                bpl endless
                 jmp SpaceInvaders.init
                 jmp *
-                jmp (PROGRAM_ADR_LO)
+                //jmp (PROGRAM_ADR_LO)
             
 PROGRAM_ADR_LO: .byte 0
 PROGRAM_ADR_HI: .byte 0
 PROGRAM_ADR_CR: .byte 0
+
+test_isr: {
+        pha
+        phx
+        phy
+        lda #$ee 
+        sta DEBUG
+        AcknowledgeIRQ()
+        // Printing the frame numer to the screen
+        FILL_RECT_I(0,0,22*FONT_CHAR_HEIGHT,0,100,3*FONT_CHAR_HEIGHT,4)
+        PrintFrameNumber(9,23)
+        SetCursorI(2,26)
+        PrintText(txt_frame)
+
+        dec GAME_COUNTDOWN
+        bne exit
+        lda #$80
+        sta PROGRAM_ADR_CR
+exit:        
+        ply 
+        plx 
+        pla 
+        rti
+    }
 
 setup_timer:
                 // -----------------------------------------------------
@@ -169,7 +197,9 @@ setup_timer:
 
 // Default kernel interrupt routine.
 
-IRQ_DATA: .byte $00
+IRQ_DATA:       .byte $00
+GAME_COUNTDOWN: .byte $ff
+
 
 kernel_isr: {
     pha
@@ -177,7 +207,14 @@ kernel_isr: {
     phy
     WriteDebugNumberI($55)
     lda $dc0d            // Acknowledge the IRQ
+    dec GAME_COUNTDOWN
+    bne exit
+    lda #$80
+    sta PROGRAM_ADR_CR
+    jmp exit
+
     //bpl exit           // No IRQ. Should never happen. Only relevant, when polling            
+start_isr:
     sta IRQ_DATA
     sta DEBUG
 test_frame_irq:

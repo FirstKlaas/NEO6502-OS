@@ -157,7 +157,7 @@
 
         EnableFrameIRQ()
         WriteDebugNumberI(255)
-!loop:  jmp !loop- // Loop endless instead of getting back.
+!loop:  jmp * // Loop endless instead of getting back.
         WriteDebugNumberI(254)
         
     }

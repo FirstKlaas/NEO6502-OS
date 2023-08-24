@@ -198,6 +198,7 @@ void tick6502(TContextPtr ctx)
 
   DELAY_FACTOR_SHORT();
 
+
   ctx->address = getAddress();
   ctx->clock_cycle++;
 
