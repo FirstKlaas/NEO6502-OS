@@ -41,7 +41,7 @@ class Segment:
         index = 0
         view = memoryview(self.data)
         while True:
-            chunk = view[index : index + 16]
+            chunk = view[index: index + 16]
             if len(chunk) > 0:
                 line = "".join(f"0x{format(x, '02x')}, " for x in chunk)
                 out.write(f"    {line}\n")

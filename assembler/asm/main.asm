@@ -1,100 +1,4 @@
 .cpu _65c02
-.macro EnableCursorAutoAdjustment() {
-    lda DISCR   // Set the auto adjust 
-    ora #$0C    // and wrap flag
-    sta DISCR                
-}
-
-.macro EnableFrameIRQ() {
-    lda #(CIA_SET_FLAGS | FRAME_INTERRUPT_FLAG)
-    sta $dc0d
-}
-
-.macro EnableKeyboardIRQ() {
-    lda #(CIA_SET_FLAGS | KBD_INTERRUPT_FLAG)
-    sta $dc0d
-}
-
-.macro DisableAllIRQ() {
-    lda #CIA_IRQ_MASK
-    sta REG_CIA_ICR
-}
-
-.macro SetVectorNMI(label) {
-    lda #<label
-    sta $fffa 
-    lda #>label
-    sta $fffb
-}
-
-.macro SetVectorIRQ(label) {
-    lda #<label
-    sta $fffe 
-    lda #>label
-    sta $ffff
-}
-
-.macro AcknowledgeIRQ() {
-    lda REG_CIA_ICR
-}
-
-.macro DisableCursorAutoAdjustment() {
-    lda DISCR   // Clear the auto adjust 
-    and #$fd    // flag>
-    sta DISCR                
-}
-
-.macro PrintText(addr) {
-    lda #<addr
-    sta zpRegE0
-    lda #>addr
-    sta zpRegE1
-    jsr print_text_
-}
-
-.macro PrintFrameNumber(sx,sy) {
-    SetCursorI(sx,sy)
-    lda $d0fd       // Framecounter LO Byte
-    sta HTD_IN
-    lda $d0fe       // Framecounter HI Byte
-    sta HTD_IN+1
-    jsr bcd_convert_word_
-    lda HTD_OUT+2
-    HexPrintA()
-    lda HTD_OUT+1
-    HexPrintA()
-    lda HTD_OUT
-    HexPrintA()
-}
-
-.macro WriteDebugNumberI(code) {
-    lda #code
-    sta DEBUG
-}
-
-// Colors
-.const AMBER                    = 32
-
-// CIA Contants
-.const TIMER_A_INTERRUPT_FLAG   = $01
-.const TIMER_B_INTERRUPT_FLAG   = $02
-.const FRAME_INTERRUPT_FLAG     = $04
-.const KBD_INTERRUPT_FLAG       = $08
-
-.const CIA_SET_FLAGS            = $80
-
-.const STD_BACKGROUND_COLOR     =  41
-.const STD_FOREGROUND_COLOR     =  31
-.const TITLE_FG_COLOR           =  46
-.const FONT_CHAR_WIDTH          =   6
-.const FONT_CHAR_HEIGHT         =   8
-.const SCREEN_WIDTH             = 320
-.const SCREEN_HEIGHT            = 240
-.const LINECHARS                =  52
-.const LINES                    = SCREEN_HEIGHT / (FONT_CHAR_HEIGHT + 1)
-
-
-
 /* ============================================================================
                 MAIN PROGRAM
    ----------------------------------------------------------------------------
@@ -116,6 +20,7 @@ start:          ldx #$ff    // Set the stackpointer to
                 SetCursorI(10,12)
                 PrintText(txt_menue_2)
 
+                jsr TestPrimitives.all
                 // Set isr vector for IRQ and NMI
                 // As IRQ currently does not work,
                 // we install the ISR on both. 
@@ -123,32 +28,21 @@ start:          ldx #$ff    // Set the stackpointer to
                 SetVectorNMI(test_isr)
                 SetVectorIRQ(test_isr)
                 //SetVectorNMI(kernel_isr)
+
                 EnableFrameIRQ()   
                 //EnableKeyboardIRQ()             
-                //jsr SpaceInvaders.init
-/*wait_for_frame:
-                lda DISCR
-                ror 
-                bcc wait_for_frame
-                lda DISCR
-                and #%11111110
-                sta DISCR
-                FILL_RECT_I(0,0,22*FONT_CHAR_HEIGHT,0,100,3*FONT_CHAR_HEIGHT,4)
-                PrintFrameNumber(9,23)
-                SetCursorI(2,26)
-                PrintText(txt_frame)
-                jmp wait_for_frame
-*/                
 endless:        
                 lda PROGRAM_ADR_CR
                 bpl endless
-                jmp SpaceInvaders.init
+                jmp SpaceInvaders.run
                 jmp *
                 //jmp (PROGRAM_ADR_LO)
             
 PROGRAM_ADR_LO: .byte 0
 PROGRAM_ADR_HI: .byte 0
 PROGRAM_ADR_CR: .byte 0
+
+.import source "asm/test_primitives.asm"
 
 test_isr: {
         pha
@@ -165,6 +59,10 @@ test_isr: {
 
         dec GAME_COUNTDOWN
         bne exit
+        lda #<SpaceInvaders.run
+        sta PROGRAM_ADR_LO
+        lda #>SpaceInvaders.run
+        sta PROGRAM_ADR_HI
         lda #$80
         sta PROGRAM_ADR_CR
 exit:        

@@ -14,9 +14,9 @@ Memory Map
 Default-segment:
   *$0002-$0009 Game Variables
   *$00e0-$00ff Zero Kernel
-  $0800-$09fe Main Program
+  $0800-$0ace Main Program
   $1000-$1773 Space Invaders
-  $e000-$e00b Kernel Routines Entry Points
+  $e000-$e032 Kernel Routines Entry Points
   $e100-$e3f3 Kernel Routines
   $f000-$f02c Kernel Data
 

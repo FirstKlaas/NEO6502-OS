@@ -8,86 +8,178 @@
 //
 // Documentation for the CIA: https://www.c64-wiki.de/wiki/CIA#CIA_1
 
+.macro EnableCursorAutoAdjustment() {
+    lda DISCR   // Set the auto adjust 
+    ora #$0C    // and wrap flag
+    sta DISCR                
+}
 
-                .const KBD    = $d010    // Keyboard regster
-                .const KBDCR  = $d011    // Keyboard control register
-                .const DIS    = $d012    // Display register
-                .const DISCR  = $d013    // Display control register
-                                         // Bit 7 $80: Execute Command
-                                         // Bit 6 $40: undefined
-                                         // Bit 5 $20: undefined
-                                         // Bit 4 $10: Autoclean screen
-                                         // Bit 3 $08: Text and colorbuf
-                                         // Bit 2 $04: Autoadjust Cursor
-                                         // Bit 1 $02: Show Cursor
-                                         // Bit 0 $01: Sprite activation 
+.macro EnableFrameIRQ() {
+    lda #(CIA_SET_FLAGS | FRAME_INTERRUPT_FLAG)
+    sta $dc0d
+}
 
-                .const DISCMD = $d014    // Display command register
-                .const DIS00 = $d015    // Data exchange register 
-                .const DIS01 = $d016    // Data exchange register 
-                .const DIS02 = $d017    // Data exchange register 
-                .const DIS03 = $d018    // Data exchange register 
-                .const DIS04 = $d019    // Data exchange register 
-                .const DIS05 = $d01A    // Data exchange register 
-                .const DIS06 = $d01B    // Data exchange register 
-                .const DIS07 = $d01C    // Data exchange register
-                .const DISFL = $d0fd    // Frame number lo
-                .const DISFH = $d0fe    // Frame number hi
-                .const DEBUG = $d0ff    // Debug register
+.macro EnableKeyboardIRQ() {
+    lda #(CIA_SET_FLAGS | KBD_INTERRUPT_FLAG)
+    sta $dc0d
+}
 
-                // CIA register and constants
-                .const REG_CIA_ICR  = $dc0d
+.macro DisableAllIRQ() {
+    lda #CIA_IRQ_MASK
+    sta REG_CIA_ICR
+}
 
-                .const CIA_IRQ_MASK = %01111111
+.macro SetVectorNMI(label) {
+    lda #<label
+    sta $fffa 
+    lda #>label
+    sta $fffb
+}
 
-                .const KBD_IRQ_FLAG = $80
-                .const DIS_IRQ_FLAG = $80
+.macro SetVectorIRQ(label) {
+    lda #<label
+    sta $fffe 
+    lda #>label
+    sta $ffff
+}
 
-                .const KEY_MOD_MASK = %01110000  // Mask for the modifiers
+.macro AcknowledgeIRQ() {
+    lda REG_CIA_ICR
+}
 
-                .const CMD_GET_CURSOR_X     = $01
-                .const CMD_GET_CURSOR_Y     = $02
-                .const CMD_SET_CURSOR_X     = $03
-                .const CMD_SET_CURSOR_Y     = $04
-                .const CMD_GET_FG_COLOR     = $05
-                .const CMD_GET_BG_COLOR     = $06
-                .const CMD_SET_FG_COLOR     = $07
-                .const CMD_SET_BG_COLOR     = $08
-                .const CMD_GET_X_OFFSET     = $09
-                .const CMD_GET_Y_OFFSET     = $0a
-                .const CMD_SET_X_OFFSET     = $0b
-                .const CMD_SET_Y_OFFSET     = $0c
-                .const CMD_WRITE_CHAR       = $0d
-                .const CMD_FILL_SCREEN      = $0e
-                .const CMD_CLEAR_SCREEN     = $0f
-                .const CMD_SCROLL_UP        = $10
-                .const CMD_SCROLL_DOWN      = $11
-                .const CMD_SHOW_CURSOR      = $12
-                .const CMD_HIDE_CURSOR      = $13
-                // Graphics Commands
-                .const CMD_DRAW_LINE        = $14
-                .const CMD_DRAW_HLINE       = $15
-                .const CMD_DRAW_VLINE       = $16
-                .const CMD_SET_SDB          = $17
-                .const CMD_GET_BGCOLOR      = $18
-                .const CMD_SET_BGCOLOR      = $19
-                .const CMD_DRAW_RECT        = $1A
-                .const CMD_FILL_RECT        = $1B
-                .const CMD_DRAW_CIRCLE      = $1C
-                .const CMD_FILL_CIRCLE      = $1D
-                .const CMD_DRAW_SPRITES     = $1E
+.macro DisableCursorAutoAdjustment() {
+    lda DISCR   // Clear the auto adjust 
+    and #$fd    // flag>
+    sta DISCR                
+}
 
-                .const CMD_DRAW_BITMAP      = $1F
-                .const CMD_DRAW_PIXEL       = $20
-                .const CMD_DRAW_TRIANGLE    = $21
-                .const CMD_FILL_TRIANGLE    = $22
-                .const CMD_DRAW_ROUND_RECT  = $23
-                .const CMD_FILL_ROUND_RECT  = $24
-                .const CMD_DRAW_CHAR        = $25
+.macro PrintText(addr) {
+    lda #<addr
+    sta zpRegE0
+    lda #>addr
+    sta zpRegE1
+    jsr print_text_
+}
+
+.macro PrintFrameNumber(sx,sy) {
+    SetCursorI(sx,sy)
+    lda $d0fd       // Framecounter LO Byte
+    sta HTD_IN
+    lda $d0fe       // Framecounter HI Byte
+    sta HTD_IN+1
+    jsr bcd_convert_word_
+    lda HTD_OUT+2
+    HexPrintA()
+    lda HTD_OUT+1
+    HexPrintA()
+    lda HTD_OUT
+    HexPrintA()
+}
+
+.macro WriteDebugNumberI(code) {
+    lda #code
+    sta DEBUG
+}
+
+// Colors
+.const AMBER                    = 32
+
+// CIA Contants
+.const TIMER_A_INTERRUPT_FLAG   = $01
+.const TIMER_B_INTERRUPT_FLAG   = $02
+.const FRAME_INTERRUPT_FLAG     = $04
+.const KBD_INTERRUPT_FLAG       = $08
+
+.const CIA_SET_FLAGS            = $80
+
+.const STD_BACKGROUND_COLOR     =  41
+.const STD_FOREGROUND_COLOR     =  31
+.const TITLE_FG_COLOR           =  46
+.const FONT_CHAR_WIDTH          =   6
+.const FONT_CHAR_HEIGHT         =   8
+.const SCREEN_WIDTH             = 320
+.const SCREEN_HEIGHT            = 240
+.const LINECHARS                =  52
+.const LINES                    = SCREEN_HEIGHT / (FONT_CHAR_HEIGHT + 1)
+
+
+.const KBD    = $d010       // Keyboard regster
+.const KBDCR  = $d011       // Keyboard control register
+.const DIS    = $d012       // Display register
+.const DISCR  = $d013       // Display control register
+                            // Bit 7 $80: Execute Command
+                            // Bit 6 $40: undefined
+                            // Bit 5 $20: undefined
+                            // Bit 4 $10: Autoclean screen
+                            // Bit 3 $08: Text and colorbuf
+                            // Bit 2 $04: Autoadjust Cursor
+                            // Bit 1 $02: Show Cursor
+                            // Bit 0 $01: Sprite activation 
+
+.const DISCMD = $d014       // Display command register
+.const DIS00 = $d015        // Data exchange register 
+.const DIS01 = $d016        // Data exchange register 
+.const DIS02 = $d017        // Data exchange register 
+.const DIS03 = $d018        // Data exchange register 
+.const DIS04 = $d019        // Data exchange register 
+.const DIS05 = $d01A        // Data exchange register 
+.const DIS06 = $d01B        // Data exchange register 
+.const DIS07 = $d01C        // Data exchange register
+.const DIS08 = $d01D        // Data exchange register
+.const DIS09 = $d01E        // Data exchange register
+
+.const DISFL = $d0fd        // Frame number lo
+.const DISFH = $d0fe        // Frame number hi
+.const DEBUG = $d0ff        // Debug register
+
+// CIA register and constants
+.const REG_CIA_ICR  = $dc0d
+.const CIA_IRQ_MASK = %01111111
+.const KBD_IRQ_FLAG = $80
+.const DIS_IRQ_FLAG = $80
+
+.const KEY_MOD_MASK = %01110000  // Mask for the modifiers
+
+.const CMD_GET_CURSOR_X     = $01
+.const CMD_GET_CURSOR_Y     = $02
+.const CMD_SET_CURSOR_X     = $03
+.const CMD_SET_CURSOR_Y     = $04
+.const CMD_GET_FG_COLOR     = $05
+.const CMD_GET_BG_COLOR     = $06
+.const CMD_SET_FG_COLOR     = $07
+.const CMD_SET_BG_COLOR     = $08
+.const CMD_GET_X_OFFSET     = $09
+.const CMD_GET_Y_OFFSET     = $0a
+.const CMD_SET_X_OFFSET     = $0b
+.const CMD_SET_Y_OFFSET     = $0c
+.const CMD_WRITE_CHAR       = $0d
+.const CMD_FILL_SCREEN      = $0e
+.const CMD_CLEAR_SCREEN     = $0f
+.const CMD_SCROLL_UP        = $10
+.const CMD_SCROLL_DOWN      = $11
+.const CMD_SHOW_CURSOR      = $12
+.const CMD_HIDE_CURSOR      = $13
+// Graphics Commands
+.const CMD_DRAW_LINE        = $14
+.const CMD_DRAW_HLINE       = $15
+.const CMD_DRAW_VLINE       = $16
+.const CMD_SET_SDB          = $17
+.const CMD_GET_BGCOLOR      = $18
+.const CMD_SET_BGCOLOR      = $19
+.const CMD_DRAW_RECT        = $1A
+.const CMD_FILL_RECT        = $1B
+.const CMD_DRAW_CIRCLE      = $1C
+.const CMD_FILL_CIRCLE      = $1D
+.const CMD_DRAW_SPRITES     = $1E
+
+.const CMD_DRAW_BITMAP      = $1F
+.const CMD_DRAW_PIXEL       = $20
+.const CMD_DRAW_TRIANGLE    = $21
+.const CMD_FILL_TRIANGLE    = $22
+.const CMD_DRAW_ROUND_RECT  = $23
+.const CMD_FILL_ROUND_RECT  = $24
+.const CMD_DRAW_CHAR        = $25
                 
-
-.import source "asm/colors.asm"
-
 /* ----------------------------------------------------------------------------
                 ZERO PAGE 
                 The kernel uses some space in the zero page for internal stuff.
@@ -137,13 +229,15 @@
                 zpRegFF: .byte 0
 }
 
-.macro HALT() {
-    // Any write to $ffee will halt the cpu  
-    sta $ffee
+.namespace KRNL {
+    .macro HALT() {
+        // Any write to $ffee will halt the cpu
+        lda #5  
+        sta $ffee
+    }
 }
 
 .import source "asm/main.asm"
-
 
 /* ============================================================================
                 KERNAL ROUTINES
@@ -151,10 +245,28 @@
 */
                 * = $E000 "Kernel Routines Entry Points"
 
-get_key:        jmp get_key_
-set_cursor_x:   jmp set_cursor_x_
-set_cursor_y:   jmp set_cursor_y_
-print_char:     jmp print_char_
+.namespace KRNL {
+    get_key:            jmp get_key_
+    set_cursor_x:       jmp set_cursor_x_
+    set_cursor_y:       jmp set_cursor_y_
+    print_char:         jmp print_char_
+
+    draw_pixel:         jmp GFX.draw_pixel_
+    draw_line:          jmp GFX.draw_line_
+    draw_hline:         jmp GFX.draw_horizonal_line_ 
+    draw_vline:         jmp GFX.draw_vertical_line_
+    draw_rect:          jmp GFX.draw_rect_
+    fill_rect:          jmp GFX.fill_rect_
+    draw_circle:        jmp GFX.draw_circle_
+    fill_circle:        jmp GFX.fill_circle_
+    draw_triangle:      jmp GFX.draw_triangle_
+    fill_triangle:      jmp GFX.fill_triangle_
+    draw_round_rect:    jmp GFX.draw_round_rect_
+    fill_round_rect:    jmp GFX.fill_round_rect_
+    draw_char:          jmp GFX.draw_char_
+}
+
+
 
 /* ----------------------------------------------------------------------------
     Display Routines.
@@ -188,4 +300,4 @@ print_char:     jmp print_char_
                 * = $f000 "Kernel Data"
 
 hex_chars:      .text "0123456789ABCDEF"
-msg_01:         .text "Welcome to FirstKlaas OS v0.1"
+msg_01:         .text "NE/OS v0.2 by FirstKlaas 2023"

@@ -134,7 +134,7 @@
        # 5) Enable interrupts
        ########################################################################
     */
-    init: {
+    run: {
 
         // Disable all interrupts        
         DisableAllIRQ()
@@ -404,7 +404,7 @@
         sta DIS00
         lda ALIEN_BULLETS_Y,x 
         sta DIS02                   // ypos 
-        jsr draw_vertical_line_
+        jsr GFX.draw_vertical_line_
     !next:
         dex 
         bpl !loop-
