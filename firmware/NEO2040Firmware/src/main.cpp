@@ -1,6 +1,7 @@
 //#include <Arduino.h>
 #include "pico/stdio.h"
 #include "pico/stdlib.h"  // In Pico SDK
+#include "pico/config.h"
 
 //#include "pico/stdlib.h"
 #define DEBUG
