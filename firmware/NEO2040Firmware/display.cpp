@@ -439,6 +439,53 @@ void executeCommand(TContextPtr ctx)
     );
     markScreenDirty();
     break;
+  
+  case CMD_DRAW_ROUND_RECT:
+    display.drawRoundRect(
+      word(params),   // XPOS1  DIS00 DIS01
+      params[2],      // YPOS1  DIS02
+      word(params+3), // WIDTH  DIS03 DIS04
+      params[5],      // HEIGHT DIS05
+      params[6],      // RADIUS DIS06
+      params[7]       // COLOR  DIS07
+    );
+    markScreenDirty();
+    break;
+
+  case CMD_FILL_ROUND_RECT:
+    display.fillRoundRect(
+      word(params),   // XPOS1  DIS00 DIS01
+      params[2],      // YPOS1  DIS02
+      word(params+3), // WIDTH  DIS03 DIS04
+      params[5],      // HEIGHT DIS05
+      params[6],      // RADIUS DIS06
+      params[7]       // COLOR  DIS07
+    );
+    markScreenDirty();
+    break;
+
+  case CMD_DRAW_LINE:
+    display.drawLine(
+      word(params),   // XPOS1  DIS00 DIS01
+      params[2],      // YPOS1  DIS02
+      word(params+3), // XPOS2  DIS03 DIS04
+      params[5],      // YPOS2  DIS05
+      params[6]       // COLOR  DIS06
+    );
+    markScreenDirty();
+    break;
+
+  case CMD_DRAW_CHAR: 
+    display.drawChar(
+      word(params),   // XPOS1  DIS00 DIS01
+      params[2],      // YPOS1  DIS02
+      params[3],      // CHAR   DIS03
+      params[4],      // COLOR  DIS04
+      params[5],      // BGCOL  DIS05
+      params[6]       // SIZE   DIS06
+    );
+    markScreenDirty();
+    break;
 
   case CMD_SET_SDB:
   {

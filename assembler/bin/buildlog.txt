@@ -1,22 +1,22 @@
-Warning. Already have an inputfile. Won't use 'c:\development\NEO6502-OS\assembler\kernel.asm'
 Output dir: C:\development\NEO6502-OS\assembler\bin
 parsing
 flex pass 1
 flex pass 2
 Output pass
+Writing prg file: kernel_Space Invaders.prg
 Writing prg file: kernel_Kernel Data.prg
 Writing prg file: kernel_Main Program.prg
-Writing prg file: kernel_ISR.prg
 Writing prg file: kernel_Kernel Routines.prg
 Writing prg file: kernel_Kernel Routines Entry Points.prg
 
 Memory Map
 ----------
 Default-segment:
-  *$00e0-$00ff Unnamed
-  $0800-$08f1 Main Program
-  $0a00-$0b18 ISR
+  *$0002-$0009 Game Variables
+  *$00e0-$00ff Zero Kernel
+  $0800-$09fe Main Program
+  $1000-$1773 Space Invaders
   $e000-$e00b Kernel Routines Entry Points
-  $e100-$e6ee Kernel Routines
+  $e100-$e3f3 Kernel Routines
   $f000-$f02c Kernel Data
 

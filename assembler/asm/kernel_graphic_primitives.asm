@@ -80,9 +80,9 @@
     lda DISCR
     ora #$80
     sta DISCR               // Raise the IRQ flag
-wait_for_ready:
+!wait_for_ready:
     bit DISCR               // Check, if the excecution/irg flag is cleared
-    bmi wait_for_ready      // No! Let's wait
+    bmi !wait_for_ready-    // No! Let's wait
 }
 
 /* ----------------------------------------------------------------------------
@@ -211,4 +211,14 @@ fill_screen_: {
     rts
 }
 
+draw_line_: {
+    lda #CMD_DRAW_LINE 
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}
 
+draw_char_: {
+    lda #CMD_DRAW_CHAR
+    EXECUTE_DISPLAY_COMMAND_A()
+    rts
+}

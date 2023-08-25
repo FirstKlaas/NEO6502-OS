@@ -1,0 +1,20 @@
+Output dir: C:\development\NEO6502-OS\assembler\asm\bin
+parsing
+Got 42 errors and 0 warnings while executing:
+  (C:\development\NEO6502-OS\assembler\asm\kernel_graphic_primitives.asm 4:9) Error: Unknown symbol 'DIS00'
+  (C:\development\NEO6502-OS\assembler\asm\kernel_graphic_primitives.asm 6:9) Error: Unknown symbol 'DIS01'
+  (C:\development\NEO6502-OS\assembler\asm\kernel_graphic_primitives.asm 8:9) Error: Unknown symbol 'DIS02'
+  (C:\development\NEO6502-OS\assembler\asm\kernel_graphic_primitives.asm 10:9) Error: Unknown symbol 'DIS03'
+  (C:\development\NEO6502-OS\assembler\asm\kernel_graphic_primitives.asm 12:9) Error: Unknown symbol 'DIS04'
+  ...
+
+.macro DRAW_HLINE_I(xlo, xhi, y, lenlo, lenhi, col) {
+    pha
+    lda #xlo
+    sta DIS00
+        ^
+
+Error: Unknown symbol 'DIS00'
+at line 4, column 9 in kernel_graphic_primitives.asm
+
+

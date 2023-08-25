@@ -73,6 +73,7 @@ enum {
   CMD_FILL_TRIANGLE    = 0x22,
   CMD_DRAW_ROUND_RECT  = 0x23,
   CMD_FILL_ROUND_RECT  = 0x24,
+  CMD_DRAW_CHAR        = 0x25,
 
   
   // Sprite handling

@@ -83,6 +83,7 @@
                 .const CMD_FILL_TRIANGLE    = $22
                 .const CMD_DRAW_ROUND_RECT  = $23
                 .const CMD_FILL_ROUND_RECT  = $24
+                .const CMD_DRAW_CHAR        = $25
                 
 
 .import source "asm/colors.asm"
