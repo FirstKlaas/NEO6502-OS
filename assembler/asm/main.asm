@@ -14,13 +14,14 @@ start:          ldx #$ff    // Set the stackpointer to
                 PrintText(welcome)
                 SetForgroundColorI(STD_FOREGROUND_COLOR)
 
-                // Print the main menu                
+                // Print the main menu
+                FILL_CIRCLE_I(63,0,84,8,27)                
                 SetCursorI(10,10)
                 PrintText(txt_menue_1)
                 SetCursorI(10,12)
                 PrintText(txt_menue_2)
 
-                jsr TestPrimitives.all
+                //jsr TestPrimitives.all
                 // Set isr vector for IRQ and NMI
                 // As IRQ currently does not work,
                 // we install the ISR on both. 
@@ -191,11 +192,11 @@ txt_score:      .encoding "ascii"
                 .byte 0
 
 txt_menue_1:    .encoding "ascii"
-                .text "[1] Load program"
+                .text "1  Load program"
                 .byte 0
 
 txt_menue_2:    .encoding "ascii"
-                .text "[2] Play Space Invaders"
+                .text "2  Play Space Invaders"
                 .byte 0
 
 

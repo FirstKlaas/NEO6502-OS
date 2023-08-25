@@ -1,5 +1,5 @@
 //#include <Arduino.h>
-
+#include "pico/stdio.h"
 #include "pico/stdlib.h"  // In Pico SDK
 
 //#include "pico/stdlib.h"
@@ -81,4 +81,6 @@ void loop() {
   }
   checkCIA(ctxPtr);
   tick6502(ctxPtr);
+  //stdio_flush();
+  //sleep_us(10);
 }

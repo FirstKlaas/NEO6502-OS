@@ -56,6 +56,20 @@
     pla 
 }
 
+.macro FILL_CIRCLE_I(xlo,xhi,y,rad,color) {
+    lda #xlo
+    sta DIS00
+    lda #xhi
+    sta DIS01
+    lda #y
+    sta DIS02
+    lda #rad
+    sta DIS03
+    lda #color 
+    sta DIS04 
+    jsr GFX.fill_circle_ 
+}
+
 .macro DRAW_SPRITES() {
     jsr GFX.draw_sprites_
 }

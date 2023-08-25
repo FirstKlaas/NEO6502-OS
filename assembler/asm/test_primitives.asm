@@ -36,7 +36,7 @@
         sta DIS03   // LENGTH LO
         lda #0
         sta DIS04   // LENGTH HI
-        lda #32
+        lda #33
         sta DIS05   // COLOR
         jsr GFX.draw_horizonal_line_
         rts
@@ -53,7 +53,7 @@
         sta DIS03   // LENGTH LO
         lda #0
         sta DIS04   // LENGTH HI
-        lda #32
+        lda #34
         sta DIS05   // COLOR
         jsr GFX.draw_vertical_line_
         rts
@@ -91,7 +91,7 @@
         sta DIS04   // WIDTH HI
         lda #100    
         sta DIS05   // HEIGHT
-        lda #32
+        lda #35
         sta DIS06   // COLOR
         jsr GFX.fill_rect_
         rts
