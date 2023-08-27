@@ -12,11 +12,12 @@
     .const BULLET_ENABLE_FLAG       = $80
 
     // GAME_STATES
-    .const GAME_STATE_INTRO         =   1
-    .const GAME_STATE_LEVEL_START   =   2
-    .const GAME_STATE_FIGHT         =   3
-    .const GAME_STATE_WIN           =   4
-    .const GAME_STATE_LOST          =   5
+    .const GAME_STATE_INTRO         =   0
+    .const GAME_STATE_LEVEL_START   =   1
+    .const GAME_STATE_FIGHT         =   2
+    .const GAME_STATE_WON           =   3
+    .const GAME_STATE_LOST          =   4
+    .const GAME_STATE_DEBUG         =   5
 
     .const ALIEN_ANIM_SPEED         = %00010000
 
@@ -63,6 +64,7 @@
         SetSpriteColor_IA(index)
     }
 
+
     .macro UpdateAlienAnimationFrame() {
         lda ALIEN_ANIM_FRAME_LO
         clc
@@ -72,6 +74,11 @@
         adc #00
         and #3
         sta ALIEN_ANIM_FRAME_HI
+    }
+
+    .macro SwitchGameStateA(state) {
+        lda #state
+        jsr switch_game_state
     }
 
     .macro PrintScore(sx,sy) {
@@ -93,7 +100,8 @@
     .zp {
         SCORE_LO:               .byte $00
         SCORE_HI:               .byte $00
-        GAME_STATE:             .byte $00
+        ZP_GAME_STATE:          .byte $00 // Current GameState
+        ZP_NEW_GAME_STATE:      .byte $ff
         ALIEN_ANIM_FRAME_LO:    .byte $00 // Subpixel Animation Frame
         ALIEN_ANIM_FRAME_HI:    .byte $00 // Animation Frame
         CURRENT_GAME_STATE:     .byte $00
@@ -102,9 +110,6 @@
     } 
 
         * = $1000 "Space Invaders"
-
-        .import source "game_loop_isr.asm"
-
 
     dummy_isr: {
         pha
@@ -140,26 +145,58 @@
         DisableAllIRQ()
         
         // Fill Screen
-        FILL_SCREEN_I(STD_BACKGROUND_COLOR)
+        FILL_SCREEN_I(STD_BACKGROUND_COLOR+1)
 
-        sei
-        // Set isr vector for IRQ
-        SetVectorIRQ(main_isr)
-        //SetVectorIRQ(dummy_isr)
-
-        // Setting isr vector for NMI 
-        SetVectorNMI(main_isr)
-        //SetVectorNMI(dummy_isr)
-        cli
 
         jsr init_alien_animation
         jsr initialize_sprite_definition_block
 
-        EnableFrameIRQ()
-        WriteDebugNumberI(255)
-!loop:  jmp * // Loop endless instead of getting back.
-        WriteDebugNumberI(254)
+        // We start with the gamestate intro
+        SwitchGameStateA(GAME_STATE_DEBUG)
         
+        rts
+        // Loop endless instead of getting back.
+        // Somewhere in the future, we need to get back 
+        // to where we came from (main menu)
+    }
+    
+    // Based on the Gamestate, a different
+    // Initialization routine is called
+    // This initialization routine may or may not 
+    // install it's own ISR.
+    switch_game_state: {
+        sta ZP_GAME_STATE
+    gs_intro:
+        cmp #GAME_STATE_INTRO
+        bne gs_level_start
+        jsr Intro.init
+        jmp exit
+    gs_level_start:
+        cmp #GAME_STATE_LEVEL_START
+        bne gs_fight
+
+        jmp exit
+    gs_fight:
+        cmp #GAME_STATE_FIGHT
+        bne gs_won
+        jsr Fight.init
+        jmp exit
+    gs_won:
+        cmp #GAME_STATE_WON 
+        bne gs_lost
+
+        jmp exit
+    gs_lost:
+        cmp #GAME_STATE_LOST
+        bne gs_debug 
+
+    gs_debug:
+        cmp #GAME_STATE_DEBUG 
+        bne exit
+        jsr Debug.init
+        
+    exit:
+        rts
     }
 
     animate_aliens: {
@@ -185,7 +222,12 @@
         rts
     }          
 
-    .import source "spin_sprites.asm"
+    .import source "sprites.asm"
+    .import source "gamestate/intro.asm"
+    .import source "gamestate/level_start.asm"
+    .import source "gamestate/fight.asm"
+    .import source "gamestate/debug.asm"
+    
 
     SPRITE_DEFINITON_BLOCK:
     SPRITE_FLAGS:       .byte $80, $80, $80, $80, $80, $80, $80, $80  // Sprite 00-07
@@ -221,24 +263,33 @@
     SPRITE_DATA_LO:     .fill 32, 0
     SPRITE_DATA_HI:     .fill 32, 0
 
+    // A table for the sprite adresses per frame
+    // the animation has for frames.
     ALIEN_A_SPRITE_ANIMATION_LO:    .fill 4, 0
     ALIEN_A_SPRITE_ANIMATION_HI:    .fill 4, 0
     ALIEN_B_SPRITE_ANIMATION_LO:    .fill 4, 0
     ALIEN_B_SPRITE_ANIMATION_HI:    .fill 4, 0
+    ALIEN_C_SPRITE_ANIMATION_LO:    .fill 4, 0
+    ALIEN_C_SPRITE_ANIMATION_HI:    .fill 4, 0
+    ALIEN_D_SPRITE_ANIMATION_LO:    .fill 4, 0
+    ALIEN_D_SPRITE_ANIMATION_HI:    .fill 4, 0
 
+    // Set the starting sprite adress in the 
+    // sprite definition block.
     initialize_sprite_definition_block: {
-        // Initialize Sprites
+        // Initialize sprite data adresses
         .for (var i=0; i<8; i++) {
             SetSpriteAddress_IM(i,    SPACE_ALIEN_A)
             SetSpriteAddress_IM(i+8,  SPACE_ALIEN_B)
             SetSpriteAddress_IM(i+16, SPACE_ALIEN_C)
         }
         
+        // Enable all 32 sprites
         .for (var i=0;i<24;i++) { 
             EnableSprite_I(i)
         }
         
-        // Init the sprite definition block
+        // Register the sprite definition block
         lda #<SPRITE_DEFINITON_BLOCK
         sta DIS00
         lda #>SPRITE_DEFINITON_BLOCK
@@ -271,6 +322,9 @@
         sta ALIEN_A_SPRITE_ANIMATION_HI
         sta ALIEN_A_SPRITE_ANIMATION_HI+2
         // Frame 1
+        lda #GAME_STATE_INTRO
+        sta ZP_GAME_STATE
+
         lda #<SPACE_ALIEN_A1
         sta ALIEN_A_SPRITE_ANIMATION_LO+1
         lda #>SPACE_ALIEN_A1

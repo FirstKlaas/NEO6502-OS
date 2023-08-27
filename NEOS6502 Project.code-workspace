@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "firmware/NEO2040Firmware"
+		},
+		{
+			"path": "assembler"
+		},
+		{
+			"path": "tools/firmware_converter"
+		}
+	],
+	"settings": {}
+}

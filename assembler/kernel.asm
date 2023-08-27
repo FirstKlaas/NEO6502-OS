@@ -19,6 +19,11 @@
     sta $dc0d
 }
 
+.macro DisableFrameIRQ() {
+    lda #FRAME_INTERRUPT_FLAG
+    sta $dc0d
+}
+
 .macro EnableKeyboardIRQ() {
     lda #(CIA_SET_FLAGS | KBD_INTERRUPT_FLAG)
     sta $dc0d
@@ -30,17 +35,21 @@
 }
 
 .macro SetVectorNMI(label) {
+    sei
     lda #<label
     sta $fffa 
     lda #>label
     sta $fffb
+    cli
 }
 
 .macro SetVectorIRQ(label) {
+    sei
     lda #<label
     sta $fffe 
     lda #>label
     sta $ffff
+    cli
 }
 
 .macro AcknowledgeIRQ() {
@@ -291,7 +300,7 @@
 .import source "asm/kernel_graphic_primitives.asm"
 
 // Starts at 0x1000
-.import source "asm/space_invaders/spin_main.asm"
+.import source "asm/space_invaders/main.asm"
 
 /* ============================================================================
                 KERNAL DATA

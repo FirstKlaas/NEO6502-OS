@@ -11,25 +11,25 @@ debug_register_:    SetCursorI(40,1)
 
                     SetForgroundColorI(COLOR_YELLOW)
                     SetCursorI(46,1)
-                    HexPrintAddr(DISCMD)    // command register
+                    HexPrintM(DISCMD)    // command register
                     PrintCharI(' ')
-                    HexPrintAddr(DISCR)     // Print the control register
+                    HexPrintM(DISCR)     // Print the control register
                     SetCursorI(40,2)
-                    HexPrintAddr(DIS00)
+                    HexPrintM(DIS00)
                     PrintCharI(' ')
-                    HexPrintAddr(DIS01)
+                    HexPrintM(DIS01)
                     PrintCharI(' ')
-                    HexPrintAddr(DIS02)
+                    HexPrintM(DIS02)
                     PrintCharI(' ')
-                    HexPrintAddr(DIS03)
+                    HexPrintM(DIS03)
                     SetCursorI(40,3)
-                    HexPrintAddr(DIS04)
+                    HexPrintM(DIS04)
                     PrintCharI(' ')
-                    HexPrintAddr(DIS05)
+                    HexPrintM(DIS05)
                     PrintCharI(' ')
-                    HexPrintAddr(DIS06)
+                    HexPrintM(DIS06)
                     PrintCharI(' ')
-                    HexPrintAddr(DIS07)
+                    HexPrintM(DIS07)
                     rts
 
 debug_txt_01:       .encoding "ascii"
