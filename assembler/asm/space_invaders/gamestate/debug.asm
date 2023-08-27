@@ -17,7 +17,7 @@
             FILL_RECT_I(0,0,0,100,0,10,STD_BACKGROUND_COLOR)
             AcknowledgeIRQ()
             PrintFrameNumber(0,0)
-            EnableFrameIRQ()
+            //EnableFrameIRQ()
 
             ply 
             plx 

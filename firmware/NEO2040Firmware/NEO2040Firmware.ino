@@ -65,7 +65,8 @@ void setup() {
   // updates. We use a negative value, so the time between
   // calls is including the execution time
   //add_repeating_timer_us(-(FRAMETIME*1000), frame_update_callback, ctxPtr, &frame_timer);
-
+  //Serial.begin(9600);
+  
   //Serial.println("Starting programm");
 }
 

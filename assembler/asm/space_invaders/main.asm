@@ -152,7 +152,7 @@
         jsr initialize_sprite_definition_block
 
         // We start with the gamestate intro
-        SwitchGameStateA(GAME_STATE_DEBUG)
+        SwitchGameStateA(GAME_STATE_INTRO)
         
         rts
         // Loop endless instead of getting back.
