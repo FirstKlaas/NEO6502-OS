@@ -1,6 +1,7 @@
 .cpu _65c02
 .namespace SpaceInvaders {
 
+
     .namespace Debug {
 
         init: {
@@ -13,12 +14,15 @@
         run_debug: {
             pha 
             phx 
-            phy 
-            FILL_RECT_I(0,0,0,100,0,10,STD_BACKGROUND_COLOR)
+            phy
+            // Get clock cycle and store it 
+            // in time_stamp
+            GetClockCycleAndSave()
+            FILL_RECT_I(0,0,0,50,0,240,STD_BACKGROUND_COLOR)
             AcknowledgeIRQ()
             PrintFrameNumber(0,0)
-            //EnableFrameIRQ()
-
+            SetCursorI(0,3)
+            PrintClockCycleDelta()
             ply 
             plx 
             pla

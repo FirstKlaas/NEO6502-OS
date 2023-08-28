@@ -36,6 +36,7 @@ bool frame_update_callback(struct repeating_timer *t) {
   return true;
 }
 
+
 void setup() {
   needsDisplayUpdate = false;
   //Serial.begin(9600);
@@ -84,4 +85,9 @@ void loop() {
   tick6502(ctxPtr);
   //stdio_flush();
   //sleep_us(10);
+}
+
+int main() {
+  setup();
+  loop();
 }

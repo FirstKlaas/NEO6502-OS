@@ -487,6 +487,13 @@ void executeCommand(TContextPtr ctx)
     markScreenDirty();
     break;
 
+  case CMD_GET_CLOCK_CYCLE:
+    params[0] = (ctx->clock_cycle & 0xff);
+    params[1] = ((ctx->clock_cycle >> 8) & 0xff);
+    params[2] = ((ctx->clock_cycle >> 16) & 0xff);
+    params[3] = ((ctx->clock_cycle >> 24) & 0xff);
+    break;
+
   case CMD_SET_SDB:
   {
     screendata.sdb.address = ((ctx->memory[DIS01] << 8) | ctx->memory[DIS00]);

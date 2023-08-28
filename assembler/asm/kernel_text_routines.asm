@@ -5,6 +5,25 @@
     jsr set_cursor_y_    
 }
 
+.macro SetCursor_AI(ypos) {
+    jsr set_cursor_x_
+    lda #ypos
+    jsr set_cursor_y_    
+}
+
+.macro SetCursor_IA(xpos) {
+    jsr set_cursor_y_
+    lda #xpos
+    jsr set_cursor_x_    
+}
+
+.macro SetCursor_XY() {
+    txa
+    jsr set_cursor_x_
+    tya 
+    jsr set_cursor_y_    
+}
+
 .macro HexPrintM(addr) {
     lda addr
     jsr print_hex_

@@ -70,6 +70,50 @@
     jsr print_text_
 }
 
+// Lowbyte in DIS00 Highbyte in DIS03 (32 Bit)
+.macro GetClockCycle() {
+    jsr GFX.get_clock_cycle
+}
+
+.macro GetClockCycleAndSave() {
+    GetClockCycle()
+    // Data is in DIS00-DIS03
+    ldx #3
+!ccl:
+    lda DIS00,x 
+    sta zpRegFC,x
+    dex 
+    bpl !ccl-
+}
+
+
+// Get current clockcycle and subtract it
+// from zpRegFC:zpRegFF 
+// The result is stored back to zpRegFC:zpRegFF 
+.macro GetClockCyleDelta() {
+    GetClockCycle()
+    sec 
+    lda DIS00
+    sbc zpRegFC
+    sta zpRegFC
+    lda DIS01
+    sbc zpRegFD 
+    sta zpRegFD
+    lda DIS02 
+    sbc zpRegFE 
+    sta zpRegFE 
+    lda DIS03 
+    sbc zpRegFF
+    sta zpRegFF 
+}
+
+.macro PrintClockCycleDelta() {
+    GetClockCyleDelta()
+    HexPrintM(zpRegFF)
+    HexPrintM(zpRegFE)
+    HexPrintM(zpRegFD)
+    HexPrintM(zpRegFC)
+}
 .macro PrintFrameNumber(sx,sy) {
     SetCursorI(sx,sy)
     lda $d0fd       // Framecounter LO Byte
@@ -188,6 +232,8 @@
 .const CMD_DRAW_ROUND_RECT  = $23
 .const CMD_FILL_ROUND_RECT  = $24
 .const CMD_DRAW_CHAR        = $25
+
+.const CMD_GET_CLOCK_CYCLE  = $30
                 
 /* ----------------------------------------------------------------------------
                 ZERO PAGE 

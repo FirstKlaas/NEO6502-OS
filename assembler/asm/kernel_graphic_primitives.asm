@@ -16,6 +16,7 @@
     pla 
 }
 
+
 .macro FILL_RECT_I(xlo, xhi, y, width_lo, width_hi, height,col) {
     pha
     lda #xlo
@@ -88,6 +89,8 @@
     lda color
     FILL_SCREEN_A()
 }
+
+
 
 .namespace GFX {
 
@@ -238,4 +241,9 @@
         EXECUTE_DISPLAY_COMMAND_A()
         rts
     }
+
+    get_clock_cycle:
+        lda #CMD_GET_CLOCK_CYCLE
+        EXECUTE_DISPLAY_COMMAND_A()
+        rts
 }

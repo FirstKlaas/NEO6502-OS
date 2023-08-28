@@ -75,6 +75,8 @@ enum {
   CMD_FILL_ROUND_RECT  = 0x24,
   CMD_DRAW_CHAR        = 0x25,
 
+  CMD_GET_CLOCK_CYCLE  = 0x30,
+
   
   // Sprite handling
   CMD_SPRITE_SET_POSITION = 0x40,
