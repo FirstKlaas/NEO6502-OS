@@ -7,6 +7,7 @@
 start:          ldx #$ff    // Set the stackpointer to
                 txs         // highest possible position.
 
+                DisableAllIRQ()
                 EnableCursorAutoAdjustment()
                 FILL_SCREEN_I(STD_BACKGROUND_COLOR)
                 SetForgroundColorI(TITLE_FG_COLOR)
@@ -35,7 +36,8 @@ start:          ldx #$ff    // Set the stackpointer to
 endless:        
                 lda PROGRAM_ADR_CR
                 bpl endless
-                jmp SpaceInvaders.run
+                DisableAllIRQ()
+                jsr SpaceInvaders.run
                 jmp *
                 //jmp (PROGRAM_ADR_LO)
             
@@ -49,8 +51,7 @@ test_isr: {
         pha
         phx
         phy
-        lda #$ee 
-        sta DEBUG
+
         AcknowledgeIRQ()
         // Printing the frame numer to the screen
         FILL_RECT_I(0,0,22*FONT_CHAR_HEIGHT,0,100,3*FONT_CHAR_HEIGHT,4)
@@ -104,8 +105,7 @@ kernel_isr: {
     pha
     phx
     phy
-    WriteDebugNumberI($55)
-    lda $dc0d            // Acknowledge the IRQ
+    AcknowledgeIRQ()
     dec GAME_COUNTDOWN
     bne exit
     lda #$80
@@ -121,15 +121,12 @@ test_frame_irq:
     bit IRQ_DATA
     beq test_keyboard
     // We have a frame intterrupt
-    WriteDebugNumberI($66)
     jmp exit
 
 test_keyboard:
     lda #KBD_INTERRUPT_FLAG
     bit IRQ_DATA
     beq test_timer_a 
-    // We have an keyboard interrupt.
-    WriteDebugNumberI($77)
     jsr handle_key_event
     jmp exit
 
@@ -137,16 +134,12 @@ test_timer_a:
     lda #TIMER_A_INTERRUPT_FLAG
     bit IRQ_DATA
     beq test_timer_b
-    // We have an timer a interrupt.
-    WriteDebugNumberI($88)
     jmp exit
 
 test_timer_b:
     lda #TIMER_B_INTERRUPT_FLAG
     bit IRQ_DATA
     beq exit
-    // We have an timer b interrupt.
-    WriteDebugNumberI($99)
 
 exit:  
     ply 
