@@ -1,0 +1,22 @@
+GIMP Palette
+Name: Space Invaders
+Columns: 16
+#
+ 35  31  30	Index 0
+ 82  46 143	Index 1
+235   0 142	Index 2
+146  36 141	Index 3
+191  33  92	Index 4
+238  26  32	Index 5
+ 77  77  44	Index 6
+ 23 111 184	Index 7
+243  99  33	Index 8
+ 61 152 140	Index 9
+  0 192 215	Index 10
+184 151  97	Index 11
+108 191  67	Index 12
+129 200 157	Index 13
+252 185   0	Index 14
+252 221   0	Index 15
+227 231 234	Index 16
+ 49  45  44	Unbenannt
