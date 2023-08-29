@@ -71,7 +71,7 @@
             // Random Delay Triggered Shot
             dec shot_delay      // Shot delay countdown
             bne draw_bullets    // Still positive. No Shot
-            jsr rand8           // New delay in frames ( 0..255)
+            jsr Math.rand8           // New delay in frames ( 0..255)
             and #7
             adc #7              // Increase to at least 7 frames. 
             sta shot_delay      // Store new delay
@@ -86,7 +86,7 @@
             //       consider, that aliens may be dead. So
             //       actually we are looking for the n-th
             //       alien, that's alive.
-            jsr rand8  // Random value to accu
+            jsr Math.rand8  // Random value to accu
             and #15    // One of the first sixteen aliens
             tay        // Using y as alien index
             lda SPRITE_XPOS,y

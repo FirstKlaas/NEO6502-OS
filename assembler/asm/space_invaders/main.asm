@@ -84,15 +84,15 @@
     .macro PrintScore(sx,sy) {
         SetCursorI(sx,sy)
         lda SCORE_LO       
-        sta HTD_IN
+        sta Math.HTD_IN
         lda SCORE_HI       
-        sta HTD_IN+1
-        jsr bcd_convert_word_
-        lda HTD_OUT+2
+        sta Math.HTD_IN+1
+        jsr Math.bcd_convert_word_
+        lda Math.HTD_OUT+2
         HexPrintA()
-        lda HTD_OUT+1
+        lda Math.HTD_OUT+1
         HexPrintA()
-        lda HTD_OUT
+        lda Math.HTD_OUT
         HexPrintA()
     }
 

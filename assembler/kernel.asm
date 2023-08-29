@@ -117,15 +117,15 @@
 .macro PrintFrameNumber(sx,sy) {
     SetCursorI(sx,sy)
     lda $d0fd       // Framecounter LO Byte
-    sta HTD_IN
+    sta Math.HTD_IN
     lda $d0fe       // Framecounter HI Byte
-    sta HTD_IN+1
-    jsr bcd_convert_word_
-    lda HTD_OUT+2
+    sta Math.HTD_IN+1
+    jsr Math.bcd_convert_word_
+    lda Math.HTD_OUT+2
     HexPrintA()
-    lda HTD_OUT+1
+    lda Math.HTD_OUT+1
     HexPrintA()
-    lda HTD_OUT
+    lda Math.HTD_OUT
     HexPrintA()
 }
 
@@ -342,6 +342,7 @@
                 * = $E100 "Kernel Routines"
 
 .import source "asm/math.asm"
+.import source "asm/color.asm"
 .import source "asm/kernel_text_routines.asm"
 .import source "asm/kernel_graphic_primitives.asm"
 
