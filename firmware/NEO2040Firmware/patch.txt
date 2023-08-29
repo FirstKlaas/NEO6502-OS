@@ -1,0 +1,42 @@
+// In the file PicoDVI.cpp in the Adafruit library
+
+#ifdef USE_DMA
+int chan32;
+volatile bool dma_done;
+
+//
+static void
+dma32_isr(void)
+{
+  dma_channel_acknowledge_irq1(chan32);
+  dma_done = true;
+}
+#endif
+
+//
+void DVIGFX8::swap(bool copy_framebuffer, bool copy_palette) {
+  if (dbuf) {
+    // Request buffer swap at next frame end, wait for it to happen.
+    for (swap_wait = 1; swap_wait;)
+      ;
+
+    if ((copy_framebuffer)) {
+      uint32_t bufsize = WIDTH * HEIGHT;
+#ifdef USE_DMA
+      dma_channel_set_write_addr(chan32, buffer_save + bufsize * back_index, false);
+      dma_channel_set_read_addr(chan32, buffer_save + bufsize * (1 - back_index), false);
+      dma_channel_set_trans_count(chan32, bufsize >> 2, false);
+      dma_done = false;
+      dma_channel_start(chan32);
+      while (!dma_done); // need a better way
+#else
+      memcpy(buffer_save + bufsize * back_index,
+             buffer_save + bufsize * (1 - back_index), bufsize);
+#endif
+    }
+
+    if ((copy_palette)) {
+      memcpy(palette[back_index], palette[1 - back_index], sizeof(palette[0]));
+    }
+  }
+}
