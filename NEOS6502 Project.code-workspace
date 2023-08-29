@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "tools/firmware_converter"
+		},
+		{
+			"path": "../../Arduino/libraries/PicoDVI_-_Adafruit_Fork"
 		}
 	],
 	"settings": {}

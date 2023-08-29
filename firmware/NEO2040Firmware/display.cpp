@@ -243,10 +243,8 @@ void updateDisplay(TContextPtr ctx)
   // screendata.needsRefresh
   if (true)
   {
-    noInterrupts();
     ctx->memory[DISCR] |= FRAME_UPDATE_IRQ;
     display.swap(true, false);
-    interrupts();
   };
   screendata.needsRefresh = 0;
 }
@@ -273,7 +271,7 @@ const TSpritePtr getSprite(const TContextPtr ctx)
 }
 
 inline __attribute__((always_inline))
-uint16_t word(uint8_t* p) {
+uint16_t pword(uint8_t* p) {
   return (p[0] | (p[1] << 8));
 }
 
@@ -328,9 +326,9 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_DRAW_HLINE:
     display.drawFastHLine(
-      word(params),   // XPOS   DIS00 DIS01
+      pword(params),   // XPOS   DIS00 DIS01
       params[2],      // YPOS   DIS02
-      word(params+3), // LENGTH DIS03 DIS04
+      pword(params+3), // LENGTH DIS03 DIS04
       params[5]       // COLOR  DIS05
     );
     markScreenDirty();
@@ -338,9 +336,9 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_DRAW_VLINE:
     display.drawFastVLine(
-      word(params),   // XPOS   DIS00 DIS01
+      pword(params),   // XPOS   DIS00 DIS01
       params[2],      // YPOS   DIS02
-      word(params+3), // LENGTH DIS03 DIS04
+      pword(params+3), // LENGTH DIS03 DIS04
       params[5]       // COLOR  DIS05
     );
     markScreenDirty();
@@ -348,9 +346,9 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_DRAW_RECT:
     display.drawRect(
-      word(params),   // XPOS   DIS00 DIS01
+      pword(params),   // XPOS   DIS00 DIS01
       params[2],      // YPOS   DIS02
-      word(params+3), // WIDTH  DIS03 DIS04
+      pword(params+3), // WIDTH  DIS03 DIS04
       params[5],      // HEIGHT DIS05
       params[6]       // COLOR  DIS06
     );
@@ -359,9 +357,9 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_FILL_RECT:
     display.fillRect(
-      word(params),   // XPOS   DIS00 DIS01
+      pword(params),   // XPOS   DIS00 DIS01
       params[2],      // YPOS   DIS02
-      word(params+3), // WIDTH  DIS03 DIS04
+      pword(params+3), // WIDTH  DIS03 DIS04
       params[5],      // HEIGHT DIS05
       params[6]       // COLOR  DIS06
     );
@@ -375,10 +373,10 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_DRAW_BITMAP:
     display.drawBitmap(
-      word(params),   // XPOS   DIS00 DIS01
+      pword(params),   // XPOS   DIS00 DIS01
       params[2],      // YPOS   DIS02
-      ctx->memory + word(params+3), // DATA LO/HI   DIS03 DIS04
-      word(params+5), // WIDTH  DIS05 DIS06
+      ctx->memory + pword(params+3), // DATA LO/HI   DIS03 DIS04
+      pword(params+5), // WIDTH  DIS05 DIS06
       params[7],      // HEIGHT DIS07
       params[8]       // COLOR  DIS08
     );
@@ -387,7 +385,7 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_DRAW_PIXEL:
     display.drawPixel(
-      word(params),   // XPOS   DIS00 DIS01
+      pword(params),   // XPOS   DIS00 DIS01
       params[2],      // YPOS   DIS02
       params[3]       // COLOR  DIS03
     );
@@ -396,7 +394,7 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_DRAW_CIRCLE:
     display.drawCircle(
-      word(params),   // XPOS   DIS00 DIS01
+      pword(params),   // XPOS   DIS00 DIS01
       params[2],      // YPOS   DIS02
       params[3],      // RADIUS DIS03
       params[4]       // COLOR  DIS04
@@ -406,7 +404,7 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_FILL_CIRCLE:
     display.fillCircle(
-      word(params),   // XPOS   DIS00 DIS01
+      pword(params),   // XPOS   DIS00 DIS01
       params[2],      // YPOS   DIS02
       params[3],      // RADIUS DIS03
       params[4]       // COLOR  DIS04
@@ -416,11 +414,11 @@ void executeCommand(TContextPtr ctx)
   
   case CMD_DRAW_TRIANGLE:
     display.drawTriangle(
-      word(params),   // XPOS1  DIS00 DIS01
+      pword(params),   // XPOS1  DIS00 DIS01
       params[2],      // YPOS1  DIS02
-      word(params+3), // XPOS2  DIS03 DIS04
+      pword(params+3), // XPOS2  DIS03 DIS04
       params[5],      // YPOS2  DIS05
-      word(params+6), // XPOS3  DIS06 DIS07
+      pword(params+6), // XPOS3  DIS06 DIS07
       params[8],      // YPOS3  DIS08
       params[9]       // COLOR  DIS09
     );
@@ -429,11 +427,11 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_FILL_TRIANGLE:
     display.fillTriangle(
-      word(params),   // XPOS1  DIS00 DIS01
+      pword(params),   // XPOS1  DIS00 DIS01
       params[2],      // YPOS1  DIS02
-      word(params+3), // XPOS2  DIS03 DIS04
+      pword(params+3), // XPOS2  DIS03 DIS04
       params[5],      // YPOS2  DIS05
-      word(params+6), // XPOS3  DIS06 DIS07
+      pword(params+6), // XPOS3  DIS06 DIS07
       params[8],      // YPOS3  DIS08
       params[9]       // COLOR  DIS09
     );
@@ -442,9 +440,9 @@ void executeCommand(TContextPtr ctx)
   
   case CMD_DRAW_ROUND_RECT:
     display.drawRoundRect(
-      word(params),   // XPOS1  DIS00 DIS01
+      pword(params),   // XPOS1  DIS00 DIS01
       params[2],      // YPOS1  DIS02
-      word(params+3), // WIDTH  DIS03 DIS04
+      pword(params+3), // WIDTH  DIS03 DIS04
       params[5],      // HEIGHT DIS05
       params[6],      // RADIUS DIS06
       params[7]       // COLOR  DIS07
@@ -454,9 +452,9 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_FILL_ROUND_RECT:
     display.fillRoundRect(
-      word(params),   // XPOS1  DIS00 DIS01
+      pword(params),   // XPOS1  DIS00 DIS01
       params[2],      // YPOS1  DIS02
-      word(params+3), // WIDTH  DIS03 DIS04
+      pword(params+3), // WIDTH  DIS03 DIS04
       params[5],      // HEIGHT DIS05
       params[6],      // RADIUS DIS06
       params[7]       // COLOR  DIS07
@@ -466,9 +464,9 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_DRAW_LINE:
     display.drawLine(
-      word(params),   // XPOS1  DIS00 DIS01
+      pword(params),   // XPOS1  DIS00 DIS01
       params[2],      // YPOS1  DIS02
-      word(params+3), // XPOS2  DIS03 DIS04
+      pword(params+3), // XPOS2  DIS03 DIS04
       params[5],      // YPOS2  DIS05
       params[6]       // COLOR  DIS06
     );
@@ -477,7 +475,7 @@ void executeCommand(TContextPtr ctx)
 
   case CMD_DRAW_CHAR: 
     display.drawChar(
-      word(params),   // XPOS1  DIS00 DIS01
+      pword(params),   // XPOS1  DIS00 DIS01
       params[2],      // YPOS1  DIS02
       params[3],      // CHAR   DIS03
       params[4],      // COLOR  DIS04
@@ -493,6 +491,23 @@ void executeCommand(TContextPtr ctx)
     params[2] = ((ctx->clock_cycle >> 16) & 0xff);
     params[3] = ((ctx->clock_cycle >> 24) & 0xff);
     break;
+
+  case CMD_GET_MILLIS: {
+    unsigned long t(millis());
+    params[0] = (t & 0xff);
+    params[1] = ((t >> 8) & 0xff);
+    params[2] = ((t >> 16) & 0xff);
+    params[3] = ((t >> 24) & 0xff);
+    break;
+  }
+
+  case CMD_GET_FRAME_TIME: {
+    params[0] = (ctx->frame_update_time & 0xff);
+    params[1] = ((ctx->frame_update_time >> 8) & 0xff);
+    params[2] = ((ctx->frame_update_time >> 16) & 0xff);
+    params[3] = ((ctx->frame_update_time >> 24) & 0xff);
+    break;
+  }
 
   case CMD_SET_SDB:
   {

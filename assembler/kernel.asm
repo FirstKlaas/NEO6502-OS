@@ -234,6 +234,8 @@
 .const CMD_DRAW_CHAR        = $25
 
 .const CMD_GET_CLOCK_CYCLE  = $30
+.const CMD_GET_MILLIS       = $31
+.const CMD_GET_FRAME_TIME   = $32
                 
 /* ----------------------------------------------------------------------------
                 ZERO PAGE 

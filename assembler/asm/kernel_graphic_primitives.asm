@@ -246,4 +246,16 @@
         lda #CMD_GET_CLOCK_CYCLE
         EXECUTE_DISPLAY_COMMAND_A()
         rts
+
+    get_millis: {
+        lda #CMD_GET_MILLIS
+        EXECUTE_DISPLAY_COMMAND_A()
+        rts
+    }
+
+    get_frame_time: {
+        lda #CMD_GET_FRAME_TIME
+        EXECUTE_DISPLAY_COMMAND_A()
+        rts
+    }
 }

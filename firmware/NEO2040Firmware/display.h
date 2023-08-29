@@ -4,7 +4,7 @@
 #include <pico/stdlib.h>
 #include "datatypes.h"
 
-#define FRAMERATE 25  // frames per sec
+#define FRAMERATE 20  // frames per sec
 #define FRAMETIME 1000/FRAMERATE  // msec
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 240
@@ -75,8 +75,10 @@ enum {
   CMD_FILL_ROUND_RECT  = 0x24,
   CMD_DRAW_CHAR        = 0x25,
 
+  // Kind of util calls for measuring
   CMD_GET_CLOCK_CYCLE  = 0x30,
-
+  CMD_GET_MILLIS       = 0x31,
+  CMD_GET_FRAME_TIME   = 0x32,
   
   // Sprite handling
   CMD_SPRITE_SET_POSITION = 0x40,

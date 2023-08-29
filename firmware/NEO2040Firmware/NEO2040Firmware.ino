@@ -80,6 +80,7 @@ void loop() {
     lastClockTS = millis();
     updateDisplay(ctxPtr);
     raiseFrameRequest(ctxPtr);
+    ctx.frame_update_time = millis()-lastClockTS;
   }
   checkCIA(ctxPtr);
   tick6502(ctxPtr);
@@ -87,7 +88,8 @@ void loop() {
   //sleep_us(10);
 }
 
-int main() {
+int main_nop() {
   setup();
   loop();
+  return 0;
 }
