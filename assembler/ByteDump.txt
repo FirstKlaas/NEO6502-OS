@@ -1239,11 +1239,11 @@
 19ae: bd 86 16  -         lda SPRITE_FLAGS, x
 19b1: 05 c0     -         ora SPRITE_ENABLE_FLAG
 19b3: 9d 86 16  -         sta SPRITE_FLAGS, x
-19b6: a9 86     -         lda #<SPRITE_DEFINITON_BLOCK
+19b6: a9 86     -         lda #<data
 19b8: 8d 15 d0  -         sta DIS00
-19bb: a9 16     -         lda #>SPRITE_DEFINITON_BLOCK
+19bb: a9 16     -         lda #>data
 19bd: 8d 16 d0  -         sta DIS01
-19c0: a9 20     -         lda #32                 // Set number of sprites
+19c0: a9 20     -         lda #count                 // Set number of sprites
 19c2: 8d 17 d0  -         sta DIS02
 19c5: a9 17     -         lda #CMD_SET_SDB        // Command "Set Sprite Definition Block"
 19c7: 8d 14 d0  -         sta DISCMD              //                                          

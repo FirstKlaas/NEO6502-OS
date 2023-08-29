@@ -347,6 +347,7 @@
 .import source "asm/color.asm"
 .import source "asm/kernel_text_routines.asm"
 .import source "asm/kernel_graphic_primitives.asm"
+.import source "asm/sprites.asm"
 
 // Starts at 0x1000
 .import source "asm/space_invaders/main.asm"

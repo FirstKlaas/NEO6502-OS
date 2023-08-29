@@ -290,6 +290,8 @@
         }
         
         // Register the sprite definition block
+        RegisterSDB_MI(SPRITE_DEFINITON_BLOCK,32)
+        /*
         lda #<SPRITE_DEFINITON_BLOCK
         sta DIS00
         lda #>SPRITE_DEFINITON_BLOCK
@@ -304,6 +306,7 @@
     !wait:
         bit DISCR               // Check, if the irg flag is cleared
         bmi !wait-              // No! Let's wait
+        */
         rts
     }
 
