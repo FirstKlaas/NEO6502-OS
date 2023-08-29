@@ -42,7 +42,7 @@
 
         .macro PrintFrameTime() {
             jsr GFX.get_frame_time
-            SetCursorI(0,5)
+            SetCursor_I(0,5)
             HexPrintM(DIS03)
             HexPrintM(DIS02)
             HexPrintM(DIS01)
@@ -87,7 +87,7 @@
             bne !loop-
             inc COLOR_OFFSET // Next frame we start with a higher index
             
-            FILL_RECT_I(0,0,0,50,0,240,STD_BACKGROUND_COLOR)
+            FillRect_I(0,0,0,50,0,240,STD_BACKGROUND_COLOR)
             PrintFrameNumber(0,0)
             GetClockCyleDelta() // The delta is in zpRegFC...zpRegFF
             lda WORST_TIME
@@ -120,14 +120,14 @@
             
             
         print_delta:
-            SetCursorI(0,3)
+            SetCursor_I(0,3)
             HexPrintM(WORST_TIME+3)
             HexPrintM(WORST_TIME+2)
             HexPrintM(WORST_TIME+1)
             HexPrintM(WORST_TIME)
 
             GetMillisDelta()
-            SetCursorI(0,4)
+            SetCursor_I(0,4)
             HexPrintM(TS+3)
             HexPrintM(TS+2)
             HexPrintM(TS+1)

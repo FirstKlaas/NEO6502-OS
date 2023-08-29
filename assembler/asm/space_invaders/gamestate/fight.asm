@@ -43,27 +43,27 @@
             phx 
             phy 
             AcknowledgeIRQ()
-            FILL_SCREEN_I(STD_BACKGROUND_COLOR)
-            FILL_RECT_I(5,0,20,250,0,160,55)
+            FillScreen_I(STD_BACKGROUND_COLOR)
+            FillRect_I(5,0,20,250,0,160,55)
 
             UpdateAlienAnimationFrame()
             jsr SpaceInvaders.animate_aliens
-            DRAW_SPRITES()
-            FILL_RECT_I(5,0,180,250,0,60,42)
-            DRAW_RECT_I(5,0,20,250,0,160,23)
-            SetForgroundColorI(43)
+            DrawSprites()
+            FillRect_I(5,0,180,250,0,60,42)
+            DrawRect_I(5,0,20,250,0,160,23)
+            SetForgroundColor_I(43)
 
             // Printing the frame numer to the screen
-            SetCursorI(2,26)
+            SetCursor_I(2,26)
             PrintText(txt_frame)
             PrintFrameNumber(9,23)
             
             // Print Level
-            SetCursorI(2,23)
+            SetCursor_I(2,23)
             PrintText(txt_level)
 
             // Print Score
-            SetCursorI(2,24)
+            SetCursor_I(2,24)
             PrintText(txt_score)
             PrintScore(9,24)
             

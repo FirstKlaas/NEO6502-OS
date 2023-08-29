@@ -65,7 +65,7 @@ enum {
   CMD_FILL_RECT    = 0x1B,
   CMD_DRAW_CIRCLE  = 0x1C,
   CMD_FILL_CIRCLE  = 0x1D,
-  CMD_DRAW_SPRITES = 0x1E,
+  CMD_DrawSprites = 0x1E,
 
   CMD_DRAW_BITMAP      = 0x1F,
   CMD_DRAW_PIXEL       = 0x20,

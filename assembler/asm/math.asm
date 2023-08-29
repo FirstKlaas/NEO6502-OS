@@ -12,8 +12,8 @@
         .byte    $00, $02, $56, $00, $05, $12, $00, $10, $24, $00, $20, $48
         .byte    $00, $40, $96, $00, $81, $92, $01, $63, $84, $03, $27, $68
 
-    HTD_IN:     .byte $00, $00
-    HTD_OUT:    .byte $00, $00, $00 
+    //HTD_IN:     .byte $00, $00        // zpRegE0, zpRegE1
+    //HTD_OUT:    .byte $00, $00, $00   // zpRegE2..4
 
     /* ----------------------------------------------------------------------------
         convert a single byte to two hex values (not characters).
@@ -51,24 +51,24 @@
         phx
         pha
         lda #0
-        sta HTD_OUT
-        sta HTD_OUT+1
-        sta HTD_OUT+2
+        sta zpRegE2
+        sta zpRegE3
+        sta zpRegE4
         ldx #$2d
     !loop:
-        asl HTD_IN 
-        rol HTD_IN+1
+        asl zpRegE0 
+        rol zpRegE1
         bcc htd1
-        lda HTD_OUT
+        lda zpRegE2
         clc 
         adc BCD_LOOKUP_TABLE+2,x
-        sta HTD_OUT
-        lda HTD_OUT+1
+        sta zpRegE2
+        lda zpRegE3
         adc BCD_LOOKUP_TABLE+1,x
-        sta HTD_OUT+1
-        lda HTD_OUT+2
+        sta zpRegE3
+        lda zpRegE4
         adc BCD_LOOKUP_TABLE,x
-        sta HTD_OUT+2
+        sta zpRegE4
     htd1:
         dex
         dex 

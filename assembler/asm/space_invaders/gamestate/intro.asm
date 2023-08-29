@@ -10,7 +10,7 @@
 
         init: {
             DisableFrameIRQ()
-            SetCursorI(10,2)
+            SetCursor_I(10,2)
             SetVectorNMI(run)
             lda #100
             sta START_DELAY
@@ -23,14 +23,14 @@
             phx
             phy  
             AcknowledgeIRQ()
-            SetCursorI(10,6)
+            SetCursor_I(10,6)
             PrintText(intro_message)
-            SetCursorI(10,9)
+            SetCursor_I(10,9)
             PrintText(men_start_game)
-            SetCursorI(10,11)
+            SetCursor_I(10,11)
             PrintText(men_sback_to_main)
 
-            SetCursorI(10,13)
+            SetCursor_I(10,13)
             HexPrintM(START_DELAY)
             PrintFrameNumber(14,13)
 

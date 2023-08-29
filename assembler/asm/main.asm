@@ -9,17 +9,17 @@ start:          ldx #$ff    // Set the stackpointer to
 
                 DisableAllIRQ()
                 EnableCursorAutoAdjustment()
-                FILL_SCREEN_I(STD_BACKGROUND_COLOR)
-                SetForgroundColorI(TITLE_FG_COLOR)
-                SetCursorI(2,1)
+                FillScreen_I(STD_BACKGROUND_COLOR)
+                SetForgroundColor_I(TITLE_FG_COLOR)
+                SetCursor_I(2,1)
                 PrintText(welcome)
-                SetForgroundColorI(STD_FOREGROUND_COLOR)
+                SetForgroundColor_I(STD_FOREGROUND_COLOR)
 
                 // Print the main menu
-                FILL_CIRCLE_I(63,0,84,8,27)                
-                SetCursorI(10,10)
+                FillCircle_I(63,0,84,8,27)                
+                SetCursor_I(10,10)
                 PrintText(txt_menue_1)
-                SetCursorI(10,12)
+                SetCursor_I(10,12)
                 PrintText(txt_menue_2)
 
                 //jsr TestPrimitives.all
@@ -54,9 +54,9 @@ test_isr: {
 
         AcknowledgeIRQ()
         // Printing the frame numer to the screen
-        FILL_RECT_I(0,0,22*FONT_CHAR_HEIGHT,0,100,3*FONT_CHAR_HEIGHT,4)
+        FillRect_I(0,0,22*FONT_CHAR_HEIGHT,0,100,3*FONT_CHAR_HEIGHT,4)
         PrintFrameNumber(9,23)
-        SetCursorI(2,26)
+        SetCursor_I(2,26)
         PrintText(txt_frame)
 
         dec GAME_COUNTDOWN
@@ -157,9 +157,9 @@ handle_key_event: {
     WriteDebugNumberI($ea) 
     lda #CIA_IRQ_MASK
     sta REG_CIA_ICR
-    FILL_SCREEN_I(AMBER)
+    FillScreen_I(AMBER)
     // Start Game
-    FILL_SCREEN_I(63)
+    FillScreen_I(63)
     //jsr SpaceInvaders.init
     lda #$80
     sta PROGRAM_ADR_CR

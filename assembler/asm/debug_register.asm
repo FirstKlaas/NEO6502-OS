@@ -1,20 +1,20 @@
 
 
 
-debug_register_:    SetCursorI(40,1)
-                    SetForgroundColorI(152)
+debug_register_:    SetCursor_I(40,1)
+                    SetForgroundColor_I(152)
                     lda #<debug_txt_01
                     sta zpRegE0
                     lda #>debug_txt_01
                     sta zpRegE1
                     jsr print_text_
 
-                    SetForgroundColorI(COLOR_YELLOW)
-                    SetCursorI(46,1)
+                    SetForgroundColor_I(COLOR_YELLOW)
+                    SetCursor_I(46,1)
                     HexPrintM(DISCMD)    // command register
                     PrintCharI(' ')
                     HexPrintM(DISCR)     // Print the control register
-                    SetCursorI(40,2)
+                    SetCursor_I(40,2)
                     HexPrintM(DIS00)
                     PrintCharI(' ')
                     HexPrintM(DIS01)
@@ -22,7 +22,7 @@ debug_register_:    SetCursorI(40,1)
                     HexPrintM(DIS02)
                     PrintCharI(' ')
                     HexPrintM(DIS03)
-                    SetCursorI(40,3)
+                    SetCursor_I(40,3)
                     HexPrintM(DIS04)
                     PrintCharI(' ')
                     HexPrintM(DIS05)

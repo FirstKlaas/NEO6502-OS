@@ -1,4 +1,4 @@
-.macro SetCursorI(xpos, ypos) {
+.macro SetCursor_I(xpos, ypos) {
     lda #xpos
     jsr set_cursor_x_
     lda #ypos
@@ -33,7 +33,7 @@
     jsr print_hex_
 }
 
-.macro SetForgroundColorI(color) {
+.macro SetForgroundColor_I(color) {
     lda #color
     jsr set_fg_color_
 }

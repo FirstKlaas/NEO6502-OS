@@ -82,17 +82,17 @@
     }
 
     .macro PrintScore(sx,sy) {
-        SetCursorI(sx,sy)
+        SetCursor_I(sx,sy)
         lda SCORE_LO       
-        sta Math.HTD_IN
+        sta zpRegE0
         lda SCORE_HI       
-        sta Math.HTD_IN+1
+        sta zpRegE1
         jsr Math.bcd_convert_word_
-        lda Math.HTD_OUT+2
+        lda zpRegE4
         HexPrintA()
-        lda Math.HTD_OUT+1
+        lda zpRegE3
         HexPrintA()
-        lda Math.HTD_OUT
+        lda zpRegE2
         HexPrintA()
     }
 
@@ -116,9 +116,9 @@
         phx
         phy
         // Printing the frame numer to the screen
-        FILL_RECT_I(0,0,22*FONT_CHAR_HEIGHT,0,100,3*FONT_CHAR_HEIGHT,4)
+        FillRect_I(0,0,22*FONT_CHAR_HEIGHT,0,100,3*FONT_CHAR_HEIGHT,4)
         PrintFrameNumber(9,23)
-        SetCursorI(2,26)
+        SetCursor_I(2,26)
         PrintText(txt_frame)
         AcknowledgeIRQ()
         ply 
@@ -145,7 +145,7 @@
         DisableAllIRQ()
         
         // Fill Screen
-        FILL_SCREEN_I(STD_BACKGROUND_COLOR+1)
+        FillScreen_I(STD_BACKGROUND_COLOR+1)
 
 
         jsr init_alien_animation

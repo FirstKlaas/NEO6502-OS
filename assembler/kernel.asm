@@ -115,17 +115,17 @@
     HexPrintM(zpRegFC)
 }
 .macro PrintFrameNumber(sx,sy) {
-    SetCursorI(sx,sy)
+    SetCursor_I(sx,sy)
     lda $d0fd       // Framecounter LO Byte
-    sta Math.HTD_IN
+    sta zpRegE0
     lda $d0fe       // Framecounter HI Byte
-    sta Math.HTD_IN+1
+    sta zpRegE1
     jsr Math.bcd_convert_word_
-    lda Math.HTD_OUT+2
+    lda zpRegE4
     HexPrintA()
-    lda Math.HTD_OUT+1
+    lda zpRegE3
     HexPrintA()
-    lda Math.HTD_OUT
+    lda zpRegE2
     HexPrintA()
 }
 
@@ -223,7 +223,7 @@
 .const CMD_FILL_RECT        = $1B
 .const CMD_DRAW_CIRCLE      = $1C
 .const CMD_FILL_CIRCLE      = $1D
-.const CMD_DRAW_SPRITES     = $1E
+.const CMD_DrawSprites     = $1E
 
 .const CMD_DRAW_BITMAP      = $1F
 .const CMD_DRAW_PIXEL       = $20

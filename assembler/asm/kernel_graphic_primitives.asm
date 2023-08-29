@@ -1,4 +1,4 @@
-.macro DRAW_HLINE_I(xlo, xhi, y, lenlo, lenhi, col) {
+.macro DrawHLine_I(xlo, xhi, y, lenlo, lenhi, col) {
     pha
     lda #xlo
     sta DIS00
@@ -17,7 +17,7 @@
 }
 
 
-.macro FILL_RECT_I(xlo, xhi, y, width_lo, width_hi, height,col) {
+.macro FillRect_I(xlo, xhi, y, width_lo, width_hi, height,col) {
     pha
     lda #xlo
     sta DIS00
@@ -37,7 +37,7 @@
     pla 
 }
 
-.macro DRAW_RECT_I(xlo, xhi, y, width_lo, width_hi, height,col) {
+.macro DrawRect_I(xlo, xhi, y, width_lo, width_hi, height,col) {
     pha
     lda #xlo
     sta DIS00
@@ -57,7 +57,7 @@
     pla 
 }
 
-.macro FILL_CIRCLE_I(xlo,xhi,y,rad,color) {
+.macro FillCircle_I(xlo,xhi,y,rad,color) {
     lda #xlo
     sta DIS00
     lda #xhi
@@ -71,30 +71,30 @@
     jsr GFX.fill_circle_ 
 }
 
-.macro DRAW_SPRITES() {
+.macro DrawSprites() {
     jsr GFX.draw_sprites_
 }
 
-.macro FILL_SCREEN_A() {
+.macro FillScreen_A() {
     sta DIS00
     jsr GFX.fill_screen_
 }
 
-.macro FILL_SCREEN_I(color) {
+.macro FillScreen_I(color) {
     lda #color 
-    FILL_SCREEN_A()
+    FillScreen_A()
 }
 
-.macro FILL_SCREEN_M(color) {
+.macro FillScreen_M(color) {
     lda color
-    FILL_SCREEN_A()
+    FillScreen_A()
 }
 
 
 
 .namespace GFX {
 
-    .macro EXECUTE_DISPLAY_COMMAND_A() {
+    .macro ExecuteDisplayCommand_A() {
         sta DISCMD
         lda DISCR
         ora #$80
@@ -124,7 +124,7 @@
     */
     draw_horizonal_line_: {
         lda #CMD_DRAW_HLINE
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
@@ -142,120 +142,123 @@
         Params Out:
             None
 
+        Clobbered Register: A
+        Used Zeropage Variables: None
+
         Since         : 15.08.2023
         Last modified : 15.08.2023
     ----------------------------------------------------------------------------
     */
     draw_vertical_line_: {
         lda #CMD_DRAW_VLINE
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     clear_screen_: {
         lda #CMD_CLEAR_SCREEN
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     draw_rect_: {
         lda #CMD_DRAW_RECT
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     fill_rect_: {
         lda #CMD_FILL_RECT
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     draw_sprites_: {
-        lda #CMD_DRAW_SPRITES
-        EXECUTE_DISPLAY_COMMAND_A()
+        lda #CMD_DrawSprites
+        ExecuteDisplayCommand_A()
         rts
     }
 
     draw_pixel_: {
         lda #CMD_DRAW_PIXEL
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     draw_bitmap_: {
         lda #CMD_DRAW_BITMAP
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     draw_circle_: {
         lda #CMD_DRAW_CIRCLE
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     fill_circle_: {
         lda #CMD_FILL_CIRCLE
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     draw_triangle_: {
         lda #CMD_DRAW_TRIANGLE
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     fill_triangle_: {
         lda #CMD_FILL_TRIANGLE
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     draw_round_rect_: {
         lda #CMD_DRAW_ROUND_RECT
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     fill_round_rect_: {
         lda #CMD_FILL_ROUND_RECT
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     fill_screen_: {
         lda #CMD_FILL_SCREEN
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     draw_line_: {
         lda #CMD_DRAW_LINE 
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     draw_char_: {
         lda #CMD_DRAW_CHAR
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     get_clock_cycle:
         lda #CMD_GET_CLOCK_CYCLE
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
 
     get_millis: {
         lda #CMD_GET_MILLIS
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 
     get_frame_time: {
         lda #CMD_GET_FRAME_TIME
-        EXECUTE_DISPLAY_COMMAND_A()
+        ExecuteDisplayCommand_A()
         rts
     }
 }

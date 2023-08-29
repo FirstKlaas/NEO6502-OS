@@ -366,7 +366,7 @@ void executeCommand(TContextPtr ctx)
     markScreenDirty();
     break;
 
-  case CMD_DRAW_SPRITES:
+  case CMD_DrawSprites:
     drawSprites(ctx);
     markScreenDirty();
     break;

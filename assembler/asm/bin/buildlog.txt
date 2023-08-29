@@ -8,7 +8,7 @@ Got 42 errors and 0 warnings while executing:
   (C:\development\NEO6502-OS\assembler\asm\kernel_graphic_primitives.asm 12:9) Error: Unknown symbol 'DIS04'
   ...
 
-.macro DRAW_HLINE_I(xlo, xhi, y, lenlo, lenhi, col) {
+.macro DrawHLine_I(xlo, xhi, y, lenlo, lenhi, col) {
     pha
     lda #xlo
     sta DIS00
