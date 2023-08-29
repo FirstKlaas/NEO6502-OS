@@ -1,5 +1,30 @@
 // In the file PicoDVI.cpp in the Adafruit library
 
+DVIGFX8::DVIGFX8(const DVIresolution r, const bool d,
+                 const struct dvi_serialiser_cfg &c, vreg_voltage v)
+    : PicoDVI(dvispec[r].timing, c, v),
+      GFXcanvas8(
+          dvispec[r].width,
+          (d ? (dvispec[r].height * 2) : ((dvispec[r].height + 1) & ~1)) + 4),
+      dbuf(d) {
+  HEIGHT = _height = dvispec[r].height;
+  buffer_save = buffer;
+  dvi_vertical_repeat = dvispec[r].v_rep;
+  dvi_monochrome_tmds = false;
+#ifdef USE_DMA
+  chan32 = dma_claim_unused_channel(true);
+  dma_channel_config cfg32 = dma_channel_get_default_config(chan32);
+  channel_config_set_transfer_data_size(&cfg32, DMA_SIZE_32);
+  channel_config_set_write_increment(&cfg32, true);
+  dma_channel_set_config(chan32, &cfg32, false);
+
+  irq_set_exclusive_handler(DMA_IRQ_1, dma32_isr);
+  irq_set_enabled(DMA_IRQ_1, true);
+  dma_set_irq1_channel_mask_enabled(1U << chan32, true);
+#endif
+}
+
+
 #ifdef USE_DMA
 int chan32;
 volatile bool dma_done;
