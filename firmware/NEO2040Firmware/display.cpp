@@ -249,6 +249,16 @@ void updateDisplay(TContextPtr ctx)
   screendata.needsRefresh = 0;
 }
 
+
+/*
+bool checkSwap(TContextPtr ctx) {
+  if (display.checkSwap(true,false)) {
+    ctx->memory[DISCR] |= FRAME_UPDATE_IRQ;
+    return true;
+  };
+  return false;
+}
+*/ 
 void writeChar(TContextPtr ctx, uint8_t c)
 {
   // Cursor position is off screen, do nothing

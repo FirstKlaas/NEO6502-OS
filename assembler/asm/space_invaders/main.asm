@@ -109,7 +109,7 @@
         ALIENS_ALIVE:           .byte $18
     } 
 
-        * = $1000 "Space Invaders"
+    * = $1000 "Space Invaders"
 
     dummy_isr: {
         pha
@@ -128,17 +128,11 @@
     }
 
 
-    /* ########################################################################
-       # Initialisation of the Space Invader Game
-       #
-       # 1) Disable interrupts
-       # 2) Install new ISR routine for the game
-       # 3) Draw Base Screen
-       # 4) Initialize Sprite
-       # 5) Initialize Sprite Definition Block
-       # 5) Enable interrupts
-       ########################################################################
-    */
+/*  ##########################################################################
+    Initialisation of the Space Invader Game
+
+    The game starts in the intro state.
+    ------------------------------------------------------------------------*/
     run: {
 
         // Disable all interrupts        
@@ -147,60 +141,100 @@
         // Fill Screen
         FillScreen_I(STD_BACKGROUND_COLOR+1)
 
-
+        // Generate a table with the correct sprite addresses for the
+        // animation of each alien type
         jsr init_alien_animation
+
+        // Set the sprite definition block
         jsr initialize_sprite_definition_block
 
         // We start with the gamestate intro
         SwitchGameStateA(GAME_STATE_INTRO)
         
-        rts
         // Loop endless instead of getting back.
         // Somewhere in the future, we need to get back 
         // to where we came from (main menu)
+        jmp *
+        //rts
     }
     
-    // Based on the Gamestate, a different
-    // Initialization routine is called
-    // This initialization routine may or may not 
-    // install it's own ISR.
+
+/*  ##########################################################################
+    Switching the program flow depending on the current game state.
+
+    This routine should be called, whenever the state changes. The new state
+    must be in the accumulator.
+
+    Based on the Gamestate, a different Initialization routine is called.
+    This initialization routine may or may not install it's own ISR.
+
+    @param: 
+        accu New game state. Must be a valid state.
+    ------------------------------------------------------------------------*/
     switch_game_state: {
-        sta ZP_GAME_STATE
-    gs_intro:
-        cmp #GAME_STATE_INTRO
-        bne gs_level_start
-        jsr Intro.init
-        jmp exit
-    gs_level_start:
-        cmp #GAME_STATE_LEVEL_START
-        bne gs_fight
-
-        jmp exit
-    gs_fight:
-        cmp #GAME_STATE_FIGHT
-        bne gs_won
-        jsr Fight.init
-        jmp exit
-    gs_won:
-        cmp #GAME_STATE_WON 
-        bne gs_lost
-
-        jmp exit
-    gs_lost:
-        cmp #GAME_STATE_LOST
-        bne gs_debug 
-
-    gs_debug:
-        cmp #GAME_STATE_DEBUG 
-        bne exit
-        jsr Debug.init
+            sta ZP_GAME_STATE
         
-    exit:
-        rts
+        gs_intro:
+            cmp #GAME_STATE_INTRO
+            bne gs_level_start
+            // START GAME STATE INTRO
+            jsr Intro.init
+            jmp exit
+
+        gs_level_start:
+            cmp #GAME_STATE_LEVEL_START
+            bne gs_fight
+            // START GAME STATE LEVEL START
+
+            jmp exit
+        
+        gs_fight:
+            cmp #GAME_STATE_FIGHT
+            bne gs_won
+            // START GAME STATE FIGHT
+            jsr Fight.init
+            jmp exit
+        
+        gs_won:
+            cmp #GAME_STATE_WON 
+            bne gs_lost
+            // START GAME STATE WON
+            
+            jmp exit
+        gs_lost:
+            cmp #GAME_STATE_LOST
+            bne gs_debug 
+            // START GAME STATE LOST
+
+            jmp exit
+        gs_debug:
+            cmp #GAME_STATE_DEBUG 
+            bne exit
+            // START GAME STATE DEBUG
+            jsr Debug.init
+            
+            // jmp exit
+        exit:
+            rts
     }
 
+/*  ##########################################################################
+    Animating the aliens.
+
+    Every alien has multiple sprite for animation.
+    For each alien we have a address table (lo/hi) with the 
+    addresses of the sprite data in correct order.
+
+    The correct address to be used for each alien type 
+    is stored in lo/hi varables. This address has to be copied
+    to the sprite adresses in the sprite definition block.
+
+    Each row shows the same alien and therefore has the same address.
+
+    Remarks: Maybe not the most clever way to do it.
+    ------------------------------------------------------------------------*/
     animate_aliens: {
-        ldx ALIEN_ANIM_FRAME_HI
+        ldx ALIEN_ANIM_FRAME_HI // Why ???
         // Alien A
         lda ALIEN_A_SPRITE_ANIMATION_LO,x
         .for (var i=0; i<8; i++) {
@@ -279,93 +313,59 @@
     initialize_sprite_definition_block: {
         // Initialize sprite data adresses
         .for (var i=0; i<8; i++) {
-            SetSpriteAddress_IM(i,    SPACE_ALIEN_A)
-            SetSpriteAddress_IM(i+8,  SPACE_ALIEN_B)
-            SetSpriteAddress_IM(i+16, SPACE_ALIEN_C)
+            SetSpriteAddress_IM(i,    SPACE_ALIEN_A)  // First row
+            SetSpriteAddress_IM(i+8,  SPACE_ALIEN_B)  // Second row
+            SetSpriteAddress_IM(i+16, SPACE_ALIEN_C)  // Third row
         }
         
-        // Enable all 32 sprites
+        // Enable all 24 alien sprites
         .for (var i=0;i<24;i++) { 
             EnableSprite_I(i)
         }
         
         // Register the sprite definition block
         RegisterSDB_MI(SPRITE_DEFINITON_BLOCK,32)
-        /*
-        lda #<SPRITE_DEFINITON_BLOCK
-        sta DIS00
-        lda #>SPRITE_DEFINITON_BLOCK
-        sta DIS01
-        lda #32                 // Set number of sprites
-        sta DIS02
-        lda #CMD_SET_SDB        // Command "Set Sprite Definition Block"
-        sta DISCMD              //                                          
-        lda DISCR               // Load Display command register
-        ora #$80                // Set the "Command Exceution" Flag
-        sta DISCR               // Raise the IRQ flag
-    !wait:
-        bit DISCR               // Check, if the irg flag is cleared
-        bmi !wait-              // No! Let's wait
-        */
         rts
     }
 
-    // -----------------------------------------
-    // Init Alien Animation
-    // The Sprite Adress for each frame sprite 
-    // is stored in a table
-    // -----------------------------------------
+    .macro StoreAlienAnimationAddress(sprite, target, frame) {
+        lda #<sprite
+        sta target+frame
+        lda #>sprite
+        sta target+frame+4
+    }
+
+/*  ##########################################################################
+    Init Alien Animation
+
+    The Sprite address for each frame sprite is stored in a table
+    ------------------------------------------------------------------------*/
     init_alien_animation: {
         // Alien A
-        // Frame 0 and 2
-        lda #<SPACE_ALIEN_A
-        sta ALIEN_A_SPRITE_ANIMATION_LO
-        sta ALIEN_A_SPRITE_ANIMATION_LO+2
-        lda #>SPACE_ALIEN_A
-        sta ALIEN_A_SPRITE_ANIMATION_HI
-        sta ALIEN_A_SPRITE_ANIMATION_HI+2
-        // Frame 1
-        lda #GAME_STATE_INTRO
-        sta ZP_GAME_STATE
-
-        lda #<SPACE_ALIEN_A1
-        sta ALIEN_A_SPRITE_ANIMATION_LO+1
-        lda #>SPACE_ALIEN_A1
-        sta ALIEN_A_SPRITE_ANIMATION_HI+1
-        // Frame 3
-        lda #<SPACE_ALIEN_A2
-        sta ALIEN_A_SPRITE_ANIMATION_LO+3
-        lda #>SPACE_ALIEN_A2
-        sta ALIEN_A_SPRITE_ANIMATION_HI+3
+        StoreAlienAnimationAddress(SPACE_ALIEN_A,  ALIEN_A_SPRITE_ANIMATION_LO,0)
+        StoreAlienAnimationAddress(SPACE_ALIEN_A1, ALIEN_A_SPRITE_ANIMATION_LO,1)
+        StoreAlienAnimationAddress(SPACE_ALIEN_A,  ALIEN_A_SPRITE_ANIMATION_LO,2)
+        StoreAlienAnimationAddress(SPACE_ALIEN_A2, ALIEN_A_SPRITE_ANIMATION_LO,3)
 
         // Alien B
-        lda #<SPACE_ALIEN_B
-        sta ALIEN_B_SPRITE_ANIMATION_LO
-        sta ALIEN_B_SPRITE_ANIMATION_LO+2
-        lda #>SPACE_ALIEN_B
-        sta ALIEN_B_SPRITE_ANIMATION_HI
-        sta ALIEN_B_SPRITE_ANIMATION_HI+2
-        // Frame 1
-        lda #<SPACE_ALIEN_B1
-        sta ALIEN_B_SPRITE_ANIMATION_LO+1
-        lda #>SPACE_ALIEN_B1
-        sta ALIEN_B_SPRITE_ANIMATION_HI+1
-        // Frame 1
-        lda #<SPACE_ALIEN_B2
-        sta ALIEN_B_SPRITE_ANIMATION_LO+3
-        lda #>SPACE_ALIEN_B2
-        sta ALIEN_B_SPRITE_ANIMATION_HI+3
+        StoreAlienAnimationAddress(SPACE_ALIEN_B,  ALIEN_B_SPRITE_ANIMATION_LO,0)
+        StoreAlienAnimationAddress(SPACE_ALIEN_B1, ALIEN_B_SPRITE_ANIMATION_LO,1)
+        StoreAlienAnimationAddress(SPACE_ALIEN_B,  ALIEN_B_SPRITE_ANIMATION_LO,2)
+        StoreAlienAnimationAddress(SPACE_ALIEN_B2, ALIEN_B_SPRITE_ANIMATION_LO,3)
+
         rts
     }
 
-    /* ===============================================================================
-        Look for the next "invisible" bullet in the table. A invisible bullet is 
-        marked with the bit 7 set to zero in the stat byte. The carry bit is used 
-        to signal success or failure.
+/*  ##########################################################################
+    Find Next Invisible/Inactive Bullet
 
-        If successful, the correct index is available in the x register and the carry
-        bit is set. Not no free slot is availabe, the carry bit is cleared.
-    */
+    Look for the next "invisible" bullet in the table. A invisible bullet is 
+    marked with the bit 7 set to zero in the stat byte. The carry bit is used 
+    to signal success or failure.
+
+    If successful, the correct index is available in the x register and the 
+    carry bit is set. Not no free slot is availabe, the carry bit is cleared.
+    ------------------------------------------------------------------------*/
     find_next_invisible_bullet: {
         ldx #(BULLET_COUNT-1)
     !loop:
@@ -385,10 +385,10 @@
         rts
     }
 
-    /* ===============================================================================
-        Update all "visible" bullets. A visible bullet is marked with the bit 7=1 in
-        tha stat(us) byte.
-    */
+/*  ##########################################################################
+    Update all "visible" bullets. A visible bullet is marked with the bit 7=1 
+    in the stat(us) byte.
+    ------------------------------------------------------------------------*/
     update_alien_bullets: {
         jsr move_bullets
         jsr check_bullets
@@ -396,10 +396,9 @@
         rts
     }
 
-    /* =======================================================================
+/*  ##########################################################################
     Move every (visible) bullet down by the defined speed
-    -----------------------------------------------------------------------
-    */
+    ------------------------------------------------------------------------*/
     move_bullets: {
         ldx #(BULLET_COUNT)
     !loop:
@@ -415,11 +414,10 @@
         rts
     }
 
-    /* =======================================================================
+/*  ##########################################################################
     Check the visible bullets, whether they are in the visible range or 
     not. If not, the bullet's state is set to "hidden" 
-    -----------------------------------------------------------------------
-    */
+    ------------------------------------------------------------------------*/
     check_bullets: {
         ldx #(BULLET_COUNT-1)
     !loop:
@@ -439,10 +437,9 @@
         rts
     }
 
-    /* =======================================================================
+/*  ##########################################################################
     Draw every (visible) bullet to the screen
-    -----------------------------------------------------------------------
-    */
+    ------------------------------------------------------------------------*/
     draw_bullets: {
 
         lda #0
@@ -456,7 +453,8 @@
         ldx #(BULLET_COUNT-1)
     !loop:
         lda ALIEN_BULLETS_STAT,x 
-        bpl !next+
+        bpl !next+                  // If bit 7 is set (also negative), the
+                                    // bullet is invisible
         lda ALIEN_BULLETS_X,x       // X-Pos low
         sta DIS00
         lda ALIEN_BULLETS_Y,x 

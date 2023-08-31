@@ -30,6 +30,7 @@ static repeating_timer_t frame_timer;
 unsigned long lastClockTS;
 volatile bool needsDisplayUpdate;
 
+
 bool frame_update_callback(struct repeating_timer *t) {
   const TContextPtr ctx((TContextPtr)t->user_data);
   needsDisplayUpdate = true;
@@ -39,6 +40,7 @@ bool frame_update_callback(struct repeating_timer *t) {
 
 void setup() {
   needsDisplayUpdate = false;
+  frameRequested = false;
   //Serial.begin(9600);
   //while (!Serial && millis() < 1000UL);
   sleep_ms(1000);
@@ -76,10 +78,10 @@ void setup() {
  * Never gets called.
  */
 void loop() {
+
   if ((millis() - lastClockTS) >= FRAMETIME) {
     lastClockTS = millis();
     updateDisplay(ctxPtr);
-    raiseFrameRequest(ctxPtr);
     ctx.frame_update_time = millis()-lastClockTS;
   }
   checkCIA(ctxPtr);

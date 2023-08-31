@@ -45,7 +45,7 @@ PROGRAM_ADR_LO: .byte 0
 PROGRAM_ADR_HI: .byte 0
 PROGRAM_ADR_CR: .byte 0
 
-.import source "asm/test_primitives.asm"
+//.import source "asm/test_primitives.asm"
 
 test_isr: {
         pha
@@ -167,29 +167,5 @@ handle_key_event: {
 exit:
     rts
 }
-
-welcome:        .encoding "ascii"
-                .text "NE/OS v0.1 - FirstKlaas Experience"
-                .byte 0
-
-txt_frame:      .encoding "ascii"
-                .text "FRAME:"
-                .byte 0
-
-txt_level:      .encoding "ascii"
-                .text "LEVEL"
-                .byte 0
-
-txt_score:      .encoding "ascii"
-                .text "SCORE"
-                .byte 0
-
-txt_menue_1:    .encoding "ascii"
-                .text "1  Load program"
-                .byte 0
-
-txt_menue_2:    .encoding "ascii"
-                .text "2  Play Space Invaders"
-                .byte 0
 
 
