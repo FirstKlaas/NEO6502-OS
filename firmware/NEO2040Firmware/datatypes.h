@@ -43,6 +43,7 @@ typedef struct HardwareType_ {
   unsigned long frame_number;
   bool cpu_running;
   unsigned long frame_update_time;
+  bool irq_active;
 } TContext, *TContextPtr;
 
 #endif

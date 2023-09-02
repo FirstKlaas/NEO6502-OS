@@ -32,7 +32,7 @@ start:          ldx #$ff    // Set the stackpointer to
                 //SetVectorNMI(kernel_isr)
 
                 EnableFrameIRQ()   
-                //EnableKeyboardIRQ()             
+                //EnableKeyboardIRQ()  
 endless:        
                 lda PROGRAM_ADR_CR
                 bpl endless
@@ -59,6 +59,7 @@ test_isr: {
         SetCursor_I(2,26)
         PrintText(txt_frame)
 
+        
         dec GAME_COUNTDOWN
         bne exit
         lda #<SpaceInvaders.run
@@ -67,6 +68,7 @@ test_isr: {
         sta PROGRAM_ADR_HI
         lda #$80
         sta PROGRAM_ADR_CR
+        
 exit:        
         ply 
         plx 

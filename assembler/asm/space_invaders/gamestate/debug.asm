@@ -65,7 +65,7 @@
             // in time_stamp
             GetClockCycleAndSave()
             // Draw lines in different colors starting with offset
-            ldy #239 // We 239 Lines
+            ldy #239 // # of Lines
             ldx COLOR_OFFSET
 
         !loop:

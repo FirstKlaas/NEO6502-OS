@@ -240,13 +240,8 @@ void clearDisplay() {
 
 void updateDisplay(TContextPtr ctx)
 {
-  // screendata.needsRefresh
-  if (true)
-  {
-    ctx->memory[DISCR] |= FRAME_UPDATE_IRQ;
-    display.swap(true, false);
-  };
-  screendata.needsRefresh = 0;
+  ctx->memory[DISCR] |= FRAME_UPDATE_IRQ;
+  display.swap(true, false);
 }
 
 

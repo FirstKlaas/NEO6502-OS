@@ -15,11 +15,6 @@
 #define ICR_NO_IRQ         0x00 //
 #define ICR_SOURCE_MASK    0x7f // Bit 0-6: 01111111
 
-#define TIMER_A_INTERRUPT_FLAG  0x01
-#define TIMER_B_INTERRUPT_FLAG  0x02
-#define FRAME_INTERRUPT_FLAG    0x04
-#define KBD_INTERRUPT_FLAG      0x08
-
 #define CIA_IRQ_MASK            0x0f
 
 #define SERIAL_DELAY            5000
@@ -31,15 +26,18 @@ void setIRQB(bool irqb)
 #endif
 }
 
-void requestFrameIinterrupt(TContextPtr ctx) {
+/*
+void requestFrameInterrupt(TContextPtr ctx) {
   // When there is an unacknowledged IRQ,
   // ignore the request.
   if (ctx->cia.irq_active) return;
   ctx->cia.raised_interrupts |= FRAME_INTERRUPT_FLAG;
 }
+*/
 
 void trigger6502IRQ(TContextPtr ctx)
 {
+  ctx->cia.irq_active = false;
   if (ctx->cia.irq_active) return;
 
   // If IRQ is still active and not acknowledged,
@@ -258,7 +256,6 @@ boolean memReadCIA(TContextPtr ctx)
 
     // Also clear Keyboard "irq" flag
     ctx->memory[KBDCR] &= 0x7f;
-
     break;
   }
   default:
@@ -432,6 +429,10 @@ void checkKeyboard(TContextPtr ctx) {
         #endif          
     }
   }
+}
+
+bool isFrameInterruptRaised(TContextPtr ctx) {
+  return ctx->cia.raised_interrupts & FRAME_INTERRUPT_FLAG;
 }
 
 void raiseFrameRequest(TContextPtr ctx) {

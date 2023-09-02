@@ -2,7 +2,7 @@
 
 .namespace SpaceInvaders {
 
-    .namespace FlyIn {
+    .namespace LevelStart {
 
         CURRENT_VELOCITY: .word $0000
         TARGET_VELOCITY:  .word $0000

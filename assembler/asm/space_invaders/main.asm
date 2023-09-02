@@ -65,6 +65,19 @@
     }
 
 
+    /********************************************
+    * Calculating the next sprite frame to be
+    * used for the aliens. To get an animation
+    * speed, that differs from the framerate, 
+    * we use subpixels. So the speed (which is
+    * less then one) is added to the low byte 
+    * of the frame number. The high byte 
+    * contains the actual sprite frame. It gets
+    * increased, when the addition of the low
+    * byte has an overflow (which is added to 
+    * the high byte). The value, added to the
+    * low byte is the "velocity".
+    *------------------------------------------*/ 
     .macro UpdateAlienAnimationFrame() {
         lda ALIEN_ANIM_FRAME_LO
         clc
@@ -78,6 +91,10 @@
 
     .macro SwitchGameStateA(state) {
         lda #state
+        jsr switch_game_state
+    }
+
+    .macro SwitchGameState() {
         jsr switch_game_state
     }
 
@@ -101,15 +118,17 @@
         SCORE_LO:               .byte $00
         SCORE_HI:               .byte $00
         ZP_GAME_STATE:          .byte $00 // Current GameState
-        ZP_NEW_GAME_STATE:      .byte $ff
         ALIEN_ANIM_FRAME_LO:    .byte $00 // Subpixel Animation Frame
         ALIEN_ANIM_FRAME_HI:    .byte $00 // Animation Frame
-        CURRENT_GAME_STATE:     .byte $00
-        CURRENT_LEVEL:          .byte $00
-        ALIENS_ALIVE:           .byte $18
+        ZP_CURRENT_LEVEL:       .byte $00
+        ZP_ALIENS_ALIVE:        .byte $18
     } 
 
     * = $1000 "Space Invaders"
+
+    GS_JUMPTABLE_LO: .fill 15,0
+    GS_JUMPTABLE_HI: .fill 15,0
+    
 
     dummy_isr: {
         pha
@@ -128,19 +147,34 @@
     }
 
 
+    .macro StoreGameStateJumpEntry(label, state) {
+        lda #<label
+        sta GS_JUMPTABLE_LO+state
+        lda #>label
+        sta GS_JUMPTABLE_HI+state
+    }
+
+
 /*  ##########################################################################
     Initialisation of the Space Invader Game
 
     The game starts in the intro state.
     ------------------------------------------------------------------------*/
     run: {
-
         // Disable all interrupts        
         DisableAllIRQ()
         
         // Fill Screen
         FillScreen_I(STD_BACKGROUND_COLOR+1)
 
+        // Populate the jump addresses for the game states
+        StoreGameStateJumpEntry(Intro.init,GAME_STATE_INTRO)
+        StoreGameStateJumpEntry(Fight.init,GAME_STATE_FIGHT)
+        StoreGameStateJumpEntry(Won.init,GAME_STATE_WON)
+        StoreGameStateJumpEntry(Lost.init,GAME_STATE_LOST)
+        StoreGameStateJumpEntry(LevelStart.init,GAME_STATE_LEVEL_START)
+        StoreGameStateJumpEntry(Debug.init,GAME_STATE_DEBUG)
+    
         // Generate a table with the correct sprite addresses for the
         // animation of each alien type
         jsr init_alien_animation
@@ -173,7 +207,17 @@
     ------------------------------------------------------------------------*/
     switch_game_state: {
             sta ZP_GAME_STATE
+            tax 
+            lda GS_JUMPTABLE_LO,x 
+            sta jump+1
+            lda GS_JUMPTABLE_HI,x // Self modified code
+            sta jump+2
+        jump:
+            jmp 0000    
+            rts
+    }
         
+    /*
         gs_intro:
             cmp #GAME_STATE_INTRO
             bne gs_level_start
@@ -216,7 +260,9 @@
             // jmp exit
         exit:
             rts
+        
     }
+    */
 
 /*  ##########################################################################
     Animating the aliens.
@@ -261,6 +307,10 @@
     .import source "gamestate/level_start.asm"
     .import source "gamestate/fight.asm"
     .import source "gamestate/debug.asm"
+    .import source "gamestate/won.asm"
+    .import source "gamestate/lost.asm"
+    .import source "gamestate/error.asm"
+    
     
 
     SPRITE_DEFINITON_BLOCK:
@@ -397,7 +447,7 @@
     }
 
 /*  ##########################################################################
-    Move every (visible) bullet down by the defined speed
+    Move every (visible) bullet down by the defined speed.
     ------------------------------------------------------------------------*/
     move_bullets: {
         ldx #(BULLET_COUNT)
@@ -467,9 +517,10 @@
     }
 
 
-    ALIEN_BULLETS_STAT:     .fill BULLET_COUNT, $04  // Bit 0..3 length
-                                                    // Bit 7: Visibility. 1 = Visible
-                                                    // Bit 6: High Bit Xpos: 1 = Xpos > 255
+    ALIEN_BULLETS_STAT:     .fill BULLET_COUNT, $04  // Bit 0: High Bit Xpos: 1 = Xpos > 255
+                                                     // Bit 1..6: Unused
+                                                     // Bit 7: Visibility. 1 = Visible
+                                                     
     ALIEN_BULLETS_X:        .fill BULLET_COUNT, $00  // xpos. If xpos > 255; stat bit 6 = 1
     ALIEN_BULLETS_Y:        .fill BULLET_COUNT, $20  // ypos of the top
     ALIEN_BULLETS_SPEED:    .fill BULLET_COUNT, $02
