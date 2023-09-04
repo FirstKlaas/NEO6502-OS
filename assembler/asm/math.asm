@@ -12,9 +12,6 @@
         .byte    $00, $02, $56, $00, $05, $12, $00, $10, $24, $00, $20, $48
         .byte    $00, $40, $96, $00, $81, $92, $01, $63, $84, $03, $27, $68
 
-    //HTD_IN:     .byte $00, $00        // zpRegE0, zpRegE1
-    //HTD_OUT:    .byte $00, $00, $00   // zpRegE2..4
-
     /* ----------------------------------------------------------------------------
         convert a single byte to two hex values (not characters).
         The value to be converted has to be in the accu and is left unchanged
@@ -101,7 +98,6 @@
         sta rand8a1
         rts
 
-
     // sets the seed based on the value in A
     // always sets a1 and b1 so that a cycle with maximum period is chosen
     // constants 217 and 21263 have been derived by simulation
@@ -137,6 +133,44 @@
         cmp zpRegE4
     exit:
         rts
+    }
+
+/*
+    THIS SUBROUTINE ARRANGES THE 8-BIT ELEMENTS OF A LIST IN ASCENDING
+    ORDER.  THE STARTING ADDRESS OF THE LIST IS IN LOCATIONS zpRegE0 AND
+    zpRegE1.  THE LENGTH OF THE LIST IS IN THE FIRST BYTE OF THE LIST.  LOCATION
+    zpRegE2 IS USED TO HOLD AN EXCHANGE FLAG.
+    Source: http://www.6502.org/source/sorting/bubble8.htm
+*/
+    sort8asc: {
+            ldy #$00            //TURN EXCHANGE FLAG OFF (= 0)
+            sty zpRegE2
+            lda (zpRegE0),y     //FETCH ELEMENT COUNT
+            tax                 // AND PUT IT INTO X
+            iny                 //POINT TO FIRST ELEMENT IN LIST
+            dex                 //DECREMENT ELEMENT COUNT
+        NXTEL:    
+            lda (zpRegE0),y     //FETCH ELEMENT
+            iny
+            cmp (zpRegE0),y     //IS IT LARGER THAN THE NEXT ELEMENT?
+            bcc CHKEND
+            beq CHKEND
+                                //YES. EXCHANGE ELEMENTS IN MEMORY
+            pha                 // BY SAVING LOW BYTE ON STACK.
+            lda (zpRegE0),y     // THEN GET HIGH BYTE AND
+            dey                 // STORE IT AT LOW ADDRESS
+            sta (zpRegE0),y
+            pla                 //PULL LOW BYTE FROM STACK
+            iny                 // AND STORE IT AT HIGH ADDRESS
+            sta (zpRegE0),y
+            lda #$ff            //TURN EXCHANGE FLAG ON (= -1)
+            sta zpRegE2
+        CHKEND:
+            dex                 //END OF LIST?
+            bne NXTEL           //NO. FETCH NEXT ELEMENT
+            bit zpRegE2         //YES. EXCHANGE FLAG STILL OFF?
+            bmi sort8asc        //NO. GO THROUGH LIST AGAIN
+            rts                 //YES. LIST IS NOW ORDERED    
     }
 }
 
