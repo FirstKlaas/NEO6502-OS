@@ -6,7 +6,7 @@
 #define USE_IRQB
 //#define DEBUG_CIA
 
-#define uP_IRQB   24      // UEXT
+#define uP_IRQB   28      // UEXT
 #define IRQ_LOW   false
 #define IRQ_HIGH  true
 

@@ -13,25 +13,41 @@ start:          ldx #$ff    // Set the stackpointer to
                 SetForgroundColor_I(TITLE_FG_COLOR)
                 SetCursor_I(2,1)
                 PrintText(welcome)
+
                 SetForgroundColor_I(STD_FOREGROUND_COLOR)
 
                 // Print the main menu
-                FillCircle_I(63,0,84,8,27)                
                 SetCursor_I(10,10)
                 PrintText(txt_menue_1)
                 SetCursor_I(10,12)
                 PrintText(txt_menue_2)
+
+                // Set the UI color system
+                lda #2
+                sta UI.PADDING
+
+                // Try a testbutton
+                UiButtonRegister(0, 50,0,200,50,txt_ok)
+                UiButtonRegister(1, 103,0,200,50,txt_cancel)
+                UiButtonRegister(2, 156,0,200,50,txt_help)
+
+                SetButtonState_II(1,1)
+                SetButtonState_II(2,2)
+                
+                jsr UI.button_draw_all
+                
 
                 //jsr TestPrimitives.all
                 // Set isr vector for IRQ and NMI
                 // As IRQ currently does not work,
                 // we install the ISR on both. 
                 // NMI and IRQ
-                SetVectorNMI(test_isr)
-                SetVectorIRQ(test_isr)
-                //SetVectorNMI(kernel_isr)
-
-                EnableFrameIRQ()   
+                //SetVectorNMI(test_isr)
+                //SetVectorIRQ(test_isr)
+                SetVectorNMI(nop_isr)
+                SetVectorIRQ(nop_isr)
+                
+                //EnableFrameIRQ()   
                 //EnableKeyboardIRQ()  
 endless:        
                 lda PROGRAM_ADR_CR
@@ -46,6 +62,9 @@ PROGRAM_ADR_HI: .byte 0
 PROGRAM_ADR_CR: .byte 0
 
 //.import source "asm/test_primitives.asm"
+nop_isr: {
+    rti
+}
 
 test_isr: {
         pha
@@ -69,31 +88,32 @@ test_isr: {
         lda #$80
         sta PROGRAM_ADR_CR
         
-exit:        
+    exit:        
         ply 
         plx 
         pla 
         rti
-    }
+}
 
-setup_timer:
-                // -----------------------------------------------------
-                // Timer Test
-                // Setting counter start value to 10 aka $000A
-                // -----------------------------------------------------
-                lda #$f0
-                sta $dc05       // Set hi-byte of timer A latch
-                lda #$00
-                sta $dc04       // Set low-byte of timer A latch
-                lda #$81        // Bit 0: Timer A / Bit 7: Set bits
-                sta $dc0d       // Enable timer A interrupt
-                lda #%00010001  // Bit 4: 1 = Load values from latch
-                                // Bit 0: 1 = Start timer 
-                                // Bit 3: 1 = Stop Timer after IRQ 
-                sta $dc0e       // Load values and start timer
-                // End Test. Timer should now be running and trigger 
-                // an interrupt to enter the ISR           
-                rts
+setup_timer:  {
+        // -----------------------------------------------------
+        // Timer Test
+        // Setting counter start value to 10 aka $000A
+        // -----------------------------------------------------
+        lda #$f0
+        sta $dc05       // Set hi-byte of timer A latch
+        lda #$00
+        sta $dc04       // Set low-byte of timer A latch
+        lda #$81        // Bit 0: Timer A / Bit 7: Set bits
+        sta $dc0d       // Enable timer A interrupt
+        lda #%00010001  // Bit 4: 1 = Load values from latch
+                        // Bit 0: 1 = Start timer 
+                        // Bit 3: 1 = Stop Timer after IRQ 
+        sta $dc0e       // Load values and start timer
+        // End Test. Timer should now be running and trigger 
+        // an interrupt to enter the ISR           
+        rts
+}
 
 // ########################################################################################
 

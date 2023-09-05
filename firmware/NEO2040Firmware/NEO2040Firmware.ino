@@ -2,7 +2,12 @@
 #include "pico/stdio.h"
 #include "pico/stdlib.h"  // In Pico SDK
 
-//#include "pico/stdlib.h"
+#ifdef USE_SPI
+#include "hardware/spi.h"
+#include "pico/binary_info.h"
+#define BUF_LEN 10
+#endif 
+
 #define DEBUG
 
 #define uP_CLOCKCYCLE_PIN 23
@@ -30,6 +35,9 @@ static repeating_timer_t frame_timer;
 unsigned long lastClockTS;
 volatile bool needsDisplayUpdate;
 
+#ifdef USE_SPI
+uint8_t out_buf [BUF_LEN], in_buf [BUF_LEN];
+#endif
 
 bool frame_update_callback(struct repeating_timer *t) {
   const TContextPtr ctx((TContextPtr)t->user_data);
@@ -73,6 +81,24 @@ void setup() {
   //Serial.begin(9600);
   
   //Serial.println("Starting programm");
+
+  #ifdef USE_SPI
+  // Enable SPI0 at 1 MHz
+  spi_init (spi_default, 1 * 1000000);
+
+  // Assign SPI functions to the default SPI pins
+  gpio_set_function (PICO_DEFAULT_SPI_RX_PIN, GPIO_FUNC_SPI);
+  gpio_set_function (PICO_DEFAULT_SPI_SCK_PIN, GPIO_FUNC_SPI);
+  gpio_set_function (PICO_DEFAULT_SPI_TX_PIN, GPIO_FUNC_SPI);
+  gpio_set_function (PICO_DEFAULT_SPI_CSN_PIN, GPIO_FUNC_SPI);
+
+  // Initialize the buffers to 0.
+  for (u_int8_t i = 0; i < BUF_LEN; ++i) {
+    out_buf [i] = 0;
+    in_buf [i] = 0;
+  }
+  spi_write_read_blocking (spi_default, out_buf, in_buf, 1);
+  #endif
 }
 
 
@@ -92,8 +118,8 @@ void loop() {
   tick6502(ctxPtr);
 }
 
-int main_nop() {
+int no_main() {
   setup();
-  loop();
+  while (true) loop();
   return 0;
 }
