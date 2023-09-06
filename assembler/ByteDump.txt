@@ -56,7 +56,7 @@
 087a: a9 f0     -         lda #>label
 087c: 85 e5     -         sta zpRegE5
 087e: a2 00     -         ldx #index
-0880: 20 e1 e4  -         jsr UI.button_register
+0880: 20 e2 e4  -         jsr UI.button_register
 0883: a9 67     -         lda #xlo
 0885: 85 e0     -         sta zpRegE0
 0887: a9 00     -         lda #xhi
@@ -70,7 +70,7 @@
 0897: a9 f0     -         lda #>label
 0899: 85 e5     -         sta zpRegE5
 089b: a2 01     -         ldx #index
-089d: 20 e1 e4  -         jsr UI.button_register
+089d: 20 e2 e4  -         jsr UI.button_register
 08a0: a9 9c     -         lda #xlo
 08a2: 85 e0     -         sta zpRegE0
 08a4: a9 00     -         lda #xhi
@@ -84,14 +84,14 @@
 08b4: a9 f0     -         lda #>label
 08b6: 85 e5     -         sta zpRegE5
 08b8: a2 02     -         ldx #index
-08ba: 20 e1 e4  -         jsr UI.button_register
+08ba: 20 e2 e4  -         jsr UI.button_register
 08bd: a9 01     -         lda #state 
 08bf: a2 01     -         ldx #index
-08c1: 20 d1 e5  -         jsr UI.button_set_state
+08c1: 20 d2 e5  -         jsr UI.button_set_state
 08c4: a9 02     -         lda #state 
 08c6: a2 02     -         ldx #index
-08c8: 20 d1 e5  -         jsr UI.button_set_state
-08cb: 20 f4 e5  -         jsr UI.button_draw_all
+08c8: 20 d2 e5  -         jsr UI.button_set_state
+08cb: 20 69 e6  -         jsr UI.button_draw_all
 08ce: 78        -         sei
 08cf: a9 f9     -         lda #<label
 08d1: 8d fa ff  -         sta $fffa 
@@ -1770,138 +1770,192 @@ e4b9: 00 00 00 00 00 00 00 00 00 00                    - TXTYPOS:.fill BTNCOUNT,
 e4c3: 00 00 00 00 00 00 00 00 00 00                    - TXTLO:  .fill BTNCOUNT, 0   // Low Byte of Textadress in memory
 e4cd: 00 00 00 00 00 00 00 00 00 00                    - TXTHI:  .fill BTNCOUNT, 0   // High Byte of Textadress in memory
 e4d7: 00 00 00 00 00 00 00 00 00 00                    - TXTWIDTH:.fill BTNCOUNT, 0   // Width of the text in pixel
-e4e1: a5 e0     - button_register:lda zpRegE0
-e4e3: 9d 73 e4  -         sta BTNXLO,x    // zpRegE0 = XPOS LO 
-e4e6: a5 e1     -         lda zpRegE1  
-e4e8: 9d 7d e4  -         sta BTNXHI,x    // zpRegE1 = XPOS HI 
-e4eb: a5 e2     -         lda zpRegE2
-e4ed: 9d 87 e4  -         sta BTNY,x      // zpRegE2 = YPOS
-e4f0: a5 e3     -         lda zpRegE3
-e4f2: 9d 91 e4  -         sta BTN_WIDTH,x // zpRegE3 = WIDTH
-e4f5: a5 e4     -         lda zpRegE4     
-e4f7: 9d c3 e4  -         sta TXTLO,x     // zpRegE4 = TXT LOW
-e4fa: a5 e5     -         lda zpRegE5
-e4fc: 9d cd e4  -         sta TXTHI,x     // zpRegE5 = TXT HI
-e4ff: a9 80     -         lda #(BTN_ENABLED_FLAG | BTN_STATE_NORMAL)
-e501: 9d 69 e4  -         sta BTNSTAT,x 
-e504: a9 08     -         lda #8
-e506: 18        -         clc 
-e507: 6d 5c e4  -         adc PADDING     // Add padding twice. For top and bottom.
-e50a: 6d 5c e4  -         adc PADDING
-e50d: 9d 9b e4  -         sta BTN_HEIGHT,x 
-e510: a0 00     -         ldy #0
-e512: a9 00     -         lda #0
-e514: 85 e6     -         sta zpRegE6     // Save text width to zero page register
-e516: b1 e4     -         lda (zpRegE4),y // Load character
-e518: f0 0b     -         beq !+          // 0 means "end-of-string"
-e51a: 18        -         clc
-e51b: a5 e6     -         lda zpRegE6     // restore sum
-e51d: 69 06     -         adc #6          // Add Charwidth to it
-e51f: 85 e6     -         sta zpRegE6
-e521: c8        -         iny             // Check next character
-e522: 4c 16 e5  -         jmp !-          // Check next character
-e525: a5 e6     -         lda zpRegE6     // load text width in pixel from zero page register
-e527: 9d d7 e4  -         sta TXTWIDTH,x  // and button info
-e52a: a5 e3     -         lda zpRegE3     // Button width
-e52c: 38        -         sec
-e52d: e5 e6     -         sbc zpRegE6     // Subtract text width from button width
-e52f: 4a        -         lsr             // And divide by 2
-e530: 18        -         clc
-e531: 7d 73 e4  -         adc BTNXLO,x 
-e534: 9d a5 e4  -         sta TXTXPOSLO,x 
-e537: a9 00     -         lda #0
-e539: 2a        -         rol             // If addition has overflow, store carry in hi byte
-e53a: 9d af e4  -         sta TXTXPOSHI,x
-e53d: bd 87 e4  -         lda BTNY,x
-e540: 18        -         clc 
-e541: 6d 5c e4  -         adc PADDING
-e544: 9d b9 e4  -         sta TXTYPOS,x 
-e547: 60        -         rts  
-e548: bd 73 e4  - button_draw:lda BTNXLO,x 
-e54b: 8d 15 d0  -         sta DIS00       // x lo
-e54e: bd 7d e4  -         lda BTNXHI,x      
-e551: 8d 16 d0  -         sta DIS01       // x hi
-e554: bd 87 e4  -         lda BTNY,x      
-e557: 8d 17 d0  -         sta DIS02       // y
-e55a: bd 91 e4  -         lda BTN_WIDTH,x      
-e55d: 8d 18 d0  -         sta DIS03       // width lo
-e560: a9 00     -         lda #0
-e562: 8d 19 d0  -         sta DIS04       // width hi
-e565: bd 9b e4  -         lda BTN_HEIGHT,x 
-e568: 8d 1a d0  -         sta DIS05
-e56b: bd 69 e4  -         lda BTNSTAT,x 
-e56e: 10 60     -         bpl exit        // if bit 7 = 0, exit immediately         
-e570: 29 07     -         and #STATEMASK
-e572: 48        -         pha             // Save state
-e573: a8        -         tay 
-e574: b9 63 e4  -         lda BGCOLOR,y 
-e577: 8d 1b d0  -         sta DIS06 
-e57a: 20 2c e3  -         jsr GFX.fill_rect_ 
-e57d: 68        -         pla             // Restore state
-e57e: bd b9 e4  -         lda TXTYPOS,x
-e581: 8d 17 d0  -         sta DIS02 
-e584: b9 5d e4  -         lda FGCOLOR,y 
-e587: 8d 19 d0  -         sta DIS04 
-e58a: b9 63 e4  -         lda BGCOLOR,y 
-e58d: 8d 1a d0  -         sta DIS05
-e590: a9 01     -         lda #1
-e592: 8d 1b d0  -         sta DIS06
-e595: a0 00     -         ldy #0
-e597: bd c3 e4  -         lda TXTLO,x 
-e59a: 85 e0     -         sta zpRegE0
-e59c: bd cd e4  -         lda TXTHI,x 
-e59f: 85 e1     -         sta zpRegE1
-e5a1: bd a5 e4  -         lda TXTXPOSLO,x 
-e5a4: 85 e2     -         sta zpRegE2
-e5a6: bd af e4  -         lda TXTXPOSHI,x 
-e5a9: 85 e3     -         sta zpRegE3
-e5ab: b1 e0     -         lda (zpRegE0),y         // Testcharacter A
-e5ad: f0 21     -         beq exit
-e5af: 8d 18 d0  -         sta DIS03
-e5b2: a5 e2     -         lda zpRegE2             // xpos low
-e5b4: 8d 15 d0  -         sta DIS00
-e5b7: a5 e3     -         lda zpRegE3             // xpos high
-e5b9: 8d 16 d0  -         sta DIS01            
-e5bc: 20 10 e4  -         jsr GFX.draw_char_ 
-e5bf: a5 e2     -         lda zpRegE2
-e5c1: 18        -         clc 
-e5c2: 69 06     -         adc #6 
-e5c4: 85 e2     -         sta zpRegE2
-e5c6: a9 00     -         lda #0
-e5c8: 65 e3     -         adc zpRegE3
-e5ca: 85 e3     -         sta zpRegE3
-e5cc: c8        -         iny 
-e5cd: 4c ab e5  -         jmp !loop-
-e5d0: 60        - exit:   rts
-e5d1: 29 07     - button_set_state:and #STATEMASK
-e5d3: 85 e0     -         sta zpRegE0
-e5d5: bd 69 e4  -         lda BTNSTAT,x 
-e5d8: 29 f8     -         and #(~STATEMASK)
-e5da: 05 e0     -         ora zpRegE0
-e5dc: 9d 69 e4  -         sta BTNSTAT,x 
-e5df: 60        -         rts
-e5e0: a2 09     - button_get_selected:ldx #(BTNCOUNT-1)
-e5e2: bd 69 e4  - loop:   lda BTNSTAT,x 
-e5e5: 25 07     -         and STATEMASK
-e5e7: c5 01     -         cmp BTN_STATE_SELECTED
-e5e9: f0 07     -         beq success
-e5eb: ca        -         dex 
-e5ec: 10 f4     -         bpl loop 
-e5ee: 38        -         sec 
-e5ef: 4c f3 e5  -         jmp exit 
-e5f2: 18        - success:clc 
-e5f3: 60        - exit:   rts
-e5f4: a2 09     - button_draw_all:ldx #(BTNCOUNT-1)
-e5f6: bd 69 e4  - loop:   lda BTNSTAT,x 
-e5f9: 10 03     -         bpl next            // If bit 7 is 0, skip this button
-e5fb: 20 48 e5  -         jsr button_draw     // Draw this button 
-e5fe: ca        - next:   dex 
-e5ff: 10 f5     -         bpl loop
-e601: 60        -         rts
-e602: bd 69 e4  - button_unregister:lda BTNSTAT,x 
-e605: 29 7f     -         and #$7f
-e607: 9d 69 e4  -         sta BTNSTAT,x 
-e60a: 60        -         rts
+e4e1: f0        - SELECTED_BUTTON_INDEX:.byte $f0 // Bit 7 = 1: No button selected
+e4e2: a5 e0     - button_register:lda zpRegE0
+e4e4: 9d 73 e4  -         sta BTNXLO,x    // zpRegE0 = XPOS LO 
+e4e7: a5 e1     -         lda zpRegE1  
+e4e9: 9d 7d e4  -         sta BTNXHI,x    // zpRegE1 = XPOS HI 
+e4ec: a5 e2     -         lda zpRegE2
+e4ee: 9d 87 e4  -         sta BTNY,x      // zpRegE2 = YPOS
+e4f1: a5 e3     -         lda zpRegE3
+e4f3: 9d 91 e4  -         sta BTN_WIDTH,x // zpRegE3 = WIDTH
+e4f6: a5 e4     -         lda zpRegE4     
+e4f8: 9d c3 e4  -         sta TXTLO,x     // zpRegE4 = TXT LOW
+e4fb: a5 e5     -         lda zpRegE5
+e4fd: 9d cd e4  -         sta TXTHI,x     // zpRegE5 = TXT HI
+e500: a9 80     -         lda #(BTN_ENABLED_FLAG | BTN_STATE_NORMAL)
+e502: 9d 69 e4  -         sta BTNSTAT,x 
+e505: a9 08     -         lda #8
+e507: 18        -         clc 
+e508: 6d 5c e4  -         adc PADDING     // Add padding twice. For top and bottom.
+e50b: 6d 5c e4  -         adc PADDING
+e50e: 9d 9b e4  -         sta BTN_HEIGHT,x 
+e511: a0 00     -         ldy #0
+e513: a9 00     -         lda #0
+e515: 85 e6     -         sta zpRegE6     // Save text width to zero page register
+e517: b1 e4     -         lda (zpRegE4),y // Load character
+e519: f0 0b     -         beq !+          // 0 means "end-of-string"
+e51b: 18        -         clc
+e51c: a5 e6     -         lda zpRegE6     // restore sum
+e51e: 69 06     -         adc #6          // Add Charwidth to it
+e520: 85 e6     -         sta zpRegE6
+e522: c8        -         iny             // Check next character
+e523: 4c 17 e5  -         jmp !-          // Check next character
+e526: a5 e6     -         lda zpRegE6     // load text width in pixel from zero page register
+e528: 9d d7 e4  -         sta TXTWIDTH,x  // and button info
+e52b: a5 e3     -         lda zpRegE3     // Button width
+e52d: 38        -         sec
+e52e: e5 e6     -         sbc zpRegE6     // Subtract text width from button width
+e530: 4a        -         lsr             // And divide by 2
+e531: 18        -         clc
+e532: 7d 73 e4  -         adc BTNXLO,x 
+e535: 9d a5 e4  -         sta TXTXPOSLO,x 
+e538: a9 00     -         lda #0
+e53a: 2a        -         rol             // If addition has overflow, store carry in hi byte
+e53b: 9d af e4  -         sta TXTXPOSHI,x
+e53e: bd 87 e4  -         lda BTNY,x
+e541: 18        -         clc 
+e542: 6d 5c e4  -         adc PADDING
+e545: 9d b9 e4  -         sta TXTYPOS,x 
+e548: 60        -         rts  
+e549: bd 73 e4  - button_draw:lda BTNXLO,x 
+e54c: 8d 15 d0  -         sta DIS00       // x lo
+e54f: bd 7d e4  -         lda BTNXHI,x      
+e552: 8d 16 d0  -         sta DIS01       // x hi
+e555: bd 87 e4  -         lda BTNY,x      
+e558: 8d 17 d0  -         sta DIS02       // y
+e55b: bd 91 e4  -         lda BTN_WIDTH,x      
+e55e: 8d 18 d0  -         sta DIS03       // width lo
+e561: a9 00     -         lda #0
+e563: 8d 19 d0  -         sta DIS04       // width hi
+e566: bd 9b e4  -         lda BTN_HEIGHT,x 
+e569: 8d 1a d0  -         sta DIS05
+e56c: bd 69 e4  -         lda BTNSTAT,x 
+e56f: 10 60     -         bpl exit        // if bit 7 = 0, exit immediately         
+e571: 29 07     -         and #STATEMASK
+e573: 48        -         pha             // Save state
+e574: a8        -         tay 
+e575: b9 63 e4  -         lda BGCOLOR,y 
+e578: 8d 1b d0  -         sta DIS06 
+e57b: 20 2c e3  -         jsr GFX.fill_rect_ 
+e57e: 68        -         pla             // Restore state
+e57f: bd b9 e4  -         lda TXTYPOS,x
+e582: 8d 17 d0  -         sta DIS02 
+e585: b9 5d e4  -         lda FGCOLOR,y 
+e588: 8d 19 d0  -         sta DIS04 
+e58b: b9 63 e4  -         lda BGCOLOR,y 
+e58e: 8d 1a d0  -         sta DIS05
+e591: a9 01     -         lda #1
+e593: 8d 1b d0  -         sta DIS06
+e596: a0 00     -         ldy #0
+e598: bd c3 e4  -         lda TXTLO,x 
+e59b: 85 e0     -         sta zpRegE0
+e59d: bd cd e4  -         lda TXTHI,x 
+e5a0: 85 e1     -         sta zpRegE1
+e5a2: bd a5 e4  -         lda TXTXPOSLO,x 
+e5a5: 85 e2     -         sta zpRegE2
+e5a7: bd af e4  -         lda TXTXPOSHI,x 
+e5aa: 85 e3     -         sta zpRegE3
+e5ac: b1 e0     -         lda (zpRegE0),y         // Testcharacter A
+e5ae: f0 21     -         beq exit
+e5b0: 8d 18 d0  -         sta DIS03
+e5b3: a5 e2     -         lda zpRegE2             // xpos low
+e5b5: 8d 15 d0  -         sta DIS00
+e5b8: a5 e3     -         lda zpRegE3             // xpos high
+e5ba: 8d 16 d0  -         sta DIS01            
+e5bd: 20 10 e4  -         jsr GFX.draw_char_ 
+e5c0: a5 e2     -         lda zpRegE2
+e5c2: 18        -         clc 
+e5c3: 69 06     -         adc #6 
+e5c5: 85 e2     -         sta zpRegE2
+e5c7: a9 00     -         lda #0
+e5c9: 65 e3     -         adc zpRegE3
+e5cb: 85 e3     -         sta zpRegE3
+e5cd: c8        -         iny 
+e5ce: 4c ac e5  -         jmp !loop-
+e5d1: 60        - exit:   rts
+e5d2: 29 07     - button_set_state:and #STATEMASK
+e5d4: 85 e0     -         sta zpRegE0
+e5d6: bd 69 e4  -         lda BTNSTAT,x 
+e5d9: 29 f8     -         and #(~STATEMASK)
+e5db: 05 e0     -         ora zpRegE0
+e5dd: 9d 69 e4  -         sta BTNSTAT,x 
+e5e0: 60        -         rts
+e5e1: ae e1 e4  - button_get_selected:ldx SELECTED_BUTTON_INDEX
+e5e4: 30 07     -         bmi none_selected // Bit 7 = 1 => none is selected
+e5e6: a9 81     -         lda #(BTN_ENABLED_FLAG|BTN_STATE_SELECTED) 
+e5e8: 9d 69 e4  -         sta BTNSTAT,x 
+e5eb: 18        -         clc
+e5ec: 60        -         rts
+e5ed: 38        - none_selected:sec 
+e5ee: 60        -         rts
+e5ef: ac e1 e4  - button_set_selected:ldy SELECTED_BUTTON_INDEX
+e5f2: 30 05     -         bmi !+  // None selected. Nothing to deselect
+e5f4: a9 80     -         lda #(BTN_ENABLED_FLAG|BTN_STATE_NORMAL)
+e5f6: 99 69 e4  -         sta BTNSTAT,y 
+e5f9: 8e e1 e4  -         stx SELECTED_BUTTON_INDEX
+e5fc: a9 81     -         lda #(BTN_ENABLED_FLAG|BTN_STATE_SELECTED)
+e5fe: 9d 69 e4  -         sta BTNSTAT,x
+e601: 60        -         rts  
+e602: a2 00     - button_select_first:ldx #0
+e604: bd 69 e4  - loop:   lda BTNSTAT,x 
+e607: 10 07     -         bpl next
+e609: 20 ef e5  -         jsr button_set_selected
+e60c: 38        -         sec     // Carry = 1: We found one
+e60d: 4c 16 e6  -         jmp exit
+e610: e8        - next:   inx 
+e611: e4 0a     -         cpx BTNCOUNT
+e613: 30 ef     -         bmi loop  
+e615: 18        -         clc     // Carry = 0: We found none
+e616: 60        - exit:   rts
+e617: ae e1 e4  - button_select_previous:ldx SELECTED_BUTTON_INDEX
+e61a: 10 06     -         bpl search 
+e61c: 20 02 e6  -         jsr button_select_first
+e61f: 4c 3e e6  -         jmp exit 
+e622: a0 09     - search: ldy #(BTNCOUNT-1)
+e624: ca        - loop:   dex 
+e625: 10 08     -         bpl !+
+e627: a2 09     -         ldx #(BTNCOUNT-1)
+e629: ec e1 e4  -         cpx SELECTED_BUTTON_INDEX
+e62c: 18        -         clc         // Carry = 0: We couldn't select one
+e62d: f0 0f     -         beq exit    // WE checked every index
+e62f: bd 69 e4  -         lda BTNSTAT,x 
+e632: 30 f0     -         bmi loop 
+e634: 20 ef e5  -         jsr button_set_selected
+e637: 38        -         sec         // Carry = 1: We selected one
+e638: 4c 3e e6  -         jmp exit
+e63b: 4c 24 e6  -         jmp loop
+e63e: 60        - exit:   rts
+e63f: ae e1 e4  - button_select_next:ldx SELECTED_BUTTON_INDEX
+e642: 10 06     -         bpl search 
+e644: 20 02 e6  -         jsr button_select_first
+e647: 4c 68 e6  -         jmp exit 
+e64a: a0 09     - search: ldy #(BTNCOUNT-1)
+e64c: e8        - loop:   inx 
+e64d: e0 0a     -         cpx #BTNCOUNT
+e64f: 10 08     -         bpl !+
+e651: a2 00     -         ldx #0
+e653: ec e1 e4  -         cpx SELECTED_BUTTON_INDEX
+e656: 18        -         clc         // Carry = 0: We couldn't select one
+e657: f0 0f     -         beq exit    // WE checked every index
+e659: bd 69 e4  -         lda BTNSTAT,x 
+e65c: 30 ee     -         bmi loop 
+e65e: 20 ef e5  -         jsr button_set_selected
+e661: 38        -         sec         // Carry = 1: We selected one
+e662: 4c 68 e6  -         jmp exit
+e665: 4c 4c e6  -         jmp loop
+e668: 60        - exit:   rts
+e669: a2 09     - button_draw_all:ldx #(BTNCOUNT-1)
+e66b: bd 69 e4  - loop:   lda BTNSTAT,x 
+e66e: 10 03     -         bpl next            // If bit 7 is 0, skip this button
+e670: 20 49 e5  -         jsr button_draw     // Draw this button 
+e673: ca        - next:   dex 
+e674: 10 f5     -         bpl loop
+e676: 60        -         rts
+e677: bd 69 e4  - button_unregister:lda BTNSTAT,x 
+e67a: 29 7f     -         and #$7f
+e67c: 9d 69 e4  -         sta BTNSTAT,x 
+e67f: 60        -         rts
 
 [Kernel Data]
 f000: 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46  - hex_chars:.text "0123456789ABCDEF"

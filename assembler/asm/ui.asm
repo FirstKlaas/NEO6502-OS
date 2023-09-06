@@ -32,6 +32,27 @@
     jsr UI.button_set_state
 }
 
+.macro DrawButtons() {
+    jsr UI.button_draw_all
+} 
+
+.macro SelectFirstButton() {
+    jsr UI.button_select_first
+}
+
+.macro SelectNextButton() {
+    jsr UI.button_select_next
+}
+
+.macro SelectPreviousButton() {
+    jsr UI.button_select_previous
+}
+
+.macro SetPadding_I(p) {
+    lda #p
+    sta UI.PADDING
+}
+
 .namespace UI {
 
     PADDING: .byte 0
@@ -210,18 +231,101 @@
     // If no button is selected, the carry flag is set
     *****************************************************/
     button_get_selected: {
-            ldx #(BTNCOUNT-1)
+            ldx SELECTED_BUTTON_INDEX
+            bmi none_selected // Bit 7 = 1 => none is selected
+            lda #(BTN_ENABLED_FLAG|BTN_STATE_SELECTED) 
+            sta BTNSTAT,x 
+            clc
+            rts
+        none_selected:
+            sec 
+            rts
+    }
+
+    button_set_selected: {
+            ldy SELECTED_BUTTON_INDEX
+            bmi !+  // None selected. Nothing to deselect
+            lda #(BTN_ENABLED_FLAG|BTN_STATE_NORMAL)
+            sta BTNSTAT,y 
+        !:  // Set the new selected button
+            stx SELECTED_BUTTON_INDEX
+            lda #(BTN_ENABLED_FLAG|BTN_STATE_SELECTED)
+            sta BTNSTAT,x
+            rts  
+    }
+
+    button_select_first: {
+            ldx #0
         loop:
             lda BTNSTAT,x 
-            and STATEMASK
-            cmp BTN_STATE_SELECTED
-            beq success
-            dex 
-            bpl loop 
-            sec 
+            bpl next
+            // Found first selectable button
+            jsr button_set_selected
+            sec     // Carry = 1: We found one
+            jmp exit
+        next:
+            inx 
+            cpx BTNCOUNT
+            bmi loop  
+            clc     // Carry = 0: We found none
+        exit:
+            rts
+    }
+
+    button_select_previous: {
+            ldx SELECTED_BUTTON_INDEX
+            bpl search 
+            // None is currently selected
+            // So select the first selectable
+            jsr button_select_first
             jmp exit 
-        success:
-            clc 
+        search:
+            ldy #(BTNCOUNT-1)
+        loop:
+            dex 
+            bpl !+
+            ldx #(BTNCOUNT-1)
+            cpx SELECTED_BUTTON_INDEX
+            clc         // Carry = 0: We couldn't select one
+            beq exit    // WE checked every index
+        !:
+            lda BTNSTAT,x 
+            bmi loop 
+            jsr button_set_selected
+            sec         // Carry = 1: We selected one
+            jmp exit
+        !: 
+            jmp loop
+        exit:
+            rts
+    }
+
+
+    button_select_next: {
+            ldx SELECTED_BUTTON_INDEX
+            bpl search 
+            // None is currently selected
+            // So select the first selectable
+            jsr button_select_first
+            jmp exit 
+        search:
+            ldy #(BTNCOUNT-1)
+        loop:
+            inx 
+            cpx #BTNCOUNT
+            bpl !+
+            ldx #0
+            cpx SELECTED_BUTTON_INDEX
+            clc         // Carry = 0: We couldn't select one
+            beq exit    // WE checked every index
+        !:
+            lda BTNSTAT,x 
+            bmi loop 
+            jsr button_set_selected
+            sec         // Carry = 1: We selected one
+            jmp exit
+        !: 
+            jmp loop
         exit:
             rts
     }

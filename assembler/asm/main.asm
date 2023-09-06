@@ -23,19 +23,15 @@ start:          ldx #$ff    // Set the stackpointer to
                 PrintText(txt_menue_2)
 
                 // Set the UI color system
-                lda #2
-                sta UI.PADDING
+                SetPadding_I(2)
 
                 // Try a testbutton
                 UiButtonRegister(0, 50,0,200,50,txt_ok)
                 UiButtonRegister(1, 103,0,200,50,txt_cancel)
                 UiButtonRegister(2, 156,0,200,50,txt_help)
 
-                SetButtonState_II(1,1)
-                SetButtonState_II(2,2)
-                
-                jsr UI.button_draw_all
-                
+                SelectFirstButton()
+                DrawButtons()
 
                 //jsr TestPrimitives.all
                 // Set isr vector for IRQ and NMI
