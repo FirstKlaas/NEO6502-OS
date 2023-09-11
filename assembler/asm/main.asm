@@ -26,9 +26,9 @@ start:          ldx #$ff    // Set the stackpointer to
                 SetPadding_I(2)
 
                 // Try a testbutton
-                UiButtonRegister(0, 50,0,200,50,txt_ok)
-                UiButtonRegister(1, 103,0,200,50,txt_cancel)
-                UiButtonRegister(2, 156,0,200,50,txt_help)
+                ButtonRegister(0, 50,0,200,50,txt_ok)
+                ButtonRegister(1, 103,0,200,50,txt_cancel)
+                ButtonRegister(2, 156,0,200,50,txt_help)
 
                 SelectFirstButton()
                 DrawButtons()

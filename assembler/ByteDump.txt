@@ -41,8 +41,8 @@
 085a: a9 f0     -         lda #>addr
 085c: 85 e1     -         sta zpRegE1
 085e: 20 a5 e2  -         jsr print_text_
-0861: a9 02     -         lda #2
-0863: 8d 5c e4  -         sta UI.PADDING
+0861: a9 02     -         lda #p
+0863: 8d 5c e4  -         sta UI.Button.PADDING
 0866: a9 32     -         lda #xlo
 0868: 85 e0     -         sta zpRegE0
 086a: a9 00     -         lda #xhi
@@ -56,7 +56,7 @@
 087a: a9 f0     -         lda #>label
 087c: 85 e5     -         sta zpRegE5
 087e: a2 00     -         ldx #index
-0880: 20 e2 e4  -         jsr UI.button_register
+0880: 20 e2 e4  -         jsr UI.Button.button_register
 0883: a9 67     -         lda #xlo
 0885: 85 e0     -         sta zpRegE0
 0887: a9 00     -         lda #xhi
@@ -70,7 +70,7 @@
 0897: a9 f0     -         lda #>label
 0899: 85 e5     -         sta zpRegE5
 089b: a2 01     -         ldx #index
-089d: 20 e2 e4  -         jsr UI.button_register
+089d: 20 e2 e4  -         jsr UI.Button.button_register
 08a0: a9 9c     -         lda #xlo
 08a2: 85 e0     -         sta zpRegE0
 08a4: a9 00     -         lda #xhi
@@ -84,151 +84,146 @@
 08b4: a9 f0     -         lda #>label
 08b6: 85 e5     -         sta zpRegE5
 08b8: a2 02     -         ldx #index
-08ba: 20 e2 e4  -         jsr UI.button_register
-08bd: a9 01     -         lda #state 
-08bf: a2 01     -         ldx #index
-08c1: 20 d2 e5  -         jsr UI.button_set_state
-08c4: a9 02     -         lda #state 
-08c6: a2 02     -         ldx #index
-08c8: 20 d2 e5  -         jsr UI.button_set_state
-08cb: 20 69 e6  -         jsr UI.button_draw_all
-08ce: 78        -         sei
-08cf: a9 f9     -         lda #<label
-08d1: 8d fa ff  -         sta $fffa 
-08d4: a9 08     -         lda #>label
-08d6: 8d fb ff  -         sta $fffb
-08d9: 58        -         cli
-08da: 78        -         sei
-08db: a9 f9     -         lda #<label
-08dd: 8d fe ff  -         sta $fffe 
-08e0: a9 08     -         lda #>label
-08e2: 8d ff ff  -         sta $ffff
-08e5: 58        -         cli
-08e6: ad f8 08  - endless:lda PROGRAM_ADR_CR
-08e9: 10 fb     -         bpl endless
-08eb: a9 7f     -         lda #CIA_IRQ_MASK
-08ed: 8d 0d dc  -         sta REG_CIA_ICR
-08f0: 20 8b 10  -         jsr SpaceInvaders.run
-08f3: 4c f3 08  -         jmp *
-08f6: 00        - PROGRAM_ADR_LO:.byte 0
-08f7: 00        - PROGRAM_ADR_HI:.byte 0
-08f8: 00        - PROGRAM_ADR_CR:.byte 0
-08f9: 40        - nop_isr:rti
-08fa: 48        - test_isr:pha
-08fb: da        -         phx
-08fc: 5a        -         phy
-08fd: ad 0d dc  -         lda REG_CIA_ICR
-0900: 48        -         pha
-0901: a9 00     -         lda #xlo
-0903: 8d 15 d0  -         sta DIS00
-0906: a9 00     -         lda #xhi 
-0908: 8d 16 d0  -         sta DIS01
-090b: a9 b0     -         lda #y 
-090d: 8d 17 d0  -         sta DIS02
-0910: a9 00     -         lda #width_lo 
-0912: 8d 18 d0  -         sta DIS03
-0915: a9 64     -         lda #width_hi
-0917: 8d 19 d0  -         sta DIS04
-091a: a9 18     -         lda #height
-091c: 8d 1a d0  -         sta DIS05
-091f: a9 04     -         lda #col 
-0921: 8d 1b d0  -         sta DIS06
-0924: 20 2c e3  -         jsr GFX.fill_rect_
-0927: 68        -         pla 
-0928: a9 09     -         lda #xpos
-092a: 20 01 e2  -         jsr set_cursor_x_
-092d: a9 17     -         lda #ypos
-092f: 20 19 e2  -         jsr set_cursor_y_    
-0932: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
-0935: 85 e0     -         sta zpRegE0
-0937: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
-093a: 85 e1     -         sta zpRegE1
-093c: 20 3f e1  -         jsr Math.bcd_convert_word_
-093f: a5 e4     -         lda zpRegE4
-0941: 20 bd e2  -         jsr print_hex_
-0944: a5 e3     -         lda zpRegE3
-0946: 20 bd e2  -         jsr print_hex_
-0949: a5 e2     -         lda zpRegE2
-094b: 20 bd e2  -         jsr print_hex_
-094e: a9 02     -         lda #xpos
-0950: 20 01 e2  -         jsr set_cursor_x_
-0953: a9 1a     -         lda #ypos
-0955: 20 19 e2  -         jsr set_cursor_y_    
-0958: a9 51     -         lda #<addr
-095a: 85 e0     -         sta zpRegE0
-095c: a9 f0     -         lda #>addr
-095e: 85 e1     -         sta zpRegE1
-0960: 20 a5 e2  -         jsr print_text_
-0963: ce 91 09  -         dec GAME_COUNTDOWN
-0966: d0 0f     -         bne exit
-0968: a9 8b     -         lda #<SpaceInvaders.run
-096a: 8d f6 08  -         sta PROGRAM_ADR_LO
-096d: a9 10     -         lda #>SpaceInvaders.run
-096f: 8d f7 08  -         sta PROGRAM_ADR_HI
-0972: a9 80     -         lda #$80
-0974: 8d f8 08  -         sta PROGRAM_ADR_CR
-0977: 7a        - exit:   ply 
-0978: fa        -         plx 
-0979: 68        -         pla 
-097a: 40        -         rti
-097b: a9 f0     - setup_timer:lda #$f0
-097d: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
-0980: a9 00     -         lda #$00
-0982: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
-0985: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
-0987: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
-098a: a9 11     -         lda #%00010001  // Bit 4: 1 = Load values from latch
-098c: 8d 0e dc  -         sta $dc0e       // Load values and start timer
-098f: 60        -         rts
-0990: 00        - IRQ_DATA:.byte $00
-0991: ff        - GAME_COUNTDOWN:.byte $ff
-0992: 48        - kernel_isr:pha
-0993: da        -         phx
-0994: 5a        -         phy
-0995: ad 0d dc  -         lda REG_CIA_ICR
-0998: ce 91 09  -         dec GAME_COUNTDOWN
-099b: d0 36     -         bne exit
-099d: a9 80     -         lda #$80
-099f: 8d f8 08  -         sta PROGRAM_ADR_CR
-09a2: 4c d3 09  -         jmp exit
-09a5: 8d 90 09  - start_isr:sta IRQ_DATA
-09a8: 8d ff d0  -         sta DEBUG
-09ab: a9 04     - test_frame_irq:lda #FRAME_INTERRUPT_FLAG
-09ad: 2c 90 09  -         bit IRQ_DATA
-09b0: f0 03     -         beq test_keyboard
-09b2: 4c d3 09  -         jmp exit
-09b5: a9 08     - test_keyboard:lda #KBD_INTERRUPT_FLAG
-09b7: 2c 90 09  -         bit IRQ_DATA
-09ba: f0 06     -         beq test_timer_a 
-09bc: 20 d7 09  -         jsr handle_key_event
-09bf: 4c d3 09  -         jmp exit
-09c2: a9 01     - test_timer_a:lda #TIMER_A_INTERRUPT_FLAG
-09c4: 2c 90 09  -         bit IRQ_DATA
-09c7: f0 03     -         beq test_timer_b
-09c9: 4c d3 09  -         jmp exit
-09cc: a9 02     - test_timer_b:lda #TIMER_B_INTERRUPT_FLAG
-09ce: 2c 90 09  -         bit IRQ_DATA
-09d1: f0 00     -         beq exit
-09d3: 7a        - exit:   ply 
-09d4: fa        -         plx 
-09d5: 68        -         pla 
-09d6: 40        -         rti
-09d7: ad 10 d0  - handle_key_event:lda KBD
-09da: c9 32     -         cmp #$32    // Key 2
-09dc: d0 1f     -         bne exit
-09de: a9 ea     -         lda #code
-09e0: 8d ff d0  -         sta DEBUG
-09e3: a9 7f     -         lda #CIA_IRQ_MASK
-09e5: 8d 0d dc  -         sta REG_CIA_ICR
-09e8: a9 20     -         lda #color 
-09ea: 8d 15 d0  -         sta DIS00
-09ed: 20 ea e3  -         jsr GFX.fill_screen_
-09f0: a9 3f     -         lda #color 
-09f2: 8d 15 d0  -         sta DIS00
-09f5: 20 ea e3  -         jsr GFX.fill_screen_
-09f8: a9 80     -         lda #$80
-09fa: 8d f8 08  -         sta PROGRAM_ADR_CR
-09fd: 60        - exit:   rts
+08ba: 20 e2 e4  -         jsr UI.Button.button_register
+08bd: 20 02 e6  -         jsr UI.Button.button_select_first
+08c0: 20 69 e6  -         jsr UI.Button.button_draw_all
+08c3: 78        -         sei
+08c4: a9 ee     -         lda #<label
+08c6: 8d fa ff  -         sta $fffa 
+08c9: a9 08     -         lda #>label
+08cb: 8d fb ff  -         sta $fffb
+08ce: 58        -         cli
+08cf: 78        -         sei
+08d0: a9 ee     -         lda #<label
+08d2: 8d fe ff  -         sta $fffe 
+08d5: a9 08     -         lda #>label
+08d7: 8d ff ff  -         sta $ffff
+08da: 58        -         cli
+08db: ad ed 08  - endless:lda PROGRAM_ADR_CR
+08de: 10 fb     -         bpl endless
+08e0: a9 7f     -         lda #CIA_IRQ_MASK
+08e2: 8d 0d dc  -         sta REG_CIA_ICR
+08e5: 20 8b 10  -         jsr SpaceInvaders.run
+08e8: 4c e8 08  -         jmp *
+08eb: 00        - PROGRAM_ADR_LO:.byte 0
+08ec: 00        - PROGRAM_ADR_HI:.byte 0
+08ed: 00        - PROGRAM_ADR_CR:.byte 0
+08ee: 40        - nop_isr:rti
+08ef: 48        - test_isr:pha
+08f0: da        -         phx
+08f1: 5a        -         phy
+08f2: ad 0d dc  -         lda REG_CIA_ICR
+08f5: 48        -         pha
+08f6: a9 00     -         lda #xlo
+08f8: 8d 15 d0  -         sta DIS00
+08fb: a9 00     -         lda #xhi 
+08fd: 8d 16 d0  -         sta DIS01
+0900: a9 b0     -         lda #y 
+0902: 8d 17 d0  -         sta DIS02
+0905: a9 00     -         lda #width_lo 
+0907: 8d 18 d0  -         sta DIS03
+090a: a9 64     -         lda #width_hi
+090c: 8d 19 d0  -         sta DIS04
+090f: a9 18     -         lda #height
+0911: 8d 1a d0  -         sta DIS05
+0914: a9 04     -         lda #col 
+0916: 8d 1b d0  -         sta DIS06
+0919: 20 2c e3  -         jsr GFX.fill_rect_
+091c: 68        -         pla 
+091d: a9 09     -         lda #xpos
+091f: 20 01 e2  -         jsr set_cursor_x_
+0922: a9 17     -         lda #ypos
+0924: 20 19 e2  -         jsr set_cursor_y_    
+0927: ad fd d0  -         lda $d0fd       // Framecounter LO Byte
+092a: 85 e0     -         sta zpRegE0
+092c: ad fe d0  -         lda $d0fe       // Framecounter HI Byte
+092f: 85 e1     -         sta zpRegE1
+0931: 20 3f e1  -         jsr Math.bcd_convert_word_
+0934: a5 e4     -         lda zpRegE4
+0936: 20 bd e2  -         jsr print_hex_
+0939: a5 e3     -         lda zpRegE3
+093b: 20 bd e2  -         jsr print_hex_
+093e: a5 e2     -         lda zpRegE2
+0940: 20 bd e2  -         jsr print_hex_
+0943: a9 02     -         lda #xpos
+0945: 20 01 e2  -         jsr set_cursor_x_
+0948: a9 1a     -         lda #ypos
+094a: 20 19 e2  -         jsr set_cursor_y_    
+094d: a9 51     -         lda #<addr
+094f: 85 e0     -         sta zpRegE0
+0951: a9 f0     -         lda #>addr
+0953: 85 e1     -         sta zpRegE1
+0955: 20 a5 e2  -         jsr print_text_
+0958: ce 86 09  -         dec GAME_COUNTDOWN
+095b: d0 0f     -         bne exit
+095d: a9 8b     -         lda #<SpaceInvaders.run
+095f: 8d eb 08  -         sta PROGRAM_ADR_LO
+0962: a9 10     -         lda #>SpaceInvaders.run
+0964: 8d ec 08  -         sta PROGRAM_ADR_HI
+0967: a9 80     -         lda #$80
+0969: 8d ed 08  -         sta PROGRAM_ADR_CR
+096c: 7a        - exit:   ply 
+096d: fa        -         plx 
+096e: 68        -         pla 
+096f: 40        -         rti
+0970: a9 f0     - setup_timer:lda #$f0
+0972: 8d 05 dc  -         sta $dc05       // Set hi-byte of timer A latch
+0975: a9 00     -         lda #$00
+0977: 8d 04 dc  -         sta $dc04       // Set low-byte of timer A latch
+097a: a9 81     -         lda #$81        // Bit 0: Timer A / Bit 7: Set bits
+097c: 8d 0d dc  -         sta $dc0d       // Enable timer A interrupt
+097f: a9 11     -         lda #%00010001  // Bit 4: 1 = Load values from latch
+0981: 8d 0e dc  -         sta $dc0e       // Load values and start timer
+0984: 60        -         rts
+0985: 00        - IRQ_DATA:.byte $00
+0986: ff        - GAME_COUNTDOWN:.byte $ff
+0987: 48        - kernel_isr:pha
+0988: da        -         phx
+0989: 5a        -         phy
+098a: ad 0d dc  -         lda REG_CIA_ICR
+098d: ce 86 09  -         dec GAME_COUNTDOWN
+0990: d0 36     -         bne exit
+0992: a9 80     -         lda #$80
+0994: 8d ed 08  -         sta PROGRAM_ADR_CR
+0997: 4c c8 09  -         jmp exit
+099a: 8d 85 09  - start_isr:sta IRQ_DATA
+099d: 8d ff d0  -         sta DEBUG
+09a0: a9 04     - test_frame_irq:lda #FRAME_INTERRUPT_FLAG
+09a2: 2c 85 09  -         bit IRQ_DATA
+09a5: f0 03     -         beq test_keyboard
+09a7: 4c c8 09  -         jmp exit
+09aa: a9 08     - test_keyboard:lda #KBD_INTERRUPT_FLAG
+09ac: 2c 85 09  -         bit IRQ_DATA
+09af: f0 06     -         beq test_timer_a 
+09b1: 20 cc 09  -         jsr handle_key_event
+09b4: 4c c8 09  -         jmp exit
+09b7: a9 01     - test_timer_a:lda #TIMER_A_INTERRUPT_FLAG
+09b9: 2c 85 09  -         bit IRQ_DATA
+09bc: f0 03     -         beq test_timer_b
+09be: 4c c8 09  -         jmp exit
+09c1: a9 02     - test_timer_b:lda #TIMER_B_INTERRUPT_FLAG
+09c3: 2c 85 09  -         bit IRQ_DATA
+09c6: f0 00     -         beq exit
+09c8: 7a        - exit:   ply 
+09c9: fa        -         plx 
+09ca: 68        -         pla 
+09cb: 40        -         rti
+09cc: ad 10 d0  - handle_key_event:lda KBD
+09cf: c9 32     -         cmp #$32    // Key 2
+09d1: d0 1f     -         bne exit
+09d3: a9 ea     -         lda #code
+09d5: 8d ff d0  -         sta DEBUG
+09d8: a9 7f     -         lda #CIA_IRQ_MASK
+09da: 8d 0d dc  -         sta REG_CIA_ICR
+09dd: a9 20     -         lda #color 
+09df: 8d 15 d0  -         sta DIS00
+09e2: 20 ea e3  -         jsr GFX.fill_screen_
+09e5: a9 3f     -         lda #color 
+09e7: 8d 15 d0  -         sta DIS00
+09ea: 20 ea e3  -         jsr GFX.fill_screen_
+09ed: a9 80     -         lda #$80
+09ef: 8d ed 08  -         sta PROGRAM_ADR_CR
+09f2: 60        - exit:   rts
 
 [Space Invaders]
 1000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00     - GS_JUMPTABLE_LO:.fill 15,0
