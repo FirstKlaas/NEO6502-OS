@@ -6,8 +6,6 @@
 .const BTN_STATE_DISABLED   = 3
 .const BTN_ENABLED_FLAG     = %10000000
 
-
-
 .macro ButtonRegister(index, xlo,xhi,y,w,label) {
     lda #xlo
     sta zpRegE0
@@ -22,30 +20,30 @@
     lda #>label
     sta zpRegE5
     ldx #index
-    jsr UI.Button.button_register
+    jsr UI.Button.register
 }
 
 
 .macro SetButtonState_II(index, state) {
     lda #state 
     ldx #index
-    jsr UI.Button.button_set_state
+    jsr UI.Button.set_state
 }
 
 .macro DrawButtons() {
-    jsr UI.Button.button_draw_all
+    jsr UI.Button.draw_all
 } 
 
 .macro SelectFirstButton() {
-    jsr UI.Button.button_select_first
+    jsr UI.Button.select_first
 }
 
 .macro SelectNextButton() {
-    jsr UI.Button.button_select_next
+    jsr UI.Button.select_next
 }
 
 .macro SelectPreviousButton() {
-    jsr UI.Button.button_select_previous
+    jsr UI.Button.select_previous
 }
 
 .macro SetPadding_I(p) {
@@ -80,7 +78,7 @@
 
         SELECTED_BUTTON_INDEX: .byte $f0 // Bit 7 = 1: No button selected
 
-        button_register: {
+        register: {
             lda zpRegE0
             sta BTNXLO,x    // zpRegE0 = XPOS LO 
             lda zpRegE1  
@@ -151,7 +149,7 @@
             x: Index of the button to draw
 
     ******************************************************************************/
-        button_draw: {
+        draw: {
                 // Set the fill rect parameter, that are shared by every state
                 lda BTNXLO,x 
                 sta DIS00       // x lo
@@ -216,7 +214,23 @@
                 rts
         }
 
-        button_set_state: {
+        /*****************************************************
+        // find the selected button index
+        // The index is stored in the x register
+        // If no button is selected, the carry flag is set
+        //
+        // @param:
+        //  x: Button index
+        //  a: State
+        //
+        // @clobbered_register:
+        //  a
+        //
+        // @zero_page_register:
+        //  zpRegE0
+        //
+        *****************************************************/
+        set_state: {
                 and #STATEMASK
                 sta zpRegE0
                 lda BTNSTAT,x 
@@ -234,7 +248,7 @@
         // @param:
         //  None
         //
-        // @used_register:
+        // @clobbered_register:
         //  x,y,a
         //
         // @zero_page_register:
@@ -244,7 +258,7 @@
         //  x: The index, if button is selected. Undefined else.
         //  c: 1 = no button selected; 0 = button selected
         *****************************************************/
-        button_get_selected: {
+        get_selected: {
                 ldx SELECTED_BUTTON_INDEX
                 bmi none_selected // Bit 7 = 1 => none is selected
                 lda #(BTN_ENABLED_FLAG|BTN_STATE_SELECTED) 
@@ -263,13 +277,13 @@
         // @param:
         //  x: The button index to be selected
         //
-        // @used_register:
+        // @clobbered_register:
         //  x,y,a
         //
         // @zero_page_register:
         //  None
         *****************************************************/
-        button_set_selected: {
+        set_selected: {
                 ldy SELECTED_BUTTON_INDEX
                 bmi !+  // None selected. Nothing to deselect
                 // Set the currently selected button back to normal
@@ -282,13 +296,13 @@
                 rts  
         }
 
-        button_select_first: {
+        select_first: {
                 ldx #0
             loop:
                 lda BTNSTAT,x 
                 bpl next
                 // Found first selectable button
-                jsr button_set_selected
+                jsr set_selected
                 sec     // Carry = 1: We found one
                 jmp exit
             next:
@@ -300,12 +314,12 @@
                 rts
         }
 
-        button_select_previous: {
+        select_previous: {
                 ldx SELECTED_BUTTON_INDEX
                 bpl search 
                 // None is currently selected
                 // So select the first selectable
-                jsr button_select_first
+                jsr select_first
                 jmp exit 
             search:
                 ldy #(BTNCOUNT-1)
@@ -319,7 +333,7 @@
             !:
                 lda BTNSTAT,x 
                 bmi loop 
-                jsr button_set_selected
+                jsr set_selected
                 sec         // Carry = 1: We selected one
                 jmp exit
             !: 
@@ -329,12 +343,12 @@
         }
 
 
-        button_select_next: {
+        select_next: {
                 ldx SELECTED_BUTTON_INDEX
                 bpl search 
                 // None is currently selected
                 // So select the first selectable
-                jsr button_select_first
+                jsr select_first
                 jmp exit 
             search:
                 ldy #(BTNCOUNT-1)
@@ -349,7 +363,7 @@
             !:
                 lda BTNSTAT,x 
                 bmi loop 
-                jsr button_set_selected
+                jsr set_selected
                 sec         // Carry = 1: We selected one
                 jmp exit
             !: 
@@ -361,12 +375,12 @@
         /*****************************************************
         | Draw all buttons 
         *****************************************************/
-        button_draw_all: {
+        draw_all: {
                 ldx #(BTNCOUNT-1)
             loop:
                 lda BTNSTAT,x 
                 bpl next            // If bit 7 is 0, skip this button
-                jsr button_draw     // Draw this button 
+                jsr draw     // Draw this button 
             next:
                 dex 
                 bpl loop
@@ -376,7 +390,7 @@
         /*****************************************************
         | Unregister button 
         *****************************************************/
-        button_unregister: {
+        unregister: {
             lda BTNSTAT,x 
             and #$7f
             sta BTNSTAT,x 

@@ -56,7 +56,7 @@
 087a: a9 f0     -         lda #>label
 087c: 85 e5     -         sta zpRegE5
 087e: a2 00     -         ldx #index
-0880: 20 e2 e4  -         jsr UI.Button.button_register
+0880: 20 e2 e4  -         jsr UI.Button.register
 0883: a9 67     -         lda #xlo
 0885: 85 e0     -         sta zpRegE0
 0887: a9 00     -         lda #xhi
@@ -70,7 +70,7 @@
 0897: a9 f0     -         lda #>label
 0899: 85 e5     -         sta zpRegE5
 089b: a2 01     -         ldx #index
-089d: 20 e2 e4  -         jsr UI.Button.button_register
+089d: 20 e2 e4  -         jsr UI.Button.register
 08a0: a9 9c     -         lda #xlo
 08a2: 85 e0     -         sta zpRegE0
 08a4: a9 00     -         lda #xhi
@@ -84,9 +84,9 @@
 08b4: a9 f0     -         lda #>label
 08b6: 85 e5     -         sta zpRegE5
 08b8: a2 02     -         ldx #index
-08ba: 20 e2 e4  -         jsr UI.Button.button_register
-08bd: 20 02 e6  -         jsr UI.Button.button_select_first
-08c0: 20 69 e6  -         jsr UI.Button.button_draw_all
+08ba: 20 e2 e4  -         jsr UI.Button.register
+08bd: 20 02 e6  -         jsr UI.Button.select_first
+08c0: 20 69 e6  -         jsr UI.Button.draw_all
 08c3: 78        -         sei
 08c4: a9 ee     -         lda #<label
 08c6: 8d fa ff  -         sta $fffa 
@@ -1766,7 +1766,7 @@ e4c3: 00 00 00 00 00 00 00 00 00 00                    - TXTLO:  .fill BTNCOUNT,
 e4cd: 00 00 00 00 00 00 00 00 00 00                    - TXTHI:  .fill BTNCOUNT, 0   // High Byte of Textadress in memory
 e4d7: 00 00 00 00 00 00 00 00 00 00                    - TXTWIDTH:.fill BTNCOUNT, 0   // Width of the text in pixel
 e4e1: f0        - SELECTED_BUTTON_INDEX:.byte $f0 // Bit 7 = 1: No button selected
-e4e2: a5 e0     - button_register:lda zpRegE0
+e4e2: a5 e0     - register:lda zpRegE0
 e4e4: 9d 73 e4  -         sta BTNXLO,x    // zpRegE0 = XPOS LO 
 e4e7: a5 e1     -         lda zpRegE1  
 e4e9: 9d 7d e4  -         sta BTNXHI,x    // zpRegE1 = XPOS HI 
@@ -1813,7 +1813,7 @@ e541: 18        -         clc
 e542: 6d 5c e4  -         adc PADDING
 e545: 9d b9 e4  -         sta TXTYPOS,x 
 e548: 60        -         rts  
-e549: bd 73 e4  - button_draw:lda BTNXLO,x 
+e549: bd 73 e4  - draw:   lda BTNXLO,x 
 e54c: 8d 15 d0  -         sta DIS00       // x lo
 e54f: bd 7d e4  -         lda BTNXHI,x      
 e552: 8d 16 d0  -         sta DIS01       // x hi
@@ -1869,14 +1869,14 @@ e5cb: 85 e3     -         sta zpRegE3
 e5cd: c8        -         iny 
 e5ce: 4c ac e5  -         jmp !loop-
 e5d1: 60        - exit:   rts
-e5d2: 29 07     - button_set_state:and #STATEMASK
+e5d2: 29 07     - set_state:and #STATEMASK
 e5d4: 85 e0     -         sta zpRegE0
 e5d6: bd 69 e4  -         lda BTNSTAT,x 
 e5d9: 29 f8     -         and #(~STATEMASK)
 e5db: 05 e0     -         ora zpRegE0
 e5dd: 9d 69 e4  -         sta BTNSTAT,x 
 e5e0: 60        -         rts
-e5e1: ae e1 e4  - button_get_selected:ldx SELECTED_BUTTON_INDEX
+e5e1: ae e1 e4  - get_selected:ldx SELECTED_BUTTON_INDEX
 e5e4: 30 07     -         bmi none_selected // Bit 7 = 1 => none is selected
 e5e6: a9 81     -         lda #(BTN_ENABLED_FLAG|BTN_STATE_SELECTED) 
 e5e8: 9d 69 e4  -         sta BTNSTAT,x 
@@ -1884,7 +1884,7 @@ e5eb: 18        -         clc
 e5ec: 60        -         rts
 e5ed: 38        - none_selected:sec 
 e5ee: 60        -         rts
-e5ef: ac e1 e4  - button_set_selected:ldy SELECTED_BUTTON_INDEX
+e5ef: ac e1 e4  - set_selected:ldy SELECTED_BUTTON_INDEX
 e5f2: 30 05     -         bmi !+  // None selected. Nothing to deselect
 e5f4: a9 80     -         lda #(BTN_ENABLED_FLAG|BTN_STATE_NORMAL)
 e5f6: 99 69 e4  -         sta BTNSTAT,y 
@@ -1892,10 +1892,10 @@ e5f9: 8e e1 e4  -         stx SELECTED_BUTTON_INDEX
 e5fc: a9 81     -         lda #(BTN_ENABLED_FLAG|BTN_STATE_SELECTED)
 e5fe: 9d 69 e4  -         sta BTNSTAT,x
 e601: 60        -         rts  
-e602: a2 00     - button_select_first:ldx #0
+e602: a2 00     - select_first:ldx #0
 e604: bd 69 e4  - loop:   lda BTNSTAT,x 
 e607: 10 07     -         bpl next
-e609: 20 ef e5  -         jsr button_set_selected
+e609: 20 ef e5  -         jsr set_selected
 e60c: 38        -         sec     // Carry = 1: We found one
 e60d: 4c 16 e6  -         jmp exit
 e610: e8        - next:   inx 
@@ -1903,9 +1903,9 @@ e611: e4 0a     -         cpx BTNCOUNT
 e613: 30 ef     -         bmi loop  
 e615: 18        -         clc     // Carry = 0: We found none
 e616: 60        - exit:   rts
-e617: ae e1 e4  - button_select_previous:ldx SELECTED_BUTTON_INDEX
+e617: ae e1 e4  - select_previous:ldx SELECTED_BUTTON_INDEX
 e61a: 10 06     -         bpl search 
-e61c: 20 02 e6  -         jsr button_select_first
+e61c: 20 02 e6  -         jsr select_first
 e61f: 4c 3e e6  -         jmp exit 
 e622: a0 09     - search: ldy #(BTNCOUNT-1)
 e624: ca        - loop:   dex 
@@ -1916,14 +1916,14 @@ e62c: 18        -         clc         // Carry = 0: We couldn't select one
 e62d: f0 0f     -         beq exit    // WE checked every index
 e62f: bd 69 e4  -         lda BTNSTAT,x 
 e632: 30 f0     -         bmi loop 
-e634: 20 ef e5  -         jsr button_set_selected
+e634: 20 ef e5  -         jsr set_selected
 e637: 38        -         sec         // Carry = 1: We selected one
 e638: 4c 3e e6  -         jmp exit
 e63b: 4c 24 e6  -         jmp loop
 e63e: 60        - exit:   rts
-e63f: ae e1 e4  - button_select_next:ldx SELECTED_BUTTON_INDEX
+e63f: ae e1 e4  - select_next:ldx SELECTED_BUTTON_INDEX
 e642: 10 06     -         bpl search 
-e644: 20 02 e6  -         jsr button_select_first
+e644: 20 02 e6  -         jsr select_first
 e647: 4c 68 e6  -         jmp exit 
 e64a: a0 09     - search: ldy #(BTNCOUNT-1)
 e64c: e8        - loop:   inx 
@@ -1935,19 +1935,19 @@ e656: 18        -         clc         // Carry = 0: We couldn't select one
 e657: f0 0f     -         beq exit    // WE checked every index
 e659: bd 69 e4  -         lda BTNSTAT,x 
 e65c: 30 ee     -         bmi loop 
-e65e: 20 ef e5  -         jsr button_set_selected
+e65e: 20 ef e5  -         jsr set_selected
 e661: 38        -         sec         // Carry = 1: We selected one
 e662: 4c 68 e6  -         jmp exit
 e665: 4c 4c e6  -         jmp loop
 e668: 60        - exit:   rts
-e669: a2 09     - button_draw_all:ldx #(BTNCOUNT-1)
+e669: a2 09     - draw_all:ldx #(BTNCOUNT-1)
 e66b: bd 69 e4  - loop:   lda BTNSTAT,x 
 e66e: 10 03     -         bpl next            // If bit 7 is 0, skip this button
-e670: 20 49 e5  -         jsr button_draw     // Draw this button 
+e670: 20 49 e5  -         jsr draw     // Draw this button 
 e673: ca        - next:   dex 
 e674: 10 f5     -         bpl loop
 e676: 60        -         rts
-e677: bd 69 e4  - button_unregister:lda BTNSTAT,x 
+e677: bd 69 e4  - unregister:lda BTNSTAT,x 
 e67a: 29 7f     -         and #$7f
 e67c: 9d 69 e4  -         sta BTNSTAT,x 
 e67f: 60        -         rts
